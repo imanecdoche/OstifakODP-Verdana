@@ -7,6 +7,11 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Penyempurnaan Tampilan Modul Rekam Sesi Login (Header Minimalis, No Footer, & Icon Toggle):
+  - HEADER MINIMALIS: Hanya menampilkan title ("Rekam Sesi Login & Log Aktivitas") tanpa tagline/subtitle.
+  - TOMBOL TUTUP ICON ONLY: Menggunakan tombol icon-only tanda silang (`X` / `w-5 h-5`) di pojok kanan atas.
+  - HAPUS FOOTER: Menghilangkan total elemen footer bawah (termasuk tombol tutup bawah).
+  - TOMBOL RINCIAN SESI ICON ONLY: Mengubah tombol buka/tutup rincian menjadi icon-only dengan panah arrow yang lebih besar (`ChevronDown` / `ChevronUp` `w-6 h-6`).
 - **[2026-08-26]**: Modul Rekam Sesi Login Menjadi Full Screen (Bukan Popup Modal):
   - TAMPILAN FULLSCREEN PENUH: Modul rekam sesi login diubah dari modal popup menjadi tampilan layar penuh edge-to-edge (`fixed inset-0 z-50 w-full h-full min-h-[100dvh] bg-white flex flex-col overflow-hidden`).
   - HAPUS BADGE & TEKS TOTAL SESI:

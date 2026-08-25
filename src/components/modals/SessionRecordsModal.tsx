@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { X, ChevronDown, ChevronUp } from 'lucide-react';
 import { 
   getStoredSessionRecords, 
   recordLoginSession, 
@@ -118,25 +119,20 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
       data-lenis-prevent
       className="fixed inset-0 z-50 w-full h-full min-h-[100dvh] bg-white flex flex-col font-body animate-in fade-in duration-150 overflow-hidden"
     >
-      {/* 1. Header (Murni Tanpa Ikon & Fullscreen) */}
+      {/* 1. Header (Hanya Title & Close Icon X) */}
       <div className="bg-[#142A18] text-white px-6 py-4 border-b border-emerald-950/40 shrink-0">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-          <div>
-            <h2 className="text-lg md:text-xl font-bold font-headline tracking-tight text-white">
-              Rekam Sesi Login & Log Aktivitas
-            </h2>
-            <p className="text-xs text-slate-300 mt-0.5">
-              Data autentikasi real-time, metadata sistem perangkat, IP jaringan, dan log kronologis aktivitas akun.
-            </p>
-          </div>
+          <h2 className="text-lg md:text-xl font-bold font-headline tracking-tight text-white">
+            Rekam Sesi Login & Log Aktivitas
+          </h2>
 
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg border border-white/20 bg-white/5 hover:bg-white/15 text-white text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95"
+            className="w-9 h-9 rounded-lg border border-white/20 bg-white/5 hover:bg-white/15 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95"
             title="Tutup Jendela"
           >
-            TUTUP
+            <X className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -303,13 +299,18 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
 
                         <button
                           type="button"
-                          className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
                             isExpanded
-                              ? 'bg-slate-900 text-white'
-                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              ? 'bg-slate-900 text-white shadow-xs'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
                           }`}
+                          title={isExpanded ? 'Tutup Rincian' : 'Buka Rincian'}
                         >
-                          {isExpanded ? '[-] TUTUP RINCIAN' : '[+] BUKA RINCIAN'}
+                          {isExpanded ? (
+                            <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6" />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -416,22 +417,6 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
             </div>
           )}
         </ScrollArea>
-
-      {/* 4. Footer */}
-      <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 shrink-0 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-          <div>
-            Data sesi login tercatat secara real-time dari perangkat yang aktif saat ini.
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer active:scale-95"
-          >
-            TUTUP MODUL
-          </button>
-        </div>
-      </div>
     </div>
   );
 };
