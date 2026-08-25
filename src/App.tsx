@@ -420,7 +420,7 @@ export default function App() {
     return (
       <>
         <LoginPage onLoginSuccess={handleLoginSuccess} />
-        <GooeyToaster position="bottom-right" duration={3500} closeButton />
+        <GooeyToaster position="top-center" duration={3500} closeButton />
       </>
     );
   }
@@ -555,7 +555,7 @@ export default function App() {
       />
 
       {/* Global Gooey Toast Notifications */}
-      <GooeyToaster position="bottom-right" duration={3500} closeButton />
+      <GooeyToaster position="top-center" duration={3500} closeButton />
     </div>
   );
 }

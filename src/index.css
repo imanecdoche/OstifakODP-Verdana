@@ -150,3 +150,28 @@ html.lenis, html.lenis body {
     transform: rotate(360deg);
   }
 }
+
+/* Gooey Toast Center-Top Placement & Scaling */
+[data-sonner-toaster][data-y-position="top"] {
+  top: 24px !important;
+}
+
+[data-sonner-toaster] [data-sonner-toast] {
+  transform-origin: top center;
+}
+
+.gooey-wrapper {
+  transform: scale(1.18);
+  transform-origin: top center;
+  margin-top: 4px;
+}
+
+.gooey-title {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+.gooey-description {
+  font-size: 13px !important;
+}
+

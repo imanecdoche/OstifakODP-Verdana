@@ -7,6 +7,9 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Posisi Toast (`goey-toast`) di Center-Top & Scaling Lebih Besar:
+  - POSISI CENTER-TOP: Seluruh komponen `<GooeyToaster />` diatur dengan `position="top-center"` sehingga popup notifikasi muncul mengambang di bagian tengah atas layar (*center-top*).
+  - SCALING LEBIH BESAR: Terapkan scaling lebih besar (`transform: scale(1.18)`, `transform-origin: top center`) dan penyesuaian ukuran font judul serta deskripsi toast agar tampil lebih jelas, proporsional, dan mudah dibaca di atas viewport.
 - **[2026-08-26]**: Styling Header Sidebar Brand "OSDIGI" (Center Aligned, No Tagline, Google Sans Black & Ukuran Lebih Besar):
   - POSISI & ALIGNMENT: Teks nama aplikasi "OSDIGI" diatur menjadi rata tengah (*center aligned* `flex items-center justify-center text-center w-full`) di dalam header sidebar.
   - HAPUS TAGLINE: Hapus seluruh teks subtitle/tagline ("Portal Manajemen Santri").
