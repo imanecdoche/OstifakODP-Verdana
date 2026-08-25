@@ -1383,10 +1383,10 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                       <button
                         type="button"
                         onClick={handleOpenSetoranModal}
-                        className="px-3.5 py-1.5 bg-[#142A18] text-white rounded-full text-xs font-semibold hover:bg-[#2E5B37] transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs active:scale-[0.98]"
+                        className="w-7 h-7 rounded-md bg-[#142A18] text-white hover:bg-[#2E5B37] transition-colors cursor-pointer flex items-center justify-center shadow-2xs active:scale-[0.98]"
+                        title="Catat Setoran Baru"
                       >
-                        <Plus className="w-3.5 h-3.5" />
-                        + Catat Setoran Baru
+                        <Plus className="w-4 h-4" />
                       </button>
                     </div>
 

@@ -7,6 +7,8 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Tombol Catat Setoran Baru Icon-Only:
+  - ICON BUTTON TANPA LABEL: Tombol pemicu modal "Catat Setoran Baru" pada tab riwayat hafalan diubah menjadi tombol icon-only (`<Plus />`) berukuran kompak tanpa label teks.
 - **[2026-08-26]**: Hapus Icon pada Kartu Metrik Tab Hafalan:
   - TANPA ICON APAPUN: Seluruh kartu ringkasan metrik statistik hafalan (Ziyadah Pekan Ini, Ziyadah Bulan Ini, Murojaah Pekan Ini, Murojaah Bulan Ini) ditampilkan murni teks tanpa ikon atau badge visual tambahan.
 - **[2026-08-26]**: Ringkasan Tab Hafalan Santri (1 Row & Tanpa Target Semester):
