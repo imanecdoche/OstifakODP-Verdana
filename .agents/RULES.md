@@ -7,6 +7,11 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Penamaan Ringkas Section "METADATA" (Rekam Sesi Login):
+  - Ganti judul section metadata teknis menjadi **"METADATA"** secara ringkas, tegas, dan unboxed.
+- **[2026-08-26]**: Unboxed Detail Metadata Jaringan & Perangkat Lengkap (Rekam Sesi Login):
+  - HAPUS KOTAK KONTAINER: Hilangkan card/box pembungkus ber-border dan ber-background (`bg-white rounded-lg p-4 border border-slate-200 shadow-xs`) pada section "DETAIL METADATA JARINGAN & PERANGKAT LENGKAP".
+  - TAMPILAN UNBOXED: Tampilkan grid metadata secara bersih langsung di atas panel rincian sesi tanpa border/kontainer kaku.
 - **[2026-08-26]**: Tabel Aksi & Aktivitas Rekam Sesi (Mobile Auto-Width & Running Text Marquee):
   - AUTO-WIDTH DENGAN MAX-WIDTH KONTROL: Lebar tabel menyesuaikan panjang konten (`w-auto min-w-full`) dengan batas kolom maksimal (`max-w-[...]`) yang presisi di mobile.
   - TANPA TEXT WRAPPING: Seluruh teks sel tabel dipaksa dalam satu baris (`whitespace-nowrap`).

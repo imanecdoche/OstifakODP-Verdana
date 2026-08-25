@@ -379,26 +379,26 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
                     {isExpanded && (
                       <div className="border-t border-slate-200 bg-slate-50/50 p-4 sm:p-6 space-y-5 animate-in fade-in duration-150">
                         
-                        {/* Detail Info Grid Box */}
-                        <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-xs">
-                          <h4 className="text-xs font-bold text-slate-900 uppercase tracking-[0.5px] mb-3">
-                            DETAIL METADATA JARINGAN & PERANGKAT LENGKAP
+                        {/* Detail Metadata (Unboxed / Tanpa Kontainer Kotak) */}
+                        <div className="space-y-3">
+                          <h4 className="text-xs font-bold text-slate-900 uppercase tracking-[0.5px]">
+                            METADATA
                           </h4>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
                             <div className="space-y-0.5">
-                              <p className="text-[10px] font-semibold text-slate-400 uppercase">ALAMAT IP (HOST/GATEWAY)</p>
+                              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">ALAMAT IP (HOST/GATEWAY)</p>
                               <p className="font-mono font-bold text-slate-800">{session.ipAddress}</p>
                             </div>
                             <div className="space-y-0.5">
-                              <p className="text-[10px] font-semibold text-slate-400 uppercase">ALAMAT MAC / IDENTIFIER</p>
+                              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">ALAMAT MAC / IDENTIFIER</p>
                               <p className="font-mono font-bold text-slate-800">{session.macAddress}</p>
                             </div>
                             <div className="space-y-0.5">
-                              <p className="text-[10px] font-semibold text-slate-400 uppercase">KOORDINAT GPS PRESISI</p>
+                              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">KOORDINAT GPS PRESISI</p>
                               <p className="font-mono font-bold text-slate-800">{session.coordinates}</p>
                             </div>
                             <div className="space-y-0.5">
-                              <p className="text-[10px] font-semibold text-slate-400 uppercase">LOKASI FISIK AKSES</p>
+                              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">LOKASI FISIK AKSES</p>
                               <p className="font-semibold text-slate-800">{session.locationName}</p>
                             </div>
                           </div>
