@@ -7,6 +7,13 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Rekonstruksi Modul Student Detail View:
+  - HEADER TANPA ICON: Header modal dibuat bersih tanpa ikon pembuka, menampilkan nama santri dan info NIS/kamar/kelas secara lugas dan elegan.
+  - TOMBOL TUTUP BOX MERAH: Tombol silang (`X`) diberi box kontainer warna merah (`bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white`).
+  - SEGMENTED BUTTON 1 ROW: Seluruh segmented tab (Bio, Hafalan, Pelanggaran, Prestasi, Riwayat Izin) berada dalam 1 horizontal row tanpa wrap (`flex flex-nowrap`).
+  - SCROLLABLE DENGAN SHADOW EDGE: Kontainer tab yang berlebih dapat di-scroll secara horizontal dan dilengkapi efek shadow edge (gradasi fade) di ujung kiri dan kanan sesuai posisi scroll.
+  - AUTO-SCROLL FOKUS: Tab yang sedang aktif/dibuka otomatis bergeser (scroll smoothly into view) ke tengah fokus layar.
+  - SEGMENTED BUTTON TANPA ICON: Tombol tab dibuat bersih tanpa icon (hanya teks label dan badge poin jika ada).
 - **[2026-08-26]**: Hapus Tab Pelanggaran pada Form Tambah Santri Baru:
   - HAPUS TAB PELANGGARAN: Menghapus tab "Disiplin & Pelanggaran" dan bilah tab bar atas pada modal pendaftaran santri baru sehingga fokus murni sebagai formulir Data Pokok & Akademik.
   - FORM TUNGGAL LANGSUNG: Form pendaftaran langsung menyajikan field pokok santri secara bersih, ringkas, dan optimal.

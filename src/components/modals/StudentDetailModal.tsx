@@ -83,6 +83,39 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     } catch {}
   }, [detailActiveTab]);
 
+  // Tab horizontal scroll & shadow edge state
+  const tabContainerRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [showLeftShadow, setShowLeftShadow] = useState(false);
+  const [showRightShadow, setShowRightShadow] = useState(false);
+
+  const checkTabScroll = () => {
+    if (tabContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tabContainerRef.current;
+      setShowLeftShadow(scrollLeft > 4);
+      setShowRightShadow(scrollLeft < scrollWidth - clientWidth - 4);
+    }
+  };
+
+  useEffect(() => {
+    checkTabScroll();
+    window.addEventListener('resize', checkTabScroll);
+    return () => window.removeEventListener('resize', checkTabScroll);
+  }, []);
+
+  // Auto-scroll active tab into view whenever detailActiveTab changes
+  useEffect(() => {
+    const activeEl = tabRefs.current[detailActiveTab];
+    if (activeEl && tabContainerRef.current) {
+      activeEl.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      });
+      setTimeout(checkTabScroll, 300);
+    }
+  }, [detailActiveTab]);
+
   // Sync state if student prop changes
   useEffect(() => {
     setCurrentStudent(student);
@@ -889,63 +922,80 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
           <div className="bg-white w-full max-w-4xl h-[92dvh] sm:h-[85vh] max-h-[95dvh] sm:max-h-[90vh] flex flex-col rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto animate-in fade-in zoom-in-95">
             
-            {/* Header Modal (Dark Emerald Branding #142A18) */}
-            <div className="bg-[#142A18] text-white px-6 py-4 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white border border-white/15">
-                  <Users className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold font-headline tracking-tight flex items-center gap-2 text-white">
-                    {currentStudent.studentName}
-                  </h3>
-                  <p className="text-xs text-slate-300">
-                    NIS: {currentStudent.nis || '-'} • <span className="text-emerald-300 font-medium">{currentStudent.kamar}</span> • {currentStudent.kelas}
-                  </p>
-                </div>
+            {/* Header Modal (Clean, No Icon, Red Close Box) */}
+            <div className="bg-[#142A18] text-white px-5 sm:px-6 py-4 flex items-center justify-between shrink-0">
+              <div className="min-w-0 pr-2">
+                <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-white truncate">
+                  {currentStudent.studentName}
+                </h3>
+                <p className="text-xs text-slate-300 truncate mt-0.5">
+                  NIS: {currentStudent.nis || '-'} • <span className="text-emerald-300 font-medium">{currentStudent.kamar}</span> • {currentStudent.kelas}
+                </p>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="w-8 h-8 rounded-md flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-md bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
                 title="Tutup Modal"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Navigasi Tab (Segmented Button Tanpa Kontainer Pembungkus) */}
-            <div className="px-6 pt-3.5 pb-2.5 flex flex-wrap items-center gap-2 border-b border-slate-200/80 bg-white shrink-0">
-              {[
-                { id: 'bio', label: 'Bio', icon: User },
-                { id: 'hafalan', label: 'Hafalan', icon: BookOpen },
-                { id: 'pelanggaran', label: 'Pelanggaran', icon: ShieldAlert },
-                { id: 'prestasi', label: 'Prestasi', icon: Trophy },
-                { id: 'izin', label: 'Riwayat Izin', icon: CalendarDays },
-              ].map((t) => {
-                const Icon = t.icon;
-                const isActive = detailActiveTab === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setDetailActiveTab(t.id as any)}
-                    className={`px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer select-none ${
-                      isActive
-                        ? 'bg-[#142A18] text-white shadow-xs'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium'
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    <span>{t.label}</span>
-                    {t.id === 'pelanggaran' && currentStudent.poinPelanggaran > 0 && (
-                      <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-red-500 text-white font-bold">
-                        {currentStudent.poinPelanggaran} Pts
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+            {/* Navigasi Tab (Segmented Button 1 Row dengan Shadow Edge & Auto-Centering) */}
+            <div className="relative border-b border-slate-200/80 bg-white shrink-0">
+              {/* Left Shadow Indicator */}
+              <div
+                className={`pointer-events-none absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white via-white/80 to-transparent z-10 transition-opacity duration-200 ${
+                  showLeftShadow ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+
+              {/* Scrollable Tab Track */}
+              <div
+                ref={tabContainerRef}
+                onScroll={checkTabScroll}
+                className="px-4 sm:px-6 pt-3 pb-2.5 flex flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth"
+              >
+                {[
+                  { id: 'bio', label: 'Bio' },
+                  { id: 'hafalan', label: 'Hafalan' },
+                  { id: 'pelanggaran', label: 'Pelanggaran' },
+                  { id: 'prestasi', label: 'Prestasi' },
+                  { id: 'izin', label: 'Riwayat Izin' },
+                ].map((t) => {
+                  const isActive = detailActiveTab === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      ref={(el) => {
+                        tabRefs.current[t.id] = el;
+                      }}
+                      type="button"
+                      onClick={() => setDetailActiveTab(t.id as any)}
+                      className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 flex items-center gap-1.5 transition-all cursor-pointer select-none ${
+                        isActive
+                          ? 'bg-[#142A18] text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium'
+                      }`}
+                    >
+                      <span>{t.label}</span>
+                      {t.id === 'pelanggaran' && currentStudent.poinPelanggaran > 0 && (
+                        <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-red-500 text-white font-bold">
+                          {currentStudent.poinPelanggaran} Pts
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Right Shadow Indicator */}
+              <div
+                className={`pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white via-white/80 to-transparent z-10 transition-opacity duration-200 ${
+                  showRightShadow ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
             </div>
 
             {/* Modal Body (Scrollable Multi-Tab Content) */}
@@ -1593,16 +1643,14 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
           <div className="bg-white w-full max-w-lg max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
             <div className="bg-[#142A18] text-white px-6 py-4 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-2.5">
-                <CalendarDays className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-base font-bold font-headline tracking-tight text-white">
-                  Rekam Izin: {currentStudent.studentName}
-                </h3>
-              </div>
+              <h3 className="text-base font-bold font-headline tracking-tight text-white">
+                Rekam Izin: {currentStudent.studentName}
+              </h3>
               <button
                 type="button"
                 onClick={() => setIsIzinModalOpen(false)}
-                className="w-8 h-8 rounded-md flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-md bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                title="Tutup Form Izin"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1683,16 +1731,14 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
           <div className="bg-white w-full max-w-md max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
             <div className="bg-[#142A18] text-white px-6 py-4 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-2.5">
-                <BedDouble className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-base font-bold font-headline tracking-tight text-white">
-                  Pindah Kamar Asrama
-                </h3>
-              </div>
+              <h3 className="text-base font-bold font-headline tracking-tight text-white">
+                Pindah Kamar Asrama
+              </h3>
               <button
                 type="button"
                 onClick={() => setIsMoveKamarModalOpen(false)}
-                className="w-8 h-8 rounded-md flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-md bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                title="Tutup Modal Pindah Kamar"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1746,16 +1792,14 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
           <div className="bg-white w-full max-w-md max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
             <div className="bg-[#142A18] text-white px-6 py-4 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-2.5">
-                <GraduationCap className="w-5 h-5 text-indigo-400" />
-                <h3 className="text-base font-bold font-headline tracking-tight text-white">
-                  Pindah Kelas / Tingkat
-                </h3>
-              </div>
+              <h3 className="text-base font-bold font-headline tracking-tight text-white">
+                Pindah Kelas / Tingkat
+              </h3>
               <button
                 type="button"
                 onClick={() => setIsMoveKelasModalOpen(false)}
-                className="w-8 h-8 rounded-md flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-md bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                title="Tutup Modal Pindah Kelas"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1810,23 +1854,18 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           <div className="bg-white w-full max-w-2xl max-h-[92dvh] sm:max-h-[90vh] flex flex-col rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto animate-in fade-in zoom-in-95">
             
             <div className="bg-[#142A18] text-white px-6 py-4 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-emerald-300 border border-white/10">
-                  <BookOpen className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold font-headline tracking-tight text-white flex items-center gap-2">
-                    Catat Setoran Mutaba'ah Tahfizh
-                  </h3>
-                  <p className="text-xs text-slate-300">
-                    Santri: <span className="font-semibold text-emerald-300">{currentStudent.studentName}</span> ({currentStudent.kamar} • {currentStudent.kelas})
-                  </p>
-                </div>
+              <div>
+                <h3 className="text-base font-bold font-headline tracking-tight text-white flex items-center gap-2">
+                  Catat Setoran Mutaba'ah Tahfizh
+                </h3>
+                <p className="text-xs text-slate-300 mt-0.5">
+                  Santri: <span className="font-semibold text-emerald-300">{currentStudent.studentName}</span> ({currentStudent.kamar} • {currentStudent.kelas})
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsSetoranModalOpen(false)}
-                className="w-8 h-8 rounded-md flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-md bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
                 title="Tutup Form Setoran"
               >
                 <X className="w-4 h-4" />
@@ -2140,23 +2179,18 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           <div className="bg-white w-full max-w-3xl max-h-[92dvh] sm:max-h-[90vh] flex flex-col rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto animate-in fade-in zoom-in-95">
             
             <div className="bg-[#142A18] text-white px-6 py-4 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-emerald-300 border border-white/10">
-                  <LineChart className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold font-headline tracking-tight text-white flex items-center gap-2">
-                    Statistik & Tren Perkembangan Hafalan
-                  </h3>
-                  <p className="text-xs text-slate-300">
-                    {currentStudent.studentName} ({currentStudent.kamar} • Capaian: {currentStudent.hafalan})
-                  </p>
-                </div>
+              <div>
+                <h3 className="text-base font-bold font-headline tracking-tight text-white flex items-center gap-2">
+                  Statistik & Tren Perkembangan Hafalan
+                </h3>
+                <p className="text-xs text-slate-300 mt-0.5">
+                  {currentStudent.studentName} ({currentStudent.kamar} • Capaian: {currentStudent.hafalan})
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsHafalanChartModalOpen(false)}
-                className="w-8 h-8 rounded-md flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-md bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
                 title="Tutup Grafik"
               >
                 <X className="w-4 h-4" />
