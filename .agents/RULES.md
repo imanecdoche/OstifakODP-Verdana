@@ -7,6 +7,9 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Accordion Single-Expand pada Kartu Rekam Sesi Login:
+  - HANYA SATU KARTU TERBUKA: Dalam satu waktu, hanya ada maksimal 1 kartu sesi login yang dapat berstatus terbuka/ter-expand (`expandedSessionId`).
+  - AUTO-COLLAPSE KARTU LAIN: Membuka rincian satu kartu sesi secara otomatis menutup rincian kartu sesi lainnya yang sebelumnya sedang terbuka.
 - **[2026-08-26]**: Batasan Max-Height & Vertical Scrollable Tabel Aksi (Rekam Sesi Login):
   - KONTROL MAX-HEIGHT: Kontainer tabel daftar aksi dibatasi dengan ketinggian maksimal (`max-h-64 sm:max-h-80 md:max-h-96`) dan dibuat scrollable vertikal (`overflow-y-auto`).
   - STICKY TABLE HEADER: Header tabel (`<thead>`) diposisikan `sticky top-0 z-10` dengan background solid sehingga judul kolom tetap terlihat jelas saat baris tabel di-scroll ke bawah.

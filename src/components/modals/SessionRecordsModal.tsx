@@ -83,7 +83,7 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
   const [records, setRecords] = useState<SessionRecord[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'ended'>('all');
-  const [expandedSessionIds, setExpandedSessionIds] = useState<Record<string, boolean>>({});
+  const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
   const [nowTimestamp, setNowTimestamp] = useState<number>(Date.now());
 
   // Load real records & keep updated
@@ -98,12 +98,7 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
 
     // Expand the first active session by default if not set
     if (list.length > 0) {
-      setExpandedSessionIds((prev) => {
-        if (Object.keys(prev).length === 0) {
-          return { [list[0].id]: true };
-        }
-        return prev;
-      });
+      setExpandedSessionId((prev) => prev ?? list[0].id);
     }
   };
 
@@ -132,10 +127,7 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
   }, [isOpen]);
 
   const toggleExpand = (id: string) => {
-    setExpandedSessionIds((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+    setExpandedSessionId((prev) => (prev === id ? null : id));
   };
 
   const filteredRecords = useMemo(() => {
@@ -268,7 +260,7 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
           ) : (
             <div className="space-y-4">
               {filteredRecords.map((session, index) => {
-                const isExpanded = !!expandedSessionIds[session.id];
+                const isExpanded = expandedSessionId === session.id;
                 const isCurrentAccount = currentUser && session.accountEmail.toLowerCase() === (currentUser.email || '').toLowerCase();
                 const liveDuration = session.isActive
                   ? formatDurationFromTimestamps(session.loginTimestamp, nowTimestamp)
