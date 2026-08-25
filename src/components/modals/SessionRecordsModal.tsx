@@ -116,25 +116,13 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
       aria-modal="true"
       data-modal="true"
       data-lenis-prevent
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-2 sm:p-4 md:p-6 overflow-y-auto overscroll-contain font-body"
-      onClick={onClose}
+      className="fixed inset-0 z-50 w-full h-full min-h-[100dvh] bg-white flex flex-col font-body animate-in fade-in duration-150 overflow-hidden"
     >
-      <div 
-        className="bg-white w-full max-w-[96vw] xl:max-w-7xl max-h-[94dvh] flex flex-col rounded-xl shadow-[0_20px_70px_rgba(15,23,42,0.35)] border border-slate-200 overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-150"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* 1. Header (Murni Tanpa Ikon) */}
-        <div className="bg-[#142A18] text-white px-6 py-5 flex items-center justify-between border-b border-emerald-950/40 shrink-0">
+      {/* 1. Header (Murni Tanpa Ikon & Fullscreen) */}
+      <div className="bg-[#142A18] text-white px-6 py-4 border-b border-emerald-950/40 shrink-0">
+        <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-3">
-              <span className="text-[11px] font-bold uppercase tracking-[1px] text-emerald-400 bg-emerald-950/80 px-2.5 py-0.5 rounded border border-emerald-800/40">
-                AUDIT KEAMANAN & SESI RILL
-              </span>
-              <span className="text-xs text-slate-300 font-medium">
-                Total {filteredRecords.length} Sesi Rill Tercatat
-              </span>
-            </div>
-            <h2 className="text-lg md:text-xl font-bold font-headline tracking-tight text-white mt-1">
+            <h2 className="text-lg md:text-xl font-bold font-headline tracking-tight text-white">
               Rekam Sesi Login & Log Aktivitas
             </h2>
             <p className="text-xs text-slate-300 mt-0.5">
@@ -145,15 +133,17 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-3.5 py-1.5 rounded-lg border border-white/20 text-white/90 hover:text-white hover:bg-white/10 text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer active:scale-95"
+            className="px-4 py-2 rounded-lg border border-white/20 bg-white/5 hover:bg-white/15 text-white text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95"
             title="Tutup Jendela"
           >
             TUTUP
           </button>
         </div>
+      </div>
 
-        {/* 2. Toolbar & Filter (Murni Tanpa Ikon) */}
-        <div className="px-6 py-3.5 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+      {/* 2. Toolbar & Filter (Murni Tanpa Ikon) */}
+      <div className="px-6 py-3.5 bg-slate-50 border-b border-slate-200 shrink-0">
+        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3">
           {/* Search Box */}
           <div className="w-full sm:w-80">
             <input
@@ -205,14 +195,15 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
             </button>
           </div>
         </div>
+      </div>
 
-        {/* 3. Table & Nested Action Logs Body */}
-        <ScrollArea 
-          className="flex-1 min-h-0 bg-white"
-          viewportClassName="p-4 sm:p-6 space-y-4"
-          topOffset="top-3"
-          bottomOffset="bottom-3"
-        >
+      {/* 3. Table & Nested Action Logs Body */}
+      <ScrollArea 
+        className="flex-1 min-h-0 bg-white"
+        viewportClassName="p-4 sm:p-6 space-y-4 max-w-7xl mx-auto w-full"
+        topOffset="top-3"
+        bottomOffset="bottom-3"
+      >
           {filteredRecords.length === 0 ? (
             <div className="text-center py-16 bg-slate-50 rounded-xl border border-dashed border-slate-300">
               <p className="text-sm font-bold text-slate-700">Belum ada riwayat sesi yang tercatat</p>
@@ -426,8 +417,9 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
           )}
         </ScrollArea>
 
-        {/* 4. Footer */}
-        <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0 text-xs text-slate-500">
+      {/* 4. Footer */}
+      <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 shrink-0 text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
           <div>
             Data sesi login tercatat secara real-time dari perangkat yang aktif saat ini.
           </div>

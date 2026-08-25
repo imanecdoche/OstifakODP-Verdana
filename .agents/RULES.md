@@ -7,6 +7,12 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Modul Rekam Sesi Login Menjadi Full Screen (Bukan Popup Modal):
+  - TAMPILAN FULLSCREEN PENUH: Modul rekam sesi login diubah dari modal popup menjadi tampilan layar penuh edge-to-edge (`fixed inset-0 z-50 w-full h-full min-h-[100dvh] bg-white flex flex-col overflow-hidden`).
+  - HAPUS BADGE & TEKS TOTAL SESI:
+    * Hapus total tag/badge `"AUDIT KEAMANAN & SESI RILL"`.
+    * Hapus total teks counter `"Total N Sesi Rill Tercatat"`.
+  - HEADER & LAYOUT BERSIH: Header Dark Emerald, toolbar pencarian & filter status, scrollable body rincian log sesi, dan footer terstruktur rapi dengan container `max-w-7xl mx-auto w-full`.
 - **[2026-08-26]**: Konfigurasi Progressive Web App (PWA) Penuh:
   - WEB APP MANIFEST (`public/manifest.json`): Disediakan manifest standar PWA dengan `display: standalone`, tema pondok (`theme_color: #142A18`, `background_color: #F8FAFC`), orientasi `portrait-primary`, daftar shortcut navigasi cepat, dan icons multi-resolusi (192x192, 512x512, maskable, apple-touch-icon).
   - SERVICE WORKER (`public/sw.js`): Diimplementasikan Service Worker dengan cache-first/stale-while-revalidate untuk static assets & web fonts, network-first untuk navigasi HTML, dan auto-claim clients tanpa mengganggu realtime sync Firestore.
