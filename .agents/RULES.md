@@ -7,6 +7,9 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Hapus Tab Pelanggaran pada Form Tambah Santri Baru:
+  - HAPUS TAB PELANGGARAN: Menghapus tab "Disiplin & Pelanggaran" dan bilah tab bar atas pada modal pendaftaran santri baru sehingga fokus murni sebagai formulir Data Pokok & Akademik.
+  - FORM TUNGGAL LANGSUNG: Form pendaftaran langsung menyajikan field pokok santri secara bersih, ringkas, dan optimal.
 - **[2026-08-26]**: Penyesuaian Tinggi Modal Dinamis saat Keyboard Mobile Muncul:
   - RESPONSIVE TERHADAP VIRTUAL KEYBOARD: Ketinggian kontainer modal menyesuaikan secara real-time saat keyboard virtual mobile muncul/hilang melalui CSS dynamic viewport & VisualViewport API (`--modal-viewport-height` / `h-[calc(var(--modal-viewport-height,100dvh)-8px)]`).
   - GAP/PADDING MINIMAL: Padding luar backdrop dibuat setipis mungkin (`p-1` / 4px gap ke batas atas dan 4px gap ke atas keyboard), memaksimalkan ruang scrollable formulir di layar ponsel saat mengetik.

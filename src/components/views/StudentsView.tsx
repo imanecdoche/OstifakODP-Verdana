@@ -1421,366 +1421,164 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               </button>
             </div>
 
-            {/* 2. Fixed Modal Tab Bar (Height: 48px) - Evenly Distributed & No Icons */}
-            <div className="h-12 shrink-0 bg-[#F8FAFC] border-b border-[#E2E8F0] px-4 sm:px-6 flex items-center">
-              <div className="grid grid-cols-2 gap-2 w-full">
-                <button
-                  type="button"
-                  onClick={() => setAddActiveTab('general')}
-                  className={`h-9 w-full rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center justify-center text-center ${
-                    addActiveTab === 'general'
-                      ? 'bg-[#0F172A] text-white shadow-xs'
-                      : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0]/50 bg-transparent'
-                  }`}
-                >
-                  Data Pokok & Akademik
-                </button>
-                
-                <button
-                  type="button"
-                  onClick={() => setAddActiveTab('discipline')}
-                  className={`h-9 w-full rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center justify-center text-center gap-1.5 ${
-                    addActiveTab === 'discipline'
-                      ? 'bg-[#0F172A] text-white shadow-xs'
-                      : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0]/50 bg-transparent'
-                  }`}
-                >
-                  <span>Disiplin & Pelanggaran</span>
-                  {addPoin > 0 && (
-                    <span className="text-[10px] bg-[#EF4444] text-white font-bold px-1.5 py-0.2 rounded-full">
-                      {addPoin} Pts
-                    </span>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* 3. Modal Scrollable Content Body (Fixed Area) */}
+            {/* 2. Modal Scrollable Content Body (Fixed Area) */}
             <ScrollArea
               className="flex-1 min-h-0"
               viewportClassName="p-6 text-xs font-body"
               topOffset="top-4"
               bottomOffset="bottom-4"
             >
-              <form id="add-student-form" onSubmit={handleAddSantri} className="space-y-6">
-                
-                {/* ------------------------------------------------------------- */}
-                {/* TAB 1: DATA POKOK & AKADEMIK                                  */}
-                {/* ------------------------------------------------------------- */}
-                {addActiveTab === 'general' && (
-                  <div className="space-y-5 animate-in fade-in duration-150">
-                    
-                    {/* Nama Lengkap */}
-                    <div>
-                      <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
-                        Nama Lengkap Santri *
-                      </label>
+              <form id="add-student-form" onSubmit={handleAddSantri} className="space-y-5">
+                {/* Nama Lengkap */}
+                <div>
+                  <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
+                    Nama Lengkap Santri *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Contoh: Abdullah Faiz"
+                    className="w-full h-10 px-3.5 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-medium focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
+                  />
+                </div>
+
+                {/* Tanggal Lahir & Domisili (Satu Row) */}
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
+                      Tanggal Lahir
+                    </label>
+                    <div className="relative">
                       <input
-                        type="text"
-                        required
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Contoh: Abdullah Faiz"
-                        className="w-full h-10 px-3.5 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-medium focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
+                        type="date"
+                        value={birthDate}
+                        onChange={(e) => setBirthDate(e.target.value)}
+                        className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
                       />
                     </div>
+                  </div>
 
-                    {/* Tanggal Lahir & Domisili (Satu Row) */}
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                      <div>
-                        <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
-                          Tanggal Lahir
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="date"
-                            value={birthDate}
-                            onChange={(e) => setBirthDate(e.target.value)}
-                            className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
-                          />
-                        </div>
-                      </div>
+                  <div>
+                    <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
+                      Domisili / Asal Kota
+                    </label>
+                    <input
+                      type="text"
+                      value={domicile}
+                      onChange={(e) => setDomicile(e.target.value)}
+                      placeholder="Contoh: Surabaya, Jawa Timur"
+                      className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
+                    />
+                  </div>
+                </div>
 
-                      <div>
-                        <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
-                          Domisili / Asal Kota
-                        </label>
-                        <input
-                          type="text"
-                          value={domicile}
-                          onChange={(e) => setDomicile(e.target.value)}
-                          placeholder="Contoh: Surabaya, Jawa Timur"
-                          className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
+                {/* Asrama/Kamar & Kelas (Satu Row) */}
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
+                      Asrama & Kamar *
+                    </label>
+                    <select
+                      value={kamar}
+                      onChange={(e) => setKamar(e.target.value)}
+                      className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-medium focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none cursor-pointer truncate"
+                    >
+                      {rooms.map((r) => (
+                        <option key={r.id} value={r.roomName}>
+                          {r.roomName} ({r.dormitoryName})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
+                      Kelas Formal/Diniyah *
+                    </label>
+                    <select
+                      value={kelas}
+                      onChange={(e) => setKelas(e.target.value)}
+                      className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-medium focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none cursor-pointer truncate"
+                    >
+                      {availableClasses.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Total Hafalan & Toggle Tahsin (Satu Row) */}
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 items-end pt-1">
+                  <div>
+                    <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
+                      Total Hafalan Al-Quran
+                    </label>
+                    <div className="relative flex items-center">
+                      <input
+                        type="number"
+                        min={0}
+                        max={30}
+                        step={1}
+                        value={hafalanCount}
+                        onChange={(e) => setHafalanCount(e.target.value === '' ? '' : Math.min(30, Math.max(0, parseInt(e.target.value) || 0)))}
+                        placeholder="0"
+                        className="w-full h-10 pl-3.5 pr-12 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-bold focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
+                      />
+                      <span className="absolute right-3.5 text-xs font-bold text-[#64748B] pointer-events-none select-none">
+                        Juz
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
+                      Status Kelayakan Tahsin
+                    </label>
+                    <div className="flex items-center justify-between p-2.5 bg-[#F8FAFC] border border-[#CBD5E1] rounded-md h-10">
+                      <span className="text-xs font-medium text-[#0F172A] truncate pr-1">
+                        {isTahsinPassed ? 'Lulus Uji' : 'Bimbingan'}
+                      </span>
+                      
+                      {/* Toggle Switch */}
+                      <button
+                        type="button"
+                        onClick={() => setIsTahsinPassed(!isTahsinPassed)}
+                        className={`w-11 h-6 shrink-0 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
+                          isTahsinPassed ? 'bg-[#059669]' : 'bg-[#94A3B8]'
+                        }`}
+                      >
+                        <div
+                          className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
+                            isTahsinPassed ? 'translate-x-5' : 'translate-x-0'
+                          }`}
                         />
-                      </div>
+                      </button>
                     </div>
-
-                    {/* Asrama/Kamar & Kelas (Satu Row) */}
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                      <div>
-                        <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
-                          Asrama & Kamar *
-                        </label>
-                        <select
-                          value={kamar}
-                          onChange={(e) => setKamar(e.target.value)}
-                          className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-medium focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none cursor-pointer truncate"
-                        >
-                          {rooms.map((r) => (
-                            <option key={r.id} value={r.roomName}>
-                              {r.roomName} ({r.dormitoryName})
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
-                          Kelas Formal/Diniyah *
-                        </label>
-                        <select
-                          value={kelas}
-                          onChange={(e) => setKelas(e.target.value)}
-                          className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-medium focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none cursor-pointer truncate"
-                        >
-                          {availableClasses.map((c) => (
-                            <option key={c} value={c}>{c}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Total Hafalan & Toggle Tahsin (Satu Row) */}
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4 items-end pt-1">
-                      <div>
-                        <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
-                          Total Hafalan Al-Quran
-                        </label>
-                        <div className="relative flex items-center">
-                          <input
-                            type="number"
-                            min={0}
-                            max={30}
-                            step={1}
-                            value={hafalanCount}
-                            onChange={(e) => setHafalanCount(e.target.value === '' ? '' : Math.min(30, Math.max(0, parseInt(e.target.value) || 0)))}
-                            placeholder="0"
-                            className="w-full h-10 pl-3.5 pr-12 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-bold focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
-                          />
-                          <span className="absolute right-3.5 text-xs font-bold text-[#64748B] pointer-events-none select-none">
-                            Juz
-                          </span>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
-                          Status Kelayakan Tahsin
-                        </label>
-                        <div className="flex items-center justify-between p-2.5 bg-[#F8FAFC] border border-[#CBD5E1] rounded-md h-10">
-                          <span className="text-xs font-medium text-[#0F172A] truncate pr-1">
-                            {isTahsinPassed ? 'Lulus Uji' : 'Bimbingan'}
-                          </span>
-                          
-                          {/* Toggle Switch */}
-                          <button
-                            type="button"
-                            onClick={() => setIsTahsinPassed(!isTahsinPassed)}
-                            className={`w-11 h-6 shrink-0 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
-                              isTahsinPassed ? 'bg-[#059669]' : 'bg-[#94A3B8]'
-                            }`}
-                          >
-                            <div
-                              className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                                isTahsinPassed ? 'translate-x-5' : 'translate-x-0'
-                              }`}
-                            />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* NIS Field (Optional Information) */}
-                    <div className="pt-2 border-t border-[#E2E8F0]">
-                      <label className="block font-semibold mb-1 text-[#64748B] font-headline">
-                        Nomor Induk Santri (NIS) <span className="text-[#94A3B8] font-normal">(Opsional)</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={nis}
-                        onChange={(e) => setNis(e.target.value)}
-                        placeholder="Contoh: 2024.12.084 (Boleh dikosongkan)"
-                        className="w-full h-10 px-3.5 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
-                      />
-                    </div>
-
                   </div>
-                )}
+                </div>
 
-                {/* ------------------------------------------------------------- */}
-                {/* TAB 2: DISIPLIN & PELANGGARAN                                 */}
-                {/* ------------------------------------------------------------- */}
-                {addActiveTab === 'discipline' && (
-                  <div className="space-y-6 animate-in fade-in duration-150">
-                    
-                    {/* Poin Pelanggaran Total Control */}
-                    <div className="p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="text-xs font-bold text-[#0F172A] font-headline">Poin Pelanggaran Awal</h4>
-                          <p className="text-[11px] text-[#64748B] mt-0.5">
-                            Akumulasi poin awal santri saat pendaftaran baru (default 0 Pts)
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="number"
-                            min={0}
-                            max={500}
-                            value={addPoin}
-                            onChange={(e) => setAddPoin(Math.max(0, parseInt(e.target.value) || 0))}
-                            className="w-20 h-10 text-center text-sm font-bold bg-white border border-[#CBD5E1] rounded-md focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] text-[#EF4444]"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setAddPoin(0)}
-                            className="h-9 px-3 text-[11px] font-semibold bg-white border border-[#E2E8F0] hover:bg-[#E2E8F0] text-[#0F172A] rounded-md transition-colors cursor-pointer"
-                          >
-                            Reset 0 Pts
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Mini Form: Tambah Riwayat Pelanggaran */}
-                    <div className="p-4 border border-[#E2E8F0] rounded-lg bg-white space-y-4">
-                      <div className="flex items-center gap-2 text-[#0F172A] font-bold font-headline text-xs">
-                        <Plus className="w-3.5 h-3.5 text-[#059669]" />
-                        <span>Catat Pelanggaran / Sanksi Awal (Opsional)</span>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="sm:col-span-2">
-                          <label className="block text-[11px] font-medium text-[#64748B] mb-1">Nama / Jenis Pelanggaran</label>
-                          <input
-                            type="text"
-                            placeholder="Contoh: Terlambat Masuk Kelas Diniyah"
-                            value={newAddVioTitle}
-                            onChange={(e) => setNewAddVioTitle(e.target.value)}
-                            className="w-full h-9 px-3 bg-white border border-[#CBD5E1] rounded text-xs focus:border-[#0F172A] focus:outline-none"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-[11px] font-medium text-[#64748B] mb-1">Bobot Poin (+Pts)</label>
-                          <input
-                            type="number"
-                            min={1}
-                            max={100}
-                            value={newAddVioPoints}
-                            onChange={(e) => setNewAddVioPoints(parseInt(e.target.value) || 0)}
-                            className="w-full h-9 px-3 bg-white border border-[#CBD5E1] rounded text-xs text-center font-bold text-[#EF4444] focus:border-[#0F172A] focus:outline-none"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-[11px] font-medium text-[#64748B] mb-1">Hukuman / Sanksi Edukatif Diberikan</label>
-                          <input
-                            type="text"
-                            placeholder="Contoh: Menulis mufrodat 1 lembar / piket masjid"
-                            value={newAddVioPenalty}
-                            onChange={(e) => setNewAddVioPenalty(e.target.value)}
-                            className="w-full h-9 px-3 bg-white border border-[#CBD5E1] rounded text-xs focus:border-[#0F172A] focus:outline-none"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-[11px] font-medium text-[#64748B] mb-1">Tanggal Kejadian</label>
-                          <input
-                            type="date"
-                            value={newAddVioDate}
-                            onChange={(e) => setNewAddVioDate(e.target.value)}
-                            className="w-full h-9 px-3 bg-white border border-[#CBD5E1] rounded text-xs focus:border-[#0F172A] focus:outline-none"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex justify-end pt-1">
-                        <button
-                          type="button"
-                          onClick={handleAddNewAddViolation}
-                          className="h-8 px-4 bg-[#0F172A] hover:bg-[#020617] text-white rounded text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                        >
-                          <Plus className="w-3 h-3" /> Tambahkan ke Riwayat
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* List Riwayat Pelanggaran Saat Ini */}
-                    <div>
-                      <h4 className="text-xs font-bold text-[#0F172A] mb-2 font-headline flex items-center justify-between">
-                        <span>Daftar Riwayat Kasus Pelanggaran Awal ({addViolationsHistory.length})</span>
-                      </h4>
-
-                      {addViolationsHistory.length === 0 ? (
-                        <div className="p-4 rounded-lg bg-[#F8FAFC] border border-dashed border-[#CBD5E1] text-center text-xs text-[#64748B]">
-                          Belum ada catatan pelanggaran awal untuk santri ini.
-                        </div>
-                      ) : (
-                        <ScrollArea
-                          className="max-h-40"
-                          viewportClassName="space-y-2 pr-1"
-                          topOffset="top-2"
-                          bottomOffset="bottom-2"
-                        >
-                          {addViolationsHistory.map((item) => (
-                            <div
-                              key={item.id}
-                              className="p-3 rounded-md bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-between gap-3 text-xs"
-                            >
-                              <div className="space-y-0.5">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-bold text-[#0F172A]">{item.title}</span>
-                                  <span className="text-[10px] font-bold text-[#EF4444] bg-[#FEF2F2] px-1.5 py-0.2 rounded border border-[#FEE2E2]">
-                                    +{item.points} Pts
-                                  </span>
-                                </div>
-                                {item.penalty && (
-                                  <p className="text-[11px] text-[#64748B]">
-                                    Sanksi: <span className="font-medium text-[#0F172A]">{item.penalty}</span>
-                                  </p>
-                                )}
-                                {item.date && (
-                                  <p className="text-[10px] text-[#94A3B8]">{item.date}</p>
-                                )}
-                              </div>
-
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveNewAddViolation(item.id)}
-                                className="w-7 h-7 rounded hover:bg-[#FEF2F2] hover:text-[#EF4444] text-[#94A3B8] flex items-center justify-center transition-colors cursor-pointer shrink-0"
-                                title="Hapus Riwayat"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          ))}
-                        </ScrollArea>
-                      )}
-                    </div>
-
-                  </div>
-                )}
-
+                {/* NIS Field (Optional Information) */}
+                <div className="pt-2 border-t border-[#E2E8F0]">
+                  <label className="block font-semibold mb-1 text-[#64748B] font-headline">
+                    Nomor Induk Santri (NIS) <span className="text-[#94A3B8] font-normal">(Opsional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={nis}
+                    onChange={(e) => setNis(e.target.value)}
+                    placeholder="Contoh: 2024.12.084 (Boleh dikosongkan)"
+                    className="w-full h-10 px-3.5 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
+                  />
+                </div>
               </form>
             </ScrollArea>
 
-            {/* 4. Modal Fixed Footer (Height: 64px) */}
+            {/* 3. Modal Fixed Footer (Height: 64px) */}
             <div className="h-16 shrink-0 bg-[#F8FAFC] border-t border-[#E2E8F0] px-6 flex items-center justify-between">
               <span className="text-[11px] text-[#64748B]">
-                {addActiveTab === 'general' ? 'Data Pokok & Akademik' : 'Disiplin & Pelanggaran'}
+                Data Pokok & Akademik
               </span>
               
               <div className="flex items-center gap-3">
