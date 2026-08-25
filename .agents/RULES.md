@@ -7,6 +7,11 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Layout Item Rekaman Riwayat Setoran & Mutaba'ah Tahfizh:
+  - BARIS 1 (NAMA SURAH): Nama surah disajikan mandiri dalam 1 baris atas.
+  - BARIS 2 (KAPSUL JENIS, HALAMAN, & KELANCARAN): Kapsul jenis setoran (Hafalan Baru / Murojaah), kapsul rentang halaman (Hal. X-Y), dan kapsul tingkat kelancaran/predikat ditata berdampingan dalam 1 baris.
+  - BARIS 3 (JUZ & MUSYRIF): Menampilkan nomor juz dan nama musyrif/ustadz pembimbing secara ringkas (`Juz N | Nama Ustadz`).
+  - SISI KANAN (TANGGAL DD MMMM YY): Tanggal pencatatan diformat dengan pola `DD MMMM YY` (contoh: `26 Agustus 26`) di sisi kanan kartu.
 - **[2026-08-26]**: Tombol Catat Setoran Baru Icon-Only:
   - ICON BUTTON TANPA LABEL: Tombol pemicu modal "Catat Setoran Baru" pada tab riwayat hafalan diubah menjadi tombol icon-only (`<Plus />`) berukuran kompak tanpa label teks.
 - **[2026-08-26]**: Hapus Icon pada Kartu Metrik Tab Hafalan:

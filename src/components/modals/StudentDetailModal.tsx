@@ -250,6 +250,72 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     return list;
   }, [currentStudent?.kelas, liveClasses]);
 
+  // Date Formatting Helper (DD MMMM YY)
+  const formatDateDDMMMMYY = (rawDate?: string, timestamp?: number): string => {
+    const fullMonths = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    if (timestamp) {
+      const d = new Date(timestamp);
+      if (!isNaN(d.getTime())) {
+        const day = d.getDate();
+        const month = fullMonths[d.getMonth()];
+        const year = String(d.getFullYear()).slice(-2);
+        return `${day} ${month} ${year}`;
+      }
+    }
+    if (!rawDate || !rawDate.trim()) return '-';
+    
+    // Check if ISO date string (YYYY-MM-DD)
+    const isoMatch = rawDate.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (isoMatch) {
+      const year = isoMatch[1].slice(-2);
+      const monthIdx = parseInt(isoMatch[2], 10) - 1;
+      const day = parseInt(isoMatch[3], 10);
+      if (monthIdx >= 0 && monthIdx < 12) {
+        return `${day} ${fullMonths[monthIdx]} ${year}`;
+      }
+    }
+
+    // Check if format "DD Month YYYY" or "DD Mmm YYYY"
+    const indoMonthMap: Record<string, number> = {
+      jan: 0, januari: 0,
+      feb: 1, februari: 1,
+      mar: 2, maret: 2,
+      apr: 3, april: 3,
+      mei: 4, may: 4,
+      jun: 5, juni: 5,
+      jul: 6, juli: 6,
+      agu: 7, agustus: 7, aug: 7,
+      sep: 8, september: 8,
+      okt: 9, oktober: 9, oct: 9,
+      nov: 10, november: 10,
+      des: 11, desember: 11, dec: 11,
+    };
+
+    const tokens = rawDate.trim().split(/[\s,]+/);
+    if (tokens.length >= 3) {
+      const day = parseInt(tokens[0], 10);
+      const monthKey = tokens[1].toLowerCase().replace('.', '');
+      const yearRaw = tokens[2];
+      const year = yearRaw.length === 4 ? yearRaw.slice(-2) : yearRaw;
+      if (!isNaN(day) && indoMonthMap[monthKey] !== undefined) {
+        return `${day} ${fullMonths[indoMonthMap[monthKey]]} ${year}`;
+      }
+    }
+
+    const d = new Date(rawDate);
+    if (!isNaN(d.getTime())) {
+      const day = d.getDate();
+      const month = fullMonths[d.getMonth()];
+      const year = String(d.getFullYear()).slice(-2);
+      return `${day} ${month} ${year}`;
+    }
+
+    return rawDate;
+  };
+
   // Phone Validation & Formatting Helpers
   const formatIndonesianPhone = (rawPhone?: string): string => {
     if (!rawPhone || !rawPhone.trim()) return '-';
@@ -1394,11 +1460,16 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                       <div className="space-y-2.5">
                         {currentStudent.hafalanHistory.map((h) => (
                           <div key={h.id} className="p-3.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs flex items-start justify-between gap-3">
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold text-xs text-slate-900">{h.surah}</span>
+                            <div className="space-y-1.5 min-w-0 flex-1">
+                              {/* Baris 1: Nama Surah (Satu Row) */}
+                              <h5 className="font-bold text-xs sm:text-sm text-slate-900 truncate font-headline">
+                                {h.surah}
+                              </h5>
+
+                              {/* Baris 2: Kapsul Jenis Setoran, Halaman, dan Kelancaran dalam 1 Row */}
+                              <div className="flex flex-wrap items-center gap-1.5">
                                 {h.category && (
-                                  <span className={`text-[10px] font-bold px-2 py-0.2 rounded-full ${
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                                     h.category === 'Hafalan Baru' 
                                       ? 'bg-emerald-100 text-emerald-800' 
                                       : 'bg-blue-100 text-blue-800'
@@ -1407,26 +1478,36 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                                   </span>
                                 )}
                                 {h.pageFrom && h.pageTo && (
-                                  <span className="text-[10px] font-semibold px-2 py-0.2 rounded-full bg-slate-100 text-slate-700">
+                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
                                     Hal. {h.pageFrom}-{h.pageTo} ({h.pageCount || (h.pageTo - h.pageFrom + 1)} Hal)
                                   </span>
                                 )}
+                                {(h.kelancaran || h.predikat) && (
+                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/60">
+                                    {h.kelancaran || h.predikat}
+                                  </span>
+                                )}
                               </div>
-                              <p className="text-[11px] text-slate-500">
-                                {h.juz} • Penguji: <strong className="text-slate-700">{h.ustadz || 'Ustadz Pembimbing'}</strong>
-                                {h.kelancaran && ` • Kelancaran: ${h.kelancaran}`}
+
+                              {/* Baris 3: Cukup Juz N dan Langsung Nama Musyrif */}
+                              <p className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                                <span>{h.juz?.toLowerCase().startsWith('juz') ? h.juz : `Juz ${h.juz || '1'}`}</span>
+                                <span className="text-slate-300">|</span>
+                                <strong className="text-slate-700 font-medium">{h.ustadz || 'Ustadz Pembimbing'}</strong>
                               </p>
+
                               {h.notes && (
-                                <p className="text-[11px] text-slate-600 bg-[#F8FAFC] p-2 rounded-lg border border-slate-200/60 mt-1">
+                                <p className="text-[11px] text-slate-600 bg-[#F8FAFC] p-2 rounded-lg border border-slate-200/60 mt-1 italic">
                                   "{h.notes}"
                                 </p>
                               )}
                             </div>
+
+                            {/* Kanan Kontainer: Tanggal DD MMMM YY */}
                             <div className="text-right shrink-0">
-                              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">
-                                {h.predikat}
+                              <span className="text-xs font-semibold text-slate-600 whitespace-nowrap">
+                                {formatDateDDMMMMYY(h.date, h.timestamp)}
                               </span>
-                              <p className="text-[10px] text-slate-400 mt-1">{h.date}</p>
                             </div>
                           </div>
                         ))}
@@ -1436,7 +1517,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         <BookOpen className="w-6 h-6 text-slate-400 mx-auto" />
                         <p className="font-semibold text-slate-800">Belum Ada Riwayat Setoran</p>
                         <p className="text-[11px] text-slate-400">
-                          Gunakan tombol <strong>+ Catat Setoran Baru</strong> di atas untuk mencatat setoran harian santri.
+                          Gunakan tombol <strong>+</strong> di atas untuk mencatat setoran harian santri.
                         </p>
                       </div>
                     )}
