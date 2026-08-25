@@ -66,6 +66,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'directives', label: 'Instruksi Mudir', icon: <ScrollText className="w-4 h-4" /> },
   ];
 
+  // Gesture Swipe Left to close Mobile Sidebar
+  const touchStartRef = React.useRef({ x: 0, y: 0, time: 0 });
+
+  const handleSidebarTouchStart = (e: React.TouchEvent) => {
+    if (!isOpenMobile || e.touches.length !== 1) return;
+    touchStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+      time: Date.now(),
+    };
+  };
+
+  const handleSidebarTouchEnd = (e: React.TouchEvent) => {
+    if (!isOpenMobile || !touchStartRef.current.time || e.changedTouches.length !== 1) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartRef.current.x;
+    const deltaY = e.changedTouches[0].clientY - touchStartRef.current.y;
+    const deltaTime = Date.now() - touchStartRef.current.time;
+    touchStartRef.current.time = 0;
+
+    // Swipe left (deltaX < -40) closes mobile sidebar
+    if (deltaX < -40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2 && deltaTime < 500) {
+      onCloseMobile();
+    }
+  };
+
   return (
     <>
       {/* Mobile Backdrop */}
@@ -78,6 +103,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       <aside
         data-sidebar="true"
+        onTouchStart={handleSidebarTouchStart}
+        onTouchEnd={handleSidebarTouchEnd}
         className={`fixed top-0 bottom-0 left-0 z-50 w-[260px] bg-[#FFFFFF] border-r border-[#E2E8F0] flex flex-col transition-transform duration-200 ease-out lg:translate-x-0 ${
           isOpenMobile ? 'translate-x-0 shadow-[0_8px_32px_rgba(15,23,42,0.15)]' : '-translate-x-full'
         }`}

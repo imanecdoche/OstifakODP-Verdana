@@ -60,6 +60,31 @@ export const RightPanel: React.FC<RightPanelProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  // Swipe right on drawer to close
+  const touchStartRef = React.useRef({ x: 0, y: 0, time: 0 });
+
+  const handleDrawerTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    touchStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+      time: Date.now(),
+    };
+  };
+
+  const handleDrawerTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current.time || e.changedTouches.length !== 1) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartRef.current.x;
+    const deltaY = e.changedTouches[0].clientY - touchStartRef.current.y;
+    const deltaTime = Date.now() - touchStartRef.current.time;
+    touchStartRef.current.time = 0;
+
+    // Swipe right (deltaX > 40) closes right panel
+    if (deltaX > 40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2 && deltaTime < 500) {
+      onClose();
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -83,6 +108,8 @@ export const RightPanel: React.FC<RightPanelProps> = ({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 350 }}
+            onTouchStart={handleDrawerTouchStart}
+            onTouchEnd={handleDrawerTouchEnd}
             className="fixed top-0 bottom-0 right-0 z-50 w-full sm:w-[380px] bg-[#FFFFFF] border-l border-[#E2E8F0] shadow-[0_8px_32px_rgba(15,23,42,0.18)] flex flex-col font-body"
           >
             {/* Header Drawer */}

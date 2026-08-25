@@ -7,6 +7,10 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Isolasi Swipe Gestures Sidebar dari Scroll Horizontal & Geser Tutup Right Panel:
+  - ISOLASI SCROLL ELEMEN HORIZONTAL: Saat pengguna melakukan scrolling pada elemen horizontal (tabel, deretan tab segmented button, daftar kartu/overflow-x), gesture swipe TIDAK akan memicu pembukaan sidebar kiri maupun panel kanan.
+  - PEMBUKAAN SIDEBAR MURNI: Sidebar kiri / panel kanan hanya terbuka dengan gesture swipe horizontal saat interaksi terjadi di luar elemen yang terscroll.
+  - TUTUP PANEL INFO ODP DENGAN SWIPE KE KANAN: Panel Info ODP (right panel) yang sedang terbuka dapat ditutup dengan menggesernya kembali ke arah kanan (`deltaX > 40`).
 - **[2026-08-26]**: Scaling Gooey Toast Normal pada Mobile:
   - STANDAR UKURAN 1.0 PADA MOBILE: Ukuran scaling `gooey-toast` pada tampilan mobile dikembalikan ke ukuran normal (`transform: scale(1)`), mempertahankan posisi top-center yang presisi tanpa perbesaran berlebih.
 - **[2026-08-26]**: Segmen Poin & Status Disiplin Pelanggaran:

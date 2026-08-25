@@ -347,6 +347,46 @@ export default function App() {
       return false;
     };
 
+    let touchStartInsideScrollable = false;
+
+    // Helper: Detect if touch target is inside any horizontally scrollable container (tables, tab lists, etc.)
+    const isInsideHorizontallyScrollable = (el: HTMLElement | null): boolean => {
+      let curr: HTMLElement | null = el;
+      while (curr && curr !== document.body && curr !== document.documentElement) {
+        // Allow gesture handling on sidebar and rightpanel drawers directly
+        if (curr.getAttribute('data-sidebar') === 'true' || curr.getAttribute('data-rightpanel') === 'true') {
+          return false;
+        }
+
+        // 1. Table elements or segmented button lists / scroll areas / custom horizontal containers
+        if (
+          curr.tagName === 'TABLE' ||
+          curr.tagName === 'THEAD' ||
+          curr.tagName === 'TBODY' ||
+          curr.tagName === 'TR' ||
+          curr.tagName === 'TD' ||
+          curr.tagName === 'TH' ||
+          curr.hasAttribute('data-radix-scroll-area-viewport') ||
+          curr.getAttribute('role') === 'tablist' ||
+          curr.classList.contains('overflow-x-auto') ||
+          curr.classList.contains('overflow-x-scroll') ||
+          curr.classList.contains('no-scrollbar')
+        ) {
+          return true;
+        }
+
+        // 2. Computed horizontal scroll overflow with actual scrollable room
+        const style = window.getComputedStyle(curr);
+        const overflowX = style.overflowX;
+        if ((overflowX === 'auto' || overflowX === 'scroll') && curr.scrollWidth > curr.clientWidth + 1) {
+          return true;
+        }
+
+        curr = curr.parentElement;
+      }
+      return false;
+    };
+
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length !== 1) return;
 
@@ -357,7 +397,7 @@ export default function App() {
       }
       
       const target = e.target as HTMLElement | null;
-      // Do not trigger swipe on form elements, buttons, or scrollable inputs/modal areas
+      // Do not trigger swipe on form elements, buttons, or scrollable modal areas
       if (target && target.closest('input, textarea, select, button, [data-prevent-swipe="true"], [role="dialog"], [data-modal="true"], [data-lenis-prevent]')) {
         touchStartTime = 0;
         return;
@@ -366,6 +406,7 @@ export default function App() {
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
       touchStartTime = Date.now();
+      touchStartInsideScrollable = isInsideHorizontallyScrollable(target);
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
@@ -386,20 +427,24 @@ export default function App() {
 
       touchStartTime = 0;
 
-      // Ensure clear horizontal swipe (distance > 45px, duration < 500ms, predominantly horizontal)
-      if (Math.abs(deltaX) > 45 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25 && deltaTime < 500) {
+      // Ensure clear horizontal swipe
+      if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25 && deltaTime < 500) {
         if (deltaX > 0) {
           // Swipe Right (geser layar ke kanan)
           if (isRightPanelOpen) {
+            // Panel info ODP terbuka -> tutup dengan geser kembali ke kanan
             setIsRightPanelOpen(false);
-          } else if (!isMobileSidebarOpen) {
+          } else if (!isMobileSidebarOpen && !touchStartInsideScrollable) {
+            // Buka sidebar kiri HANYA jika tidak ada elemen horizontal yang sedang discroll
             setIsMobileSidebarOpen(true);
           }
         } else {
           // Swipe Left (geser layar ke kiri)
           if (isMobileSidebarOpen) {
+            // Sidebar kiri terbuka -> tutup dengan geser ke kiri
             setIsMobileSidebarOpen(false);
-          } else if (!isRightPanelOpen) {
+          } else if (!isRightPanelOpen && !touchStartInsideScrollable) {
+            // Buka panel info ODP kanan HANYA jika tidak ada elemen horizontal yang sedang discroll
             setIsRightPanelOpen(true);
           }
         }
