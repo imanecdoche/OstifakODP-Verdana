@@ -7,6 +7,8 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Scaling Gooey Toast Normal pada Mobile:
+  - STANDAR UKURAN 1.0 PADA MOBILE: Ukuran scaling `gooey-toast` pada tampilan mobile dikembalikan ke ukuran normal (`transform: scale(1)`), mempertahankan posisi top-center yang presisi tanpa perbesaran berlebih.
 - **[2026-08-26]**: Segmen Poin & Status Disiplin Pelanggaran:
   - UNBOXED POIN PTS: Bagian ringkasan Poin Pelanggaran ditampilkan secara terbuka/unboxed tanpa pembungkus card kontainer.
   - STATUS PLAIN TEXT TANPA KAPSUL: Status disiplin (Bersih / Taat, Peringatan Ringan, Pembinaan Khusus) disajikan murni sebagai plain text dengan pewarnaan tipografi tanpa kapsul atau latar belakang badge.

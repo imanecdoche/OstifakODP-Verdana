@@ -162,9 +162,9 @@ html.lenis, html.lenis body {
   }
 }
 
-/* Gooey Toast Center-Top Placement & Scaling */
+/* Gooey Toast Center-Top Placement & Mobile Standard Scaling */
 [data-sonner-toaster][data-y-position="top"] {
-  top: 24px !important;
+  top: 16px !important;
 }
 
 [data-sonner-toaster] [data-sonner-toast] {
@@ -172,18 +172,23 @@ html.lenis, html.lenis body {
 }
 
 .gooey-wrapper {
-  transform: scale(1.18);
+  transform: scale(1);
   transform-origin: top center;
-  margin-top: 4px;
+  margin-top: 0;
+}
+
+@media (min-width: 640px) {
+  [data-sonner-toaster][data-y-position="top"] {
+    top: 24px !important;
+  }
+  .gooey-wrapper {
+    transform: scale(1.12);
+    margin-top: 4px;
+  }
 }
 
 .gooey-title {
-  font-size: 13px !important;
   font-weight: 700 !important;
-}
-
-.gooey-description {
-  font-size: 13px !important;
 }
 
 /* Running Ticker / Marquee Animation for Mobile Table Cells */
