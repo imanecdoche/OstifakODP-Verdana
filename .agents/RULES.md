@@ -7,6 +7,11 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Styling Header Sidebar Brand "OSDIGI" (Center Aligned, No Tagline, Google Sans Black & Ukuran Lebih Besar):
+  - POSISI & ALIGNMENT: Teks nama aplikasi "OSDIGI" diatur menjadi rata tengah (*center aligned* `flex items-center justify-center text-center w-full`) di dalam header sidebar.
+  - HAPUS TAGLINE: Hapus seluruh teks subtitle/tagline ("Portal Manajemen Santri").
+  - TYPOGRAPHY GOOGLE SANS BLACK & LEBIH BESAR: Menggunakan font Google Sans / Plus Jakarta Sans dengan weight Black 900 (`font-['Google_Sans','Product_Sans','Plus_Jakarta_Sans',sans-serif] font-black`) serta ukuran yang lebih besar dan dominan (`text-3xl` / 30px, `leading-none`).
+  - MOBILE CLOSE BUTTON: Tombol tutup mobile (`X`) diposisikan `absolute right-4 top-1/2 -translate-y-1/2` agar tidak menggeser posisi teks judul dari tengah.
 - **[2026-08-26]**: Pembesaran Ukuran Teks pada Header Utama:
   - Teks judul pada Header Topbar dibuat sedikit lebih besar:
     * Pada tampilan desktop (`hidden lg:block`), teks breadcrumb judul halaman/divisi diperbesar dari `text-base` menjadi `text-lg lg:text-xl font-bold`.

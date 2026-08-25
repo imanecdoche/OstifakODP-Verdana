@@ -83,18 +83,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }`}
       >
         {/* Brand Header */}
-        <div className="h-16 px-6 border-b border-[#E2E8F0] flex items-center justify-between">
-          <div>
-            <h1 className="font-bold text-[#0F172A] text-lg leading-tight font-headline tracking-tight">
-              OSDIGI
-            </h1>
-            <p className="text-[10px] text-[#64748B] font-medium font-body">
-              Portal Manajemen Santri
-            </p>
-          </div>
+        <div className="relative h-16 px-6 border-b border-[#E2E8F0] flex items-center justify-center">
+          <h1 className="font-black text-[#0F172A] text-3xl leading-none font-['Google_Sans','Product_Sans','Plus_Jakarta_Sans',sans-serif] tracking-tight text-center select-none">
+            OSDIGI
+          </h1>
           <button
             onClick={onCloseMobile}
-            className="lg:hidden w-7 h-7 rounded-md flex items-center justify-center text-[#64748B] hover:bg-[#F8FAFC]"
+            className="absolute right-4 top-1/2 -translate-y-1/2 lg:hidden w-8 h-8 rounded-md flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] transition-colors cursor-pointer active:scale-95"
+            title="Tutup Menu"
           >
             <X className="w-4 h-4" />
           </button>
