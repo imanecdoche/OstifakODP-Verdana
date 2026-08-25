@@ -123,6 +123,27 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
   const [newAddVioDate, setNewAddVioDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
 
+  // Dynamic visual viewport adjustment for mobile virtual keyboard
+  useEffect(() => {
+    if (!isAdding && !editingStudent) return;
+    const updateVisualViewport = () => {
+      if (window.visualViewport) {
+        document.documentElement.style.setProperty(
+          '--modal-viewport-height',
+          `${window.visualViewport.height}px`
+        );
+      }
+    };
+    updateVisualViewport();
+    window.visualViewport?.addEventListener('resize', updateVisualViewport);
+    window.visualViewport?.addEventListener('scroll', updateVisualViewport);
+    return () => {
+      window.visualViewport?.removeEventListener('resize', updateVisualViewport);
+      window.visualViewport?.removeEventListener('scroll', updateVisualViewport);
+      document.documentElement.style.removeProperty('--modal-viewport-height');
+    };
+  }, [isAdding, editingStudent]);
+
   // Edit form states
   const [editName, setEditName] = useState('');
   const [editNis, setEditNis] = useState('');
@@ -1379,11 +1400,11 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* FIXED-DIMENSION ADD STUDENT POPUP MODAL (Strict 800px x 620px, 2 Tabs)    */}
+      {/* FIXED-DIMENSION ADD STUDENT POPUP MODAL (Dynamic Mobile Keyboard Height)  */}
       {/* ========================================================================= */}
       {isAdding && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="w-[800px] max-w-full h-[92dvh] sm:h-[620px] max-h-[92dvh] sm:max-h-[90vh] bg-white rounded-lg shadow-[0_12px_40px_rgba(15,23,42,0.22)] border border-[#E2E8F0] flex flex-col overflow-hidden my-auto animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-1 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          <div className="w-[800px] max-w-full h-[calc(var(--modal-viewport-height,100dvh)-8px)] max-h-[calc(var(--modal-viewport-height,100dvh)-8px)] sm:h-[620px] sm:max-h-[90vh] bg-white rounded-md sm:rounded-lg shadow-[0_12px_40px_rgba(15,23,42,0.22)] border border-[#E2E8F0] flex flex-col overflow-hidden my-auto animate-in fade-in zoom-in-95">
             
             {/* 1. Modal Fixed Header (Height: 64px) - Clean, No Icon, No Tagline, Red Close Box */}
             <div className="h-16 shrink-0 bg-[#0F172A] text-white px-6 flex items-center justify-between border-b border-[#1E293B]">
@@ -1795,9 +1816,9 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
       {/* FIXED-DIMENSION STUDENT EDIT MODAL (Strict Width & Height, 2 Tabs Layout) */}
       {/* ========================================================================= */}
       {editingStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          {/* Strict Fixed Size Window: 800px x 620px (TIDAK BERUBAH SAMA SEKALI) */}
-          <div className="w-[800px] max-w-full h-[92dvh] sm:h-[620px] max-h-[92dvh] sm:max-h-[90vh] bg-white rounded-lg shadow-[0_12px_40px_rgba(15,23,42,0.22)] border border-[#E2E8F0] flex flex-col overflow-hidden my-auto animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-1 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          {/* Strict Fixed Size Window: 800px x 620px (Dynamic Mobile Keyboard Height) */}
+          <div className="w-[800px] max-w-full h-[calc(var(--modal-viewport-height,100dvh)-8px)] max-h-[calc(var(--modal-viewport-height,100dvh)-8px)] sm:h-[620px] sm:max-h-[90vh] bg-white rounded-md sm:rounded-lg shadow-[0_12px_40px_rgba(15,23,42,0.22)] border border-[#E2E8F0] flex flex-col overflow-hidden my-auto animate-in fade-in zoom-in-95">
             
             {/* 1. Modal Fixed Header (Height: 64px) */}
             <div className="h-16 shrink-0 bg-[#0F172A] text-white px-6 flex items-center justify-between border-b border-[#1E293B]">

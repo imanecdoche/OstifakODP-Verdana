@@ -7,6 +7,9 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Penyesuaian Tinggi Modal Dinamis saat Keyboard Mobile Muncul:
+  - RESPONSIVE TERHADAP VIRTUAL KEYBOARD: Ketinggian kontainer modal menyesuaikan secara real-time saat keyboard virtual mobile muncul/hilang melalui CSS dynamic viewport & VisualViewport API (`--modal-viewport-height` / `h-[calc(var(--modal-viewport-height,100dvh)-8px)]`).
+  - GAP/PADDING MINIMAL: Padding luar backdrop dibuat setipis mungkin (`p-1` / 4px gap ke batas atas dan 4px gap ke atas keyboard), memaksimalkan ruang scrollable formulir di layar ponsel saat mengetik.
 - **[2026-08-26]**: Rekonstruksi Modal Tambah Profil Santri Baru:
   - HEADER BERSIH: Header modal tanpa icon dan tanpa tagline (hanya judul "Tambah Profil Santri Baru").
   - TOMBOL TUTUP BOX MERAH: Tombol icon silang (`X`) diberi kotak berlatar belakang merah mencolok (`bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white`).
