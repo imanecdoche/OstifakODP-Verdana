@@ -1385,62 +1385,53 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
           <div className="w-[800px] max-w-full h-[92dvh] sm:h-[620px] max-h-[92dvh] sm:max-h-[90vh] bg-white rounded-lg shadow-[0_12px_40px_rgba(15,23,42,0.22)] border border-[#E2E8F0] flex flex-col overflow-hidden my-auto animate-in fade-in zoom-in-95">
             
-            {/* 1. Modal Fixed Header (Height: 64px) */}
+            {/* 1. Modal Fixed Header (Height: 64px) - Clean, No Icon, No Tagline, Red Close Box */}
             <div className="h-16 shrink-0 bg-[#0F172A] text-white px-6 flex items-center justify-between border-b border-[#1E293B]">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-md bg-white/10 flex items-center justify-center text-white">
-                  <UserPlus className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold font-headline tracking-tight leading-tight flex items-center gap-2">
-                    Tambah Profil Santri Baru
-                  </h3>
-                  <p className="text-xs text-[#94A3B8] leading-none mt-0.5">
-                    Registrasi data pokok santri, kamar asrama, & rekam disiplin awal
-                  </p>
-                </div>
-              </div>
+              <h3 className="text-base font-bold font-headline tracking-tight leading-tight">
+                Tambah Profil Santri Baru
+              </h3>
               <button
                 type="button"
                 onClick={() => setIsAdding(false)}
-                className="w-8 h-8 rounded-md flex items-center justify-center text-[#94A3B8] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-md bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white flex items-center justify-center transition-colors cursor-pointer"
+                title="Tutup Modal"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* 2. Fixed Modal Tab Bar (Height: 48px) */}
-            <div className="h-12 shrink-0 bg-[#F8FAFC] border-b border-[#E2E8F0] px-6 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setAddActiveTab('general')}
-                className={`h-9 px-4 rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 ${
-                  addActiveTab === 'general'
-                    ? 'bg-[#0F172A] text-white shadow-xs'
-                    : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0]/50'
-                }`}
-              >
-                <Users className="w-3.5 h-3.5" />
-                Data Pokok & Akademik
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => setAddActiveTab('discipline')}
-                className={`h-9 px-4 rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 ${
-                  addActiveTab === 'discipline'
-                    ? 'bg-[#0F172A] text-white shadow-xs'
-                    : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0]/50'
-                }`}
-              >
-                <ShieldAlert className="w-3.5 h-3.5" />
-                Disiplin & Pelanggaran
-                {addPoin > 0 && (
-                  <span className="ml-1 text-[10px] bg-[#EF4444] text-white font-bold px-1.5 py-0.2 rounded-full">
-                    {addPoin} Pts
-                  </span>
-                )}
-              </button>
+            {/* 2. Fixed Modal Tab Bar (Height: 48px) - Evenly Distributed & No Icons */}
+            <div className="h-12 shrink-0 bg-[#F8FAFC] border-b border-[#E2E8F0] px-4 sm:px-6 flex items-center">
+              <div className="grid grid-cols-2 gap-2 w-full">
+                <button
+                  type="button"
+                  onClick={() => setAddActiveTab('general')}
+                  className={`h-9 w-full rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center justify-center text-center ${
+                    addActiveTab === 'general'
+                      ? 'bg-[#0F172A] text-white shadow-xs'
+                      : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0]/50 bg-transparent'
+                  }`}
+                >
+                  Data Pokok & Akademik
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => setAddActiveTab('discipline')}
+                  className={`h-9 w-full rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center justify-center text-center gap-1.5 ${
+                    addActiveTab === 'discipline'
+                      ? 'bg-[#0F172A] text-white shadow-xs'
+                      : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0]/50 bg-transparent'
+                  }`}
+                >
+                  <span>Disiplin & Pelanggaran</span>
+                  {addPoin > 0 && (
+                    <span className="text-[10px] bg-[#EF4444] text-white font-bold px-1.5 py-0.2 rounded-full">
+                      {addPoin} Pts
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* 3. Modal Scrollable Content Body (Fixed Area) */}
@@ -1473,8 +1464,8 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                       />
                     </div>
 
-                    {/* Tanggal Lahir & Domisili */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Tanggal Lahir & Domisili (Satu Row) */}
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
                       <div>
                         <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
                           Tanggal Lahir
@@ -1503,8 +1494,8 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                       </div>
                     </div>
 
-                    {/* Asrama/Kamar & Kelas */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Asrama/Kamar & Kelas (Satu Row) */}
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
                       <div>
                         <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
                           Asrama & Kamar *
@@ -1512,7 +1503,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                         <select
                           value={kamar}
                           onChange={(e) => setKamar(e.target.value)}
-                          className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-medium focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none cursor-pointer"
+                          className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-medium focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none cursor-pointer truncate"
                         >
                           {rooms.map((r) => (
                             <option key={r.id} value={r.roomName}>
@@ -1529,7 +1520,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                         <select
                           value={kelas}
                           onChange={(e) => setKelas(e.target.value)}
-                          className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-medium focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none cursor-pointer"
+                          className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-medium focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none cursor-pointer truncate"
                         >
                           {availableClasses.map((c) => (
                             <option key={c} value={c}>{c}</option>
@@ -1538,8 +1529,8 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                       </div>
                     </div>
 
-                    {/* Total Hafalan & Toggle Tahsin */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center pt-1">
+                    {/* Total Hafalan & Toggle Tahsin (Satu Row) */}
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4 items-end pt-1">
                       <div>
                         <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
                           Total Hafalan Al-Quran
@@ -1566,15 +1557,15 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                           Status Kelayakan Tahsin
                         </label>
                         <div className="flex items-center justify-between p-2.5 bg-[#F8FAFC] border border-[#CBD5E1] rounded-md h-10">
-                          <span className="text-xs font-medium text-[#0F172A]">
-                            {isTahsinPassed ? 'Lulus Uji Tahsin' : 'Dalam Bimbingan Tahsin'}
+                          <span className="text-xs font-medium text-[#0F172A] truncate pr-1">
+                            {isTahsinPassed ? 'Lulus Uji' : 'Bimbingan'}
                           </span>
                           
                           {/* Toggle Switch */}
                           <button
                             type="button"
                             onClick={() => setIsTahsinPassed(!isTahsinPassed)}
-                            className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
+                            className={`w-11 h-6 shrink-0 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
                               isTahsinPassed ? 'bg-[#059669]' : 'bg-[#94A3B8]'
                             }`}
                           >

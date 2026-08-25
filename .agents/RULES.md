@@ -7,6 +7,14 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Rekonstruksi Modal Tambah Profil Santri Baru:
+  - HEADER BERSIH: Header modal tanpa icon dan tanpa tagline (hanya judul "Tambah Profil Santri Baru").
+  - TOMBOL TUTUP BOX MERAH: Tombol icon silang (`X`) diberi kotak berlatar belakang merah mencolok (`bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white`).
+  - FORM FIELD SATU ROW (2 KOLOM):
+    * Tanggal Lahir & Domisili dibuat 1 row (`grid grid-cols-2`).
+    * Asrama & Kelas dibuat 1 row (`grid grid-cols-2`).
+    * Total Hafalan & Status Kelayakan Tahsin dibuat 1 row (`grid grid-cols-2`).
+  - SEGMENTED BUTTON (TAB) MERATA & TANPA ICON: Tab navigasi atas ("Data Pokok & Akademik" dan "Disiplin & Pelanggaran") dibuat tanpa ikon dan lebarnya terdistribusi merata 50:50 sesuai lebar kontainer pembungkus (`grid grid-cols-2 w-full`).
 - **[2026-08-26]**: Accordion Single-Expand pada Kartu Rekam Sesi Login:
   - HANYA SATU KARTU TERBUKA: Dalam satu waktu, hanya ada maksimal 1 kartu sesi login yang dapat berstatus terbuka/ter-expand (`expandedSessionId`).
   - AUTO-COLLAPSE KARTU LAIN: Membuka rincian satu kartu sesi secara otomatis menutup rincian kartu sesi lainnya yang sebelumnya sedang terbuka.
