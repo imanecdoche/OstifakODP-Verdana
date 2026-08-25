@@ -1528,20 +1528,28 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               {/* TAB 3: PELANGGARAN */}
               {detailActiveTab === 'pelanggaran' && (
                 <div className="space-y-4 animate-in fade-in duration-150">
-                  <div className="p-4 bg-red-50/50 rounded-xl border border-red-200/80 flex items-center justify-between">
+                  {/* Unboxed Poin Pelanggaran & Plain Text Status */}
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
                     <div>
-                      <p className="text-[10px] font-semibold text-red-600 uppercase">Akumulasi Poin Pelanggaran</p>
-                      <p className="text-xl font-bold text-red-600 mt-0.5 font-headline">{currentStudent.poinPelanggaran} Pts</p>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        Akumulasi Poin Pelanggaran
+                      </p>
+                      <p className="text-2xl font-bold text-red-600 mt-0.5 font-headline">
+                        {currentStudent.poinPelanggaran} <span className="text-xs font-semibold text-slate-500 font-body">Pts</span>
+                      </p>
                     </div>
-                    <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                      currentStudent.poinPelanggaran === 0
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : currentStudent.poinPelanggaran < 30
-                        ? 'bg-amber-100 text-amber-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {currentStudent.poinPelanggaran === 0 ? 'Bersih / Taat' : currentStudent.poinPelanggaran < 30 ? 'Peringatan Ringan' : 'Pembinaan Khusus'}
-                    </span>
+                    <div className="text-right">
+                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Status Disiplin</p>
+                      <p className={`text-xs font-bold mt-0.5 ${
+                        currentStudent.poinPelanggaran === 0
+                          ? 'text-emerald-600'
+                          : currentStudent.poinPelanggaran < 30
+                          ? 'text-amber-600'
+                          : 'text-red-600'
+                      }`}>
+                        {currentStudent.poinPelanggaran === 0 ? 'Bersih / Taat' : currentStudent.poinPelanggaran < 30 ? 'Peringatan Ringan' : 'Pembinaan Khusus'}
+                      </p>
+                    </div>
                   </div>
 
                   <div className="space-y-2.5">
@@ -1560,7 +1568,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">
                                 +{v.points} Pts
                               </span>
-                              <p className="text-[10px] text-slate-400 mt-1">{v.date}</p>
+                              <p className="text-[10px] text-slate-400 mt-1">{formatDateDDMMMMYY(v.date)}</p>
                             </div>
                           </div>
                         ))}

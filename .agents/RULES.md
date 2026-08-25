@@ -7,6 +7,9 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Segmen Poin & Status Disiplin Pelanggaran:
+  - UNBOXED POIN PTS: Bagian ringkasan Poin Pelanggaran ditampilkan secara terbuka/unboxed tanpa pembungkus card kontainer.
+  - STATUS PLAIN TEXT TANPA KAPSUL: Status disiplin (Bersih / Taat, Peringatan Ringan, Pembinaan Khusus) disajikan murni sebagai plain text dengan pewarnaan tipografi tanpa kapsul atau latar belakang badge.
 - **[2026-08-26]**: Layout Item Rekaman Riwayat Setoran & Mutaba'ah Tahfizh:
   - BARIS 1 (NAMA SURAH): Nama surah disajikan mandiri dalam 1 baris atas.
   - BARIS 2 (KAPSUL JENIS, HALAMAN, & KELANCARAN): Kapsul jenis setoran (Hafalan Baru / Murojaah), kapsul rentang halaman (Hal. X-Y), dan kapsul tingkat kelancaran/predikat ditata berdampingan dalam 1 baris.
