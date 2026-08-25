@@ -416,16 +416,16 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
                           </div>
 
                           <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-xs">
-                            <div className="overflow-x-auto no-scrollbar">
+                            <div className="max-h-64 sm:max-h-80 md:max-h-96 overflow-y-auto overflow-x-auto">
                               <table className="w-auto min-w-full text-left text-xs border-collapse">
-                                <thead>
-                                  <tr className="bg-slate-100/80 border-b border-slate-200 text-slate-600 font-semibold text-[11px] uppercase tracking-wider">
-                                    <th className="py-2.5 px-3 w-10 text-center whitespace-nowrap">NO</th>
-                                    <th className="py-2.5 px-3 whitespace-nowrap">WAKTU (DETIK)</th>
-                                    <th className="py-2.5 px-3 whitespace-nowrap max-w-[130px] sm:max-w-[180px] md:max-w-none">MODUL / HALAMAN</th>
-                                    <th className="py-2.5 px-3 whitespace-nowrap max-w-[130px] sm:max-w-[170px] md:max-w-none">TIPE AKTIVITAS</th>
-                                    <th className="py-2.5 px-3 whitespace-nowrap max-w-[200px] sm:max-w-[300px] md:max-w-[420px] lg:max-w-none">DESKRIPSI TINDAKAN</th>
-                                    <th className="py-2.5 px-3 w-28 text-right whitespace-nowrap">STATUS</th>
+                                <thead className="sticky top-0 z-10 bg-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
+                                  <tr className="border-b border-slate-200 text-slate-600 font-semibold text-[11px] uppercase tracking-wider">
+                                    <th className="py-2.5 px-3 w-10 text-center whitespace-nowrap bg-slate-100">NO</th>
+                                    <th className="py-2.5 px-3 whitespace-nowrap bg-slate-100">WAKTU (DETIK)</th>
+                                    <th className="py-2.5 px-3 whitespace-nowrap max-w-[130px] sm:max-w-[180px] md:max-w-none bg-slate-100">MODUL / HALAMAN</th>
+                                    <th className="py-2.5 px-3 whitespace-nowrap max-w-[130px] sm:max-w-[170px] md:max-w-none bg-slate-100">TIPE AKTIVITAS</th>
+                                    <th className="py-2.5 px-3 whitespace-nowrap max-w-[200px] sm:max-w-[300px] md:max-w-[420px] lg:max-w-none bg-slate-100">DESKRIPSI TINDAKAN</th>
+                                    <th className="py-2.5 px-3 w-28 text-right whitespace-nowrap bg-slate-100">STATUS</th>
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
