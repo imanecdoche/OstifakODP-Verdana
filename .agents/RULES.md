@@ -7,6 +7,10 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Pembesaran Ukuran Teks pada Header Utama:
+  - Teks judul pada Header Topbar dibuat sedikit lebih besar:
+    * Pada tampilan desktop (`hidden lg:block`), teks breadcrumb judul halaman/divisi diperbesar dari `text-base` menjadi `text-lg lg:text-xl font-bold`.
+    * Pada tampilan mobile (`lg:hidden`), teks nama aplikasi "OSDIGI" diperbesar dari `text-lg` menjadi `text-xl font-black`.
 - **[2026-08-26]**: Git Commit & Push Otomatis:
   - Staging seluruh file perubahan kode (`git add .`).
   - Buat commit dengan pesan: `Update otomatis via Antigravity CLI`.

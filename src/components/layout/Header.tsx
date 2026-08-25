@@ -170,13 +170,13 @@ export const Header: React.FC<HeaderProps> = ({
           <div>
             {/* Mobile View: Teks Header Menampilkan Nama App OSDIGI */}
             <div className="lg:hidden">
-              <h2 className="text-lg font-black text-[#0F172A] font-headline tracking-tight leading-tight">
+              <h2 className="text-xl font-black text-[#0F172A] font-headline tracking-tight leading-tight">
                 OSDIGI
               </h2>
             </div>
 
             {/* Desktop View: Menampilkan Judul Breadcrumbs Halaman */}
-            <h2 className="hidden lg:block text-base font-bold text-[#0F172A] font-headline tracking-tight">
+            <h2 className="hidden lg:block text-lg lg:text-xl font-bold text-[#0F172A] font-headline tracking-tight">
               {getBreadcrumbTitle()}
             </h2>
           </div>
