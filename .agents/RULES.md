@@ -7,6 +7,12 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Hapus Icon pada Kartu Metrik Tab Hafalan:
+  - TANPA ICON APAPUN: Seluruh kartu ringkasan metrik statistik hafalan (Ziyadah Pekan Ini, Ziyadah Bulan Ini, Murojaah Pekan Ini, Murojaah Bulan Ini) ditampilkan murni teks tanpa ikon atau badge visual tambahan.
+- **[2026-08-26]**: Ringkasan Tab Hafalan Santri (1 Row & Tanpa Target Semester):
+  - HAPUS KARTU TARGET SEMESTER: Kartu "Target Semester" dihapus dari ringkasan atas tab Hafalan.
+  - 1 ROW KARTU RINGKASAN: Kartu "Capaian Hafalan" dan "Status Uji Tahsin" ditata sejajar dalam 1 baris (`grid grid-cols-2`).
+  - STATUS LULUS TANPA CEKLIS: Teks "✓ Lulus Tahsin" diganti menjadi "Lulus" secara ringkas tanpa tanda ceklis.
 - **[2026-08-26]**: Format Info Santri di Bawah Nama (Header Modal):
   - PEMBATAS PIPELINE (|): Karakter pembatas antar-informasi santri (NIS, Kamar, Kelas) di bawah nama pada header modal menggunakan tanda pipa `|` (bukan bullet `•`).
   - WARNA SERAGAM PUTIH OPACITY 70%: Warna teks informasi diseragamkan seluruhnya menggunakan putih dengan opacity 70% (`text-white/70`), tanpa aksen warna berbeda pada item kamar.

@@ -1265,8 +1265,8 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               {/* TAB 2: HAFALAN */}
               {detailActiveTab === 'hafalan' && (
                 <div className="space-y-5 animate-in fade-in duration-150">
-                  {/* Top 3 Summary Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Top Summary Cards (1 Row, 2 Cards) */}
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     <div className="p-4 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
                       <p className="text-[10px] font-semibold text-slate-500 uppercase">Capaian Hafalan</p>
                       <p className="text-xl font-bold text-slate-900 mt-1">{currentStudent.hafalan}</p>
@@ -1274,16 +1274,12 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                     <div className="p-4 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
                       <p className="text-[10px] font-semibold text-slate-500 uppercase">Status Uji Tahsin</p>
                       <p className={`text-base font-bold mt-1 ${currentStudent.isTahsinPassed ? 'text-emerald-600' : 'text-amber-600'}`}>
-                        {currentStudent.isTahsinPassed ? '✓ Lulus Tahsin' : '⏳ Bimbingan Tahsin'}
+                        {currentStudent.isTahsinPassed ? 'Lulus' : 'Bimbingan'}
                       </p>
-                    </div>
-                    <div className="p-4 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
-                      <p className="text-[10px] font-semibold text-slate-500 uppercase">Target Semester</p>
-                      <p className="text-base font-bold text-slate-900 mt-1">2 Juz / Semester</p>
                     </div>
                   </div>
 
-                  {/* Compact Stats Cards (4 Metrics with Clickable Chart Navigation) */}
+                  {/* Compact Stats Cards (4 Metrics with Clickable Chart Navigation, No Icons) */}
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     {/* Card 1: Ziyadah Pekan Ini */}
                     <button
@@ -1295,11 +1291,8 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                       }}
                       className="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs hover:border-emerald-600 hover:shadow-xs transition-all text-left group cursor-pointer"
                     >
-                      <div className="flex items-center justify-between">
+                      <div>
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Ziyadah Pekan Ini</span>
-                        <span className="w-5 h-5 rounded-md bg-emerald-50 text-emerald-700 flex items-center justify-center text-[10px] group-hover:bg-emerald-700 group-hover:text-white transition-colors">
-                          <TrendingUp className="w-3 h-3" />
-                        </span>
                       </div>
                       <p className="text-base font-bold text-[#0F172A] mt-1 font-headline">
                         {hafalanStats.ziyadahWeekPages} <span className="text-xs font-semibold text-slate-500 font-body">Hal</span>
@@ -1321,11 +1314,8 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                       }}
                       className="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs hover:border-emerald-600 hover:shadow-xs transition-all text-left group cursor-pointer"
                     >
-                      <div className="flex items-center justify-between">
+                      <div>
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Ziyadah Bulan Ini</span>
-                        <span className="w-5 h-5 rounded-md bg-emerald-50 text-emerald-700 flex items-center justify-center text-[10px] group-hover:bg-emerald-700 group-hover:text-white transition-colors">
-                          <Sparkles className="w-3 h-3" />
-                        </span>
                       </div>
                       <p className="text-base font-bold text-[#0F172A] mt-1 font-headline">
                         {hafalanStats.ziyadahMonthPages} <span className="text-xs font-semibold text-slate-500 font-body">Hal</span>
@@ -1347,11 +1337,8 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                       }}
                       className="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs hover:border-blue-600 hover:shadow-xs transition-all text-left group cursor-pointer"
                     >
-                      <div className="flex items-center justify-between">
+                      <div>
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Murojaah Pekan Ini</span>
-                        <span className="w-5 h-5 rounded-md bg-blue-50 text-blue-700 flex items-center justify-center text-[10px] group-hover:bg-blue-700 group-hover:text-white transition-colors">
-                          <Activity className="w-3 h-3" />
-                        </span>
                       </div>
                       <p className="text-base font-bold text-[#0F172A] mt-1 font-headline">
                         {hafalanStats.murojaahWeekPages} <span className="text-xs font-semibold text-slate-500 font-body">Hal</span>
@@ -1373,11 +1360,8 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                       }}
                       className="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs hover:border-blue-600 hover:shadow-xs transition-all text-left group cursor-pointer"
                     >
-                      <div className="flex items-center justify-between">
+                      <div>
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Murojaah Bulan Ini</span>
-                        <span className="w-5 h-5 rounded-md bg-blue-50 text-blue-700 flex items-center justify-center text-[10px] group-hover:bg-blue-700 group-hover:text-white transition-colors">
-                          <BarChart3 className="w-3 h-3" />
-                        </span>
                       </div>
                       <p className="text-base font-bold text-[#0F172A] mt-1 font-headline">
                         {hafalanStats.murojaahMonthPages} <span className="text-xs font-semibold text-slate-500 font-body">Hal</span>
