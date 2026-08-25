@@ -20,6 +20,7 @@ import { UserProfile, DivisionId } from '../../types';
 import { mockDivisions } from '../../data/mockData';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
+import { SessionRecordsModal } from '../modals/SessionRecordsModal';
 
 interface HeaderProps {
   currentUser: UserProfile;
@@ -50,10 +51,14 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
+  const [isSessionRecordsModalOpen, setIsSessionRecordsModalOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSearchBoxExpanded, setIsSearchBoxExpanded] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
   const avatarButtonRef = useRef<HTMLButtonElement>(null);
+  const settingsButtonRef = useRef<HTMLButtonElement>(null);
+  const settingsMenuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const searchWrapRef = useRef<HTMLDivElement>(null);
   const searchCollapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -104,6 +109,35 @@ export const Header: React.FC<HeaderProps> = ({
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isProfileOpen]);
+
+  // Close settings dropdown when clicking outside or pressing Escape
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        settingsMenuRef.current &&
+        !settingsMenuRef.current.contains(event.target as Node) &&
+        settingsButtonRef.current &&
+        !settingsButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsSettingsMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsSettingsMenuOpen(false);
+      }
+    };
+
+    if (isSettingsMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isSettingsMenuOpen]);
 
   const getBreadcrumbTitle = () => {
     if (selectedDivision) {
@@ -244,6 +278,75 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </button>
 
+          {/* Settings Icon Button with Dropdown (Rekam Sesi Login) */}
+          <div className="relative shrink-0">
+            <button
+              ref={settingsButtonRef}
+              type="button"
+              onClick={() => setIsSettingsMenuOpen(!isSettingsMenuOpen)}
+              className={`w-8 h-8 rounded-md border transition-all cursor-pointer flex items-center justify-center active:scale-[0.97] ${
+                isSettingsMenuOpen
+                  ? 'bg-[#0F172A] text-white border-[#0F172A]'
+                  : 'bg-[#FFFFFF] text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] border-[#E2E8F0]'
+              }`}
+              title="Pengaturan Sistem & Rekam Sesi"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+
+            {/* Settings Dropdown Menu */}
+            {isSettingsMenuOpen && (
+              <div
+                ref={settingsMenuRef}
+                className="absolute right-0 top-11 w-64 bg-white rounded-md shadow-[0_8px_32px_rgba(15,23,42,0.14)] border border-[#E2E8F0] overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-150 font-body"
+                style={{ transformOrigin: 'top right' }}
+              >
+                <div className="px-3 py-2 border-b border-[#E2E8F0] bg-[#F8FAFC]">
+                  <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">
+                    PENGATURAN & AUDIT
+                  </p>
+                </div>
+
+                <div className="p-1 space-y-0.5">
+                  {/* Rekam Sesi Login Option */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSettingsMenuOpen(false);
+                      setIsSessionRecordsModalOpen(true);
+                    }}
+                    className="w-full px-3 py-2.5 text-left rounded-md hover:bg-[#F8FAFC] text-xs font-semibold text-[#0F172A] flex items-center justify-between transition-colors cursor-pointer group"
+                  >
+                    <div>
+                      <p className="font-bold text-slate-900 group-hover:text-[#059669] transition-colors">
+                        Rekam Sesi Login
+                      </p>
+                      <p className="text-[10px] text-slate-500 font-normal mt-0.5">
+                        Metadata perangkat, IP & log aksi
+                      </p>
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300">
+                      Audit
+                    </span>
+                  </button>
+
+                  {/* Preferensi Portal Option */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSettingsMenuOpen(false);
+                      setIsSettingsModalOpen(true);
+                    }}
+                    className="w-full px-3 py-2 text-left rounded-md hover:bg-[#F8FAFC] text-xs font-medium text-slate-700 hover:text-slate-900 flex items-center justify-between transition-colors cursor-pointer"
+                  >
+                    <span>Preferensi Portal</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* User Profile Avatar with Popover Window */}
           <div className="relative pl-3 border-l border-[#E2E8F0] shrink-0">
             <button
@@ -279,6 +382,23 @@ export const Header: React.FC<HeaderProps> = ({
 
                 {/* 2. Menu Navigation Items */}
                 <div className="p-2 space-y-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      setIsSessionRecordsModalOpen(true);
+                    }}
+                    className="w-full px-3 py-2 text-left rounded-md hover:bg-[#F8FAFC] text-xs font-medium text-[#0F172A] flex items-center justify-between transition-colors cursor-pointer active:scale-[0.97]"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <ShieldCheck className="w-4 h-4 text-[#059669]" />
+                      <span className="font-semibold text-slate-800">Rekam Sesi Login</span>
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300">
+                      Audit
+                    </span>
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => {
@@ -364,6 +484,13 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       </Modal>
+
+      {/* Near-Fullscreen Session Records Modal (Clean, No Icon) */}
+      <SessionRecordsModal
+        isOpen={isSessionRecordsModalOpen}
+        onClose={() => setIsSessionRecordsModalOpen(false)}
+        currentUser={currentUser}
+      />
     </>
   );
 };

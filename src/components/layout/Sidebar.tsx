@@ -77,6 +77,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       <aside
+        data-sidebar="true"
         className={`fixed top-0 bottom-0 left-0 z-50 w-[260px] bg-[#FFFFFF] border-r border-[#E2E8F0] flex flex-col transition-transform duration-200 ease-out lg:translate-x-0 ${
           isOpenMobile ? 'translate-x-0 shadow-[0_8px_32px_rgba(15,23,42,0.15)]' : '-translate-x-full'
         }`}

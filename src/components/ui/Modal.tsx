@@ -40,6 +40,9 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      data-modal="true"
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0F172A]/40 backdrop-blur-xs transition-opacity duration-200 overflow-y-auto overscroll-contain"
       onClick={onClose}
     >

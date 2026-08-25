@@ -7,6 +7,39 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Git Commit & Push Otomatis:
+  - Staging seluruh file perubahan kode (`git add .`).
+  - Buat commit dengan pesan: `Update otomatis via Antigravity CLI`.
+  - Push ke repositori target `git@github.com:imanecdoche/OstifakODP-Verdana.git` pada branch `main` menggunakan SSH Port 443 yang terkonfigurasi.
+- **[2026-08-26]**: Disable Touch Swipe Gestures Ketika Ada Modal / Overlay Aktif:
+  - PENGECEKAN MODAL / OVERLAY AKTIF:
+    * Deteksi apakah ada modal/dialog/drawer/overlay aktif (baik via React modal state maupun deteksi DOM seperti `[role="dialog"]`, `[data-modal="true"]`, overlay backdrop, dsb.).
+  - NONAKTIFKAN SEMENTARA GESTURE SWIPE:
+    * Pada event listener gesture swipe di `App.tsx`, jika ada modal yang aktif, batalkan / return early seluruh aksi swipe gesture sehingga tidak membuka/menutup sidebar secara tidak sengaja saat interaksi modal.
+    * Setelah modal ditutup, gesture swipe otomatis kembali aktif secara normal.
+- **[2026-08-26]**: Hapus Lokasi & Koordinat Fiktif pada Modul Rekam Sesi (Gunakan Data Rill atau Tanda Strip `-`):
+  - HAPUS HARDCODED LOKASI / KOORDINAT:
+    * Hapus total koordinat fiktif, nama lokasi palsu, dan alamat MAC tiruan dari sistem rekam sesi.
+  - ATURAN FALLBACK TANDA STRIP (`-`):
+    * Coba ambil koordinat rill via `navigator.geolocation` secara asinkron jika diizinkan.
+    * Jika izin lokasi tidak aktif, ditolak, tidak didukung, atau tidak ada data geolokasi rill, wajib mengisi kolom Koordinat GPS, Lokasi Fisik, dan Alamat MAC dengan tanda strip (**`-`**). Dilarang keras membuat data tebakan/halusinasi.
+- **[2026-08-26]**: Real Data Logging pada Modul Rekam Sesi Login (Hapus Total Mock/Dummy Data):
+  - BERSIHKAN DATA DUMMY / MOCK: Hapus seluruh data dummy / hardcoded palsu dari modul rekam sesi.
+  - SISTEM LOGGING REAL-TIME & PERSISTENT (`localStorage`):
+    * Catat sesi login rill dari akun yang sedang login ke penyimpanan lokal (`localStorage`).
+    * Waktu masuk presisi hingga detik (`HH:mm:ss WIB`).
+    * Deteksi rill informasi perangkat (`navigator.userAgent`, OS, browser, resolusi).
+    * Hitung durasi sesi aktif secara real-time dan deteksi lokasi/IP jaringan aktif.
+    * Catat setiap aksi pengguna (navigasi modul, input pelanggaran, pembuatan program kerja, dll.) secara otomatis ke dalam log aksi sesi aktif.
+- **[2026-08-26]**: Fitur Rekam Sesi Login (Settings Dropdown & Near-Fullscreen Modal Tanpa Ikon):
+  - OPSI MENU SETTINGS DI HEADER:
+    * Pada tombol Settings di Topbar Header, sediakan menu dropdown dengan opsi **"Rekam Sesi Login"**.
+  - MODUL REKAM SESI LOGIN (NEAR-FULLSCREEN & BEBAS IKON):
+    * Tampilkan modul berukuran hampir satu layar penuh (*near-fullscreen* `w-[96vw] max-w-7xl max-h-[94dvh]`).
+    * Seluruh antarmuka modul (judul, tabel, header, status badge, list rincian) harus tampil murni bersih **TANPA IKON**.
+  - LOG LENGKAP & EXPANDABLE RIWAYAT AKSI:
+    * Mencakup: Tanggal & Hari, Jam Masuk (detik `HH:mm:ss`), Nama PC/Perangkat, Browser & OS, Alamat IP, Alamat MAC, Koordinat & Nama Lokasi, Durasi Sesi, dan Akun Ostifak.
+    * Setiap baris log dapat di-expand (*accordion*) untuk menampilkan rincian daftar aksi/aktivitas yang dilakukan selama sesi tersebut.
 - **[2026-08-26]**: Input Email dengan Suffix Domain "@ostifak.edu" Otomatis:
   - Pada input field email halaman login, terapkan layout horizontal flex row dengan underline (`border-b border-white/30 focus-within:border-white`).
   - Di sebelah kanan input tampilkan teks suffix permanen **`@ostifak.edu`** berwarna putih redup (`text-white/50`).

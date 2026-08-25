@@ -78,6 +78,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
           {/* Overlay Slide-over Drawer Panel */}
           <motion.aside
             key="right-panel-drawer"
+            data-rightpanel="true"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}

@@ -4,6 +4,7 @@ export type UserRole = 'mudir' | 'pembina' | 'bph' | 'ketua_divisi' | 'santri';
 
 export interface UserProfile {
   id: string;
+  email?: string;
   name: string;
   role: UserRole;
   roleLevel: RoleLevel;

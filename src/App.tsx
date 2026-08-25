@@ -41,6 +41,12 @@ import {
 } from './lib/firestoreService';
 import { GooeyToaster, gooeyToast } from 'goey-toast';
 import 'goey-toast/styles.css';
+import { 
+  recordLoginSession, 
+  recordLogoutSession, 
+  recordSessionAction,
+  getStoredSessionRecords 
+} from './lib/sessionLogService';
 
 export default function App() {
   // Activate Lenis Smooth Scroll
@@ -194,6 +200,42 @@ export default function App() {
     return out;
   }, [violations, students]);
 
+  // Ensure active session exists in storage when user is logged in
+  useEffect(() => {
+    if (currentUser && isLoggedIn) {
+      const records = getStoredSessionRecords();
+      const activeId = localStorage.getItem('ostifak_active_session_id');
+      const hasActive = records.some((r) => r.id === activeId && r.isActive);
+      if (!hasActive) {
+        recordLoginSession(currentUser);
+      }
+    }
+  }, [currentUser, isLoggedIn]);
+
+  // Log page navigation actions automatically
+  useEffect(() => {
+    if (isLoggedIn && activeView) {
+      const viewNames: Record<string, string> = {
+        dashboard: 'Dashboard Eksekutif',
+        students: 'Direktori & Biodata Santri',
+        dormitory: 'Daftar Asrama & Kebersihan',
+        classes: 'Daftar Kelas & Akademik',
+        violations: 'Kedisiplinan & Mahkamah',
+        programs: 'Program Kerja & Proposal',
+        directives: 'Instruksi Mudir',
+      };
+      const title = viewNames[activeView] || activeView;
+      recordSessionAction(title, 'Navigasi Halaman', `Membuka halaman ${title}`);
+    }
+  }, [activeView, isLoggedIn]);
+
+  // Log division switches automatically
+  useEffect(() => {
+    if (isLoggedIn && selectedDivision) {
+      recordSessionAction('Detail Divisi', 'Buka Divisi', `Membuka modul operasional Divisi ${selectedDivision.toUpperCase()}`);
+    }
+  }, [selectedDivision, isLoggedIn]);
+
   // Auth Handlers
   const handleLoginSuccess = (user: UserProfile) => {
     if (user.role === 'mudir') {
@@ -202,12 +244,14 @@ export default function App() {
     setCurrentUser(user);
     setIsLoggedIn(true);
     localStorage.setItem('ostifak_auth_user', JSON.stringify(user));
+    recordLoginSession(user);
     gooeyToast.success(`Selamat Datang, ${user.name}`, {
       description: `Masuk sebagai ${user.roleTitle}`,
     });
   };
 
   const handleLogout = async () => {
+    recordLogoutSession();
     await logoutUser();
     setCurrentUser(null);
     setIsLoggedIn(false);
@@ -224,6 +268,11 @@ export default function App() {
   // Add violation handler (mirrors case into the santri record to keep points in sync)
   const handleAddViolation = async (record: Omit<ViolationRecord, 'id'>) => {
     await addPelanggaranRecord(record);
+    recordSessionAction(
+      'Kedisiplinan & Mahkamah',
+      'Pencatatan Pelanggaran',
+      `Mencatat pelanggaran santri ${record.studentName} (+${record.points} Pts): ${record.violation}`
+    );
     const target = students.find(
       (s) => s.studentName.trim().toLowerCase() === record.studentName.trim().toLowerCase()
     );
@@ -248,23 +297,69 @@ export default function App() {
   // Add proposal handler
   const handleAddProgram = async (prog: Omit<WorkProgram, 'id'>) => {
     await addProposalRecord(prog);
+    recordSessionAction(
+      'Program Kerja & Proposal',
+      'Pengajuan Proposal',
+      `Mengajukan program kerja: ${prog.title} (Divisi: ${prog.divisionId})`
+    );
     gooeyToast.success('Program Kerja Berhasil Diajukan', {
       description: `${prog.title} telah tersimpan.`,
     });
   };
 
   // Mobile touch gestures: swipe right -> open sidebar / close rightbar; swipe left -> open rightbar / close sidebar
+  // Disabled when any modal, popup, or overlay is open
   useEffect(() => {
     let touchStartX = 0;
     let touchStartY = 0;
     let touchStartTime = 0;
 
+    const isAnyModalActive = (): boolean => {
+      if (typeof document === 'undefined') return false;
+
+      // 1. Direct state checks
+      if (isNewViolationModalOpen || isNewProgramModalOpen) return true;
+
+      // 2. Check for active dialog/modal DOM elements outside sidebar/rightpanel
+      const modalElements = document.querySelectorAll<HTMLElement>(
+        '[role="dialog"], [data-modal="true"], [data-lenis-prevent], [aria-modal="true"]'
+      );
+      for (let i = 0; i < modalElements.length; i++) {
+        const el = modalElements[i];
+        if (el.closest('[data-sidebar="true"]') || el.closest('[data-rightpanel="true"]')) {
+          continue;
+        }
+        // If element is attached and visible
+        if (el.offsetWidth > 0 || el.offsetHeight > 0 || el.getClientRects().length > 0) {
+          return true;
+        }
+      }
+
+      // 3. Check for fixed overlays with high z-index (modal backdrop)
+      const fixedOverlays = document.querySelectorAll<HTMLElement>('.fixed.inset-0.z-50, .fixed.inset-0.z-\\[50\\]');
+      for (let i = 0; i < fixedOverlays.length; i++) {
+        const el = fixedOverlays[i];
+        if (!el.closest('[data-sidebar="true"]') && !el.closest('[data-rightpanel="true"]')) {
+          return true;
+        }
+      }
+
+      return false;
+    };
+
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length !== 1) return;
+
+      // If any modal/popup is open, completely disable touch swipe gesture
+      if (isAnyModalActive()) {
+        touchStartTime = 0;
+        return;
+      }
       
       const target = e.target as HTMLElement | null;
-      // Do not trigger swipe on form elements, buttons, or scrollable inputs
-      if (target && target.closest('input, textarea, select, button, [data-prevent-swipe="true"]')) {
+      // Do not trigger swipe on form elements, buttons, or scrollable inputs/modal areas
+      if (target && target.closest('input, textarea, select, button, [data-prevent-swipe="true"], [role="dialog"], [data-modal="true"], [data-lenis-prevent]')) {
+        touchStartTime = 0;
         return;
       }
 
@@ -276,7 +371,13 @@ export default function App() {
     const handleTouchEnd = (e: TouchEvent) => {
       if (!touchStartTime || e.changedTouches.length !== 1) return;
 
-      // Only active on mobile / tablet viewport
+      // If any modal/popup is active at touch end, cancel gesture
+      if (isAnyModalActive()) {
+        touchStartTime = 0;
+        return;
+      }
+
+      // Only active on mobile / tablet viewport (< 1024px)
       if (window.innerWidth >= 1024) return;
 
       const deltaX = e.changedTouches[0].clientX - touchStartX;
@@ -312,7 +413,7 @@ export default function App() {
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isMobileSidebarOpen, isRightPanelOpen]);
+  }, [isMobileSidebarOpen, isRightPanelOpen, isNewViolationModalOpen, isNewProgramModalOpen]);
 
   // If not logged in, render LoginPage
   if (!isLoggedIn || !currentUser) {
