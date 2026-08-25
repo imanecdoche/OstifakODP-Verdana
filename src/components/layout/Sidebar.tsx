@@ -83,8 +83,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }`}
       >
         {/* Brand Header */}
-        <div className="relative h-16 px-6 border-b border-[#E2E8F0] flex items-center justify-center">
-          <h1 className="font-black text-[#0F172A] text-3xl leading-none font-['Google_Sans','Product_Sans','Plus_Jakarta_Sans',sans-serif] tracking-tight text-center select-none">
+        <div className="relative h-16 px-6 border-b border-[#E2E8F0] flex items-center justify-center gap-2.5">
+          <img
+            src="/logo.png"
+            alt="Logo OSTIFAK"
+            className="w-7 h-7 object-contain shrink-0 drop-shadow-xs select-none"
+          />
+          <h1 className="font-black text-[#0F172A] text-2xl lg:text-[26px] leading-none font-['Google_Sans','Product_Sans','Plus_Jakarta_Sans',sans-serif] tracking-tight text-center select-none">
             OSDIGI
           </h1>
           <button

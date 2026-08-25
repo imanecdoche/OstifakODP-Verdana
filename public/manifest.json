@@ -1,0 +1,75 @@
+{
+  "name": "OSDIGI — Ostifak Digital Portal",
+  "short_name": "OSDIGI",
+  "description": "Portal Manajemen Santri & Organisasi Santri Pondok Pesantren Fajrul Karim",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
+  "background_color": "#F8FAFC",
+  "theme_color": "#142A18",
+  "orientation": "portrait-primary",
+  "categories": [
+    "education",
+    "management",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Profil Santri",
+      "short_name": "Santri",
+      "description": "Buka direktori profil santri",
+      "url": "/?view=students",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Kedisiplinan & Mahkamah",
+      "short_name": "Mahkamah",
+      "description": "Catat dan tinjau pelanggaran santri",
+      "url": "/?view=violations",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Manajemen Asrama",
+      "short_name": "Asrama",
+      "description": "Status hunian kamar asrama",
+      "url": "/?view=dormitory",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

@@ -7,6 +7,16 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Konfigurasi Progressive Web App (PWA) Penuh:
+  - WEB APP MANIFEST (`public/manifest.json`): Disediakan manifest standar PWA dengan `display: standalone`, tema pondok (`theme_color: #142A18`, `background_color: #F8FAFC`), orientasi `portrait-primary`, daftar shortcut navigasi cepat, dan icons multi-resolusi (192x192, 512x512, maskable, apple-touch-icon).
+  - SERVICE WORKER (`public/sw.js`): Diimplementasikan Service Worker dengan cache-first/stale-while-revalidate untuk static assets & web fonts, network-first untuk navigasi HTML, dan auto-claim clients tanpa mengganggu realtime sync Firestore.
+  - META TAGS PWA (`index.html`): Ditambahkan `<link rel="manifest">`, apple-mobile-web-app tags, theme-color, dan icons di `<head>`.
+- **[2026-08-26]**: Nonaktifkan Behaviour Swipe Down to Refresh pada Tampilan Mobile:
+  - Terapkan `overscroll-behavior-y: none;` dan `overscroll-behavior: none;` secara global pada `html`, `body`, dan `#root` di `src/index.css`.
+  - Mencegah browser mobile (Chrome Android, Safari iOS, dsb.) melakukan reload/pull-to-refresh yang tidak disengaja saat scrolling ke atas tanpa mengganggu scrolling normal konten di dalamnya.
+- **[2026-08-26]**: Penggunaan `logo.png` sebagai Icon Utama Aplikasi dan Favicon:
+  - Jadikan `logo.png` di root folder sebagai favicon di `index.html` (`<link rel="icon" type="image/png" href="/logo.png" />`).
+  - Tampilkan `logo.png` sebagai ikon/logo utama aplikasi pada seluruh antarmuka utama (Sidebar Brand, Mobile Topbar Header, dan Halaman Login).
 - **[2026-08-26]**: Posisi Toast (`goey-toast`) di Center-Top & Scaling Lebih Besar:
   - POSISI CENTER-TOP: Seluruh komponen `<GooeyToaster />` diatur dengan `position="top-center"` sehingga popup notifikasi muncul mengambang di bagian tengah atas layar (*center-top*).
   - SCALING LEBIH BESAR: Terapkan scaling lebih besar (`transform: scale(1.18)`, `transform-origin: top center`) dan penyesuaian ukuran font judul serta deskripsi toast agar tampil lebih jelas, proporsional, dan mudah dibaca di atas viewport.

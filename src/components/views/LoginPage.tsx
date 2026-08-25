@@ -123,8 +123,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         /* Tampilan Utama Login (Floating Centered) */
         <div className="relative z-10 w-full max-w-sm sm:max-w-md mx-auto my-auto p-4 flex flex-col items-center animate-in fade-in duration-300">
           
-          {/* Header Aplikasi (Nama & Tagline) */}
-          <div className="text-center mb-8">
+          {/* Header Aplikasi (Logo, Nama & Tagline) */}
+          <div className="text-center mb-8 flex flex-col items-center">
+            <img
+              src="/logo.png"
+              alt="Logo OSTIFAK"
+              className="w-16 h-16 sm:w-20 sm:h-20 object-contain mb-3 drop-shadow-[0_8px_20px_rgba(0,0,0,0.5)] select-none"
+            />
             <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white font-headline leading-tight drop-shadow-md select-none">
               OSDIGI
             </h1>

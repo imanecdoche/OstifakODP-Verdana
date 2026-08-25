@@ -168,8 +168,13 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           <div>
-            {/* Mobile View: Teks Header Menampilkan Nama App OSDIGI */}
-            <div className="lg:hidden">
+            {/* Mobile View: Teks Header Menampilkan Nama App OSDIGI & Logo */}
+            <div className="lg:hidden flex items-center gap-2">
+              <img
+                src="/logo.png"
+                alt="Logo OSTIFAK"
+                className="w-6 h-6 object-contain shrink-0 drop-shadow-xs select-none"
+              />
               <h2 className="text-xl font-black text-[#0F172A] font-headline tracking-tight leading-tight">
                 OSDIGI
               </h2>
