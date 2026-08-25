@@ -7,6 +7,9 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Format Info Santri di Bawah Nama (Header Modal):
+  - PEMBATAS PIPELINE (|): Karakter pembatas antar-informasi santri (NIS, Kamar, Kelas) di bawah nama pada header modal menggunakan tanda pipa `|` (bukan bullet `•`).
+  - WARNA SERAGAM PUTIH OPACITY 70%: Warna teks informasi diseragamkan seluruhnya menggunakan putih dengan opacity 70% (`text-white/70`), tanpa aksen warna berbeda pada item kamar.
 - **[2026-08-26]**: Rekonstruksi Modul Student Detail View:
   - HEADER TANPA ICON: Header modal dibuat bersih tanpa ikon pembuka, menampilkan nama santri dan info NIS/kamar/kelas secara lugas dan elegan.
   - TOMBOL TUTUP BOX MERAH: Tombol silang (`X`) diberi box kontainer warna merah (`bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white`).

@@ -928,8 +928,8 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-white truncate">
                   {currentStudent.studentName}
                 </h3>
-                <p className="text-xs text-slate-300 truncate mt-0.5">
-                  NIS: {currentStudent.nis || '-'} • <span className="text-emerald-300 font-medium">{currentStudent.kamar}</span> • {currentStudent.kelas}
+                <p className="text-xs text-white/70 truncate mt-0.5">
+                  NIS: {currentStudent.nis || '-'} | {currentStudent.kamar} | {currentStudent.kelas}
                 </p>
               </div>
               <button
@@ -1858,8 +1858,8 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 <h3 className="text-base font-bold font-headline tracking-tight text-white flex items-center gap-2">
                   Catat Setoran Mutaba'ah Tahfizh
                 </h3>
-                <p className="text-xs text-slate-300 mt-0.5">
-                  Santri: <span className="font-semibold text-emerald-300">{currentStudent.studentName}</span> ({currentStudent.kamar} • {currentStudent.kelas})
+                <p className="text-xs text-white/70 mt-0.5">
+                  Santri: {currentStudent.studentName} | {currentStudent.kamar} | {currentStudent.kelas}
                 </p>
               </div>
               <button
@@ -2183,8 +2183,8 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 <h3 className="text-base font-bold font-headline tracking-tight text-white flex items-center gap-2">
                   Statistik & Tren Perkembangan Hafalan
                 </h3>
-                <p className="text-xs text-slate-300 mt-0.5">
-                  {currentStudent.studentName} ({currentStudent.kamar} • Capaian: {currentStudent.hafalan})
+                <p className="text-xs text-white/70 mt-0.5">
+                  {currentStudent.studentName} | {currentStudent.kamar} | Capaian: {currentStudent.hafalan}
                 </p>
               </div>
               <button
