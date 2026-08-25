@@ -1,0 +1,6 @@
+{
+  "name": "OSTIFAK Digital Portal",
+  "description": "Portal Digital Terpadu Pengelolaan Organisasi Santri Tahfizh Fajrul Karim (ODP)",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
