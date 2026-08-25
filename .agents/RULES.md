@@ -7,6 +7,10 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Tabel Aksi & Aktivitas Rekam Sesi (Mobile Auto-Width & Running Text Marquee):
+  - AUTO-WIDTH DENGAN MAX-WIDTH KONTROL: Lebar tabel menyesuaikan panjang konten (`w-auto min-w-full`) dengan batas kolom maksimal (`max-w-[...]`) yang presisi di mobile.
+  - TANPA TEXT WRAPPING: Seluruh teks sel tabel dipaksa dalam satu baris (`whitespace-nowrap`).
+  - ANIMASI RUNNING TEXT (TICKER MARQUEE): Teks yang melebihi batas kolom (`isOverflowing`) otomatis bergerak horizontal secara halus dan looping bolak-balik (*running text ticker loop* `@keyframes running-ticker`), memudahkan pembacaan teks panjang di layar ponsel tanpa membuat baris tabel memanjang ke bawah.
 - **[2026-08-26]**: Penyempurnaan Tampilan Modul Rekam Sesi Login (Header Minimalis, No Footer, & Icon Toggle):
   - HEADER MINIMALIS: Hanya menampilkan title ("Rekam Sesi Login & Log Aktivitas") tanpa tagline/subtitle.
   - TOMBOL TUTUP ICON ONLY: Menggunakan tombol icon-only tanda silang (`X` / `w-5 h-5`) di pojok kanan atas.

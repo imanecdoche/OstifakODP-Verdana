@@ -15,6 +15,66 @@ interface SessionRecordsModalProps {
   currentUser?: UserProfile;
 }
 
+const RunningText: React.FC<{
+  text: string;
+  className?: string;
+  maxWidthClass?: string;
+}> = ({
+  text,
+  className = '',
+  maxWidthClass = 'max-w-[160px] sm:max-w-[240px] md:max-w-none',
+}) => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const contentRef = React.useRef<HTMLSpanElement>(null);
+  const [isOverflowing, setIsOverflowing] = React.useState(false);
+  const [overflowDistance, setOverflowDistance] = React.useState(0);
+
+  React.useEffect(() => {
+    const checkOverflow = () => {
+      if (containerRef.current && contentRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        const contentWidth = contentRef.current.scrollWidth;
+        if (contentWidth > containerWidth + 3) {
+          setIsOverflowing(true);
+          setOverflowDistance(contentWidth - containerWidth + 12);
+        } else {
+          setIsOverflowing(false);
+          setOverflowDistance(0);
+        }
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [text]);
+
+  const duration = Math.max(3.5, Math.min(10, overflowDistance / 14));
+
+  return (
+    <div
+      ref={containerRef}
+      className={`relative overflow-hidden whitespace-nowrap ${maxWidthClass} ${className}`}
+      title={text}
+    >
+      <span
+        ref={contentRef}
+        style={
+          isOverflowing
+            ? ({
+                '--scroll-offset': `-${overflowDistance}px`,
+                animation: `running-ticker ${duration}s ease-in-out infinite alternate`,
+              } as React.CSSProperties)
+            : undefined
+        }
+        className={`inline-block whitespace-nowrap ${isOverflowing ? 'will-change-transform' : ''}`}
+      >
+        {text}
+      </span>
+    </div>
+  );
+};
+
 export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
   isOpen,
   onClose,
@@ -356,39 +416,49 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
                           </div>
 
                           <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-xs">
-                            <div className="overflow-x-auto">
-                              <table className="w-full text-left text-xs border-collapse">
+                            <div className="overflow-x-auto no-scrollbar">
+                              <table className="w-auto min-w-full text-left text-xs border-collapse">
                                 <thead>
                                   <tr className="bg-slate-100/80 border-b border-slate-200 text-slate-600 font-semibold text-[11px] uppercase tracking-wider">
-                                    <th className="py-2.5 px-4 w-12">NO</th>
-                                    <th className="py-2.5 px-4 w-32">WAKTU (DETIK)</th>
-                                    <th className="py-2.5 px-4 w-48">MODUL / HALAMAN</th>
-                                    <th className="py-2.5 px-4 w-48">TIPE AKTIVITAS</th>
-                                    <th className="py-2.5 px-4">DESKRIPSI TINDAKAN</th>
-                                    <th className="py-2.5 px-4 w-28 text-right">STATUS</th>
+                                    <th className="py-2.5 px-3 w-10 text-center whitespace-nowrap">NO</th>
+                                    <th className="py-2.5 px-3 whitespace-nowrap">WAKTU (DETIK)</th>
+                                    <th className="py-2.5 px-3 whitespace-nowrap max-w-[130px] sm:max-w-[180px] md:max-w-none">MODUL / HALAMAN</th>
+                                    <th className="py-2.5 px-3 whitespace-nowrap max-w-[130px] sm:max-w-[170px] md:max-w-none">TIPE AKTIVITAS</th>
+                                    <th className="py-2.5 px-3 whitespace-nowrap max-w-[200px] sm:max-w-[300px] md:max-w-[420px] lg:max-w-none">DESKRIPSI TINDAKAN</th>
+                                    <th className="py-2.5 px-3 w-28 text-right whitespace-nowrap">STATUS</th>
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                   {session.actions.map((act, actIdx) => (
                                     <tr key={act.id} className="hover:bg-slate-50/80 transition-colors">
-                                      <td className="py-3 px-4 font-bold text-slate-400">
+                                      <td className="py-2.5 px-3 font-bold text-slate-400 text-center whitespace-nowrap">
                                         {actIdx + 1}
                                       </td>
-                                      <td className="py-3 px-4 font-mono font-bold text-slate-800">
+                                      <td className="py-2.5 px-3 font-mono font-bold text-slate-800 whitespace-nowrap">
                                         {act.time}
                                       </td>
-                                      <td className="py-3 px-4 font-semibold text-slate-800">
-                                        {act.module}
+                                      <td className="py-2.5 px-3">
+                                        <RunningText
+                                          text={act.module}
+                                          maxWidthClass="max-w-[110px] sm:max-w-[160px] md:max-w-none"
+                                          className="font-semibold text-slate-800"
+                                        />
                                       </td>
-                                      <td className="py-3 px-4 text-slate-700">
-                                        <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-[11px] font-medium">
-                                          {act.actionType}
-                                        </span>
+                                      <td className="py-2.5 px-3">
+                                        <RunningText
+                                          text={act.actionType}
+                                          maxWidthClass="max-w-[110px] sm:max-w-[150px] md:max-w-none"
+                                          className="font-medium text-slate-700"
+                                        />
                                       </td>
-                                      <td className="py-3 px-4 text-slate-600 leading-relaxed">
-                                        {act.description}
+                                      <td className="py-2.5 px-3">
+                                        <RunningText
+                                          text={act.description}
+                                          maxWidthClass="max-w-[180px] sm:max-w-[280px] md:max-w-[400px] lg:max-w-none"
+                                          className="text-slate-600"
+                                        />
                                       </td>
-                                      <td className="py-3 px-4 text-right">
+                                      <td className="py-2.5 px-3 text-right whitespace-nowrap">
                                         <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                                           act.status === 'Sukses'
                                             ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
