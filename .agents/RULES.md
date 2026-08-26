@@ -7,6 +7,17 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Pembaruan Konfigurasi Komponen GooeyToaster (Versi v1.1.0.62b):
+  - 1. KONFIGURASI GOOEYTOASTER:
+    * Posisi toaster dipindahkan ke sudut kanan bawah: `position="bottom-right"`.
+    * Penutupan toast via tombol keyboard Escape dinonaktifkan: `closeOnEscape={false}`.
+    * Properti styling dan animasi dikonfigurasi presisi:
+      - `borderColor: '#E0E0E0'`
+      - `borderWidth: 1.5`
+      - `bounce: 0.05`
+      - `showTimestamp: false`
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan kebersihan toast notification morphing yang rapi, minimalis, dan selaras dengan standar *clean-flat* tanpa kontainer bertumpuk kaku.
 - **[2026-08-27]**: Pemutusan Total Koneksi/Sinkronisasi Cloud & Penghapusan Bar Hijau Sinkronisasi pada Mode Offline (Versi v1.1.0.61b):
   - 1. PEMUTUSAN TOTAL KONEKSI & SINKRONISASI DATABASE CLOUD:
     * Seluruh proses otomatis yang mendeteksi koneksi atau mencoba melakukan sinkronisasi/fetching ke database cloud dinonaktifkan total saat bendera status mode offline aktif (`localStorage.getItem('ostifak_offline_mode') === 'true'`).

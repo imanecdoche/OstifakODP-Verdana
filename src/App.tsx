@@ -672,7 +672,20 @@ export default function App() {
     return (
       <>
         <LoginPage onLoginSuccess={handleLoginSuccess} />
-        <GooeyToaster position="top-center" duration={3500} closeButton />
+        <GooeyToaster
+          position="bottom-right"
+          closeOnEscape={false}
+          bounce={0.05}
+          showTimestamp={false}
+          duration={3500}
+          closeButton
+          toastOptions={{
+            style: {
+              borderColor: '#E0E0E0',
+              borderWidth: '1.5px',
+            },
+          }}
+        />
       </>
     );
   }
@@ -835,7 +848,20 @@ export default function App() {
       />
 
       {/* Global Gooey Toast Notifications */}
-      <GooeyToaster position="top-center" duration={3500} closeButton />
+      <GooeyToaster
+        position="bottom-right"
+        closeOnEscape={false}
+        bounce={0.05}
+        showTimestamp={false}
+        duration={3500}
+        closeButton
+        toastOptions={{
+          style: {
+            borderColor: '#E0E0E0',
+            borderWidth: '1.5px',
+          },
+        }}
+      />
 
       {/* Global Data Fetching Loading Bar (Thin Overlay, Bright Green, Fast Spin - Disabled in Offline Mode) */}
       <AnimatePresence>

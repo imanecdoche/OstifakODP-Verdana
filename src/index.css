@@ -167,23 +167,32 @@ html.lenis, html.lenis body {
   top: 16px !important;
 }
 
+[data-sonner-toaster][data-x-position="right"] {
+  right: 20px !important;
+}
+
+[data-sonner-toaster][data-y-position="bottom"] {
+  bottom: 20px !important;
+}
+
 [data-sonner-toaster] [data-sonner-toast] {
-  transform-origin: top center;
+  transform-origin: bottom right;
 }
 
 .gooey-wrapper {
   transform: scale(1);
-  transform-origin: top center;
+  transform-origin: bottom right;
   margin-top: 0;
 }
 
+.gooey-blobSvg path {
+  stroke: #E0E0E0 !important;
+  stroke-width: 1.5px !important;
+}
+
 @media (min-width: 640px) {
-  [data-sonner-toaster][data-y-position="top"] {
-    top: 24px !important;
-  }
   .gooey-wrapper {
-    transform: scale(1.12);
-    margin-top: 4px;
+    transform: scale(1.05);
   }
 }
 
