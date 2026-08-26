@@ -193,9 +193,14 @@ export const DirectivesView: React.FC = () => {
           role="dialog"
           aria-modal="true"
           data-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200 font-body"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto font-body"
         >
-          <div className="relative w-full max-w-xl bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[92vh]">
+          <div className="relative w-full max-w-xl bg-white rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-2xl border-t sm:border border-slate-200 overflow-hidden flex flex-col max-h-[90dvh] sm:max-h-[92vh] animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
+
             {/* Modal Header (Clean Flat Header, Zero Icon Policy) */}
             <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
               <h2 className="text-base sm:text-lg font-bold text-[#0F172A] font-headline tracking-tight">
@@ -207,7 +212,7 @@ export const DirectivesView: React.FC = () => {
             </div>
 
             {/* Modal Form Content */}
-            <form onSubmit={handleCreateDirective} className="p-6 sm:p-7 space-y-5 overflow-y-auto text-xs">
+            <form onSubmit={handleCreateDirective} className="p-6 sm:p-7 space-y-5 overflow-y-auto text-xs flex-1 min-h-0">
               <div>
                 <label className="block font-semibold mb-1.5 text-[#0F172A] font-headline">
                   Judul / Perihal Instruksi *
@@ -231,46 +236,47 @@ export const DirectivesView: React.FC = () => {
                     type="text"
                     value={targetDivision}
                     onChange={(e) => setTargetDivision(e.target.value)}
-                    placeholder="Contoh: Divisi Keamanan & Ibadah"
+                    placeholder="Contoh: Keamanan, Pengasuhan..."
                     className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-slate-900 focus:outline-none font-body shadow-2xs"
                   />
                 </div>
 
                 <div>
                   <label className="block font-semibold mb-1.5 text-[#0F172A] font-headline">
-                    Prioritas Arahan
+                    Tingkat Prioritas
                   </label>
                   <select
                     value={priority}
                     onChange={(e) => setPriority(e.target.value as any)}
-                    className="w-full h-10 px-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-slate-900 focus:outline-none font-body shadow-2xs cursor-pointer font-medium"
+                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-slate-900 focus:outline-none font-body shadow-2xs"
                   >
-                    <option value="tinggi">Tinggi (Mendesak)</option>
-                    <option value="sedang">Sedang</option>
                     <option value="normal">Normal</option>
+                    <option value="sedang">Sedang</option>
+                    <option value="tinggi">Tinggi (Mendesak)</option>
                   </select>
                 </div>
               </div>
 
               <div>
                 <label className="block font-semibold mb-1.5 text-[#0F172A] font-headline">
-                  Uraian Petunjuk Teknis *
+                  Rincian Instruksi / Petunjuk Pelaksanaan *
                 </label>
                 <textarea
                   required
-                  rows={3}
+                  rows={4}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="Tuliskan petunjuk teknis dan batas waktu pelaksanaan instruksi..."
-                  className="w-full p-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-slate-900 focus:outline-none font-body shadow-2xs leading-relaxed"
+                  placeholder="Tuliskan butir-butir instruksi, batas waktu, dan teknis implementasi..."
+                  className="w-full p-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-slate-900 focus:outline-none font-body shadow-2xs resize-none"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              {/* Modal Actions Footer with Safe Bottom Padding */}
+              <div className="flex items-center justify-end gap-3 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
                 >
                   Batal
                 </button>

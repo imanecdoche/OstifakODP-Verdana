@@ -764,8 +764,13 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
 
       {/* MODAL: EDIT KASUS PELANGGARAN */}
       {editingViolation && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-2xl max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
+        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          <div className="bg-white w-full max-w-2xl max-h-[90dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
+
             {/* Header Modal (Clean Flat Header, Zero Icon Policy) */}
             <div className="px-6 sm:px-8 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
               <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">Edit Berkas Pelanggaran</h3>
@@ -799,84 +804,74 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
                   <select
                     value={editCategory}
                     onChange={(e) => setEditCategory(e.target.value)}
-                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none cursor-pointer"
+                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none"
                   >
-                    <option value="Disiplin & Ibadah">Disiplin & Ibadah</option>
-                    <option value="Bahasa & Komunikasi">Bahasa & Komunikasi</option>
-                    <option value="Kebersihan & Kerapihan">Kebersihan & Kerapihan</option>
-                    <option value="Keamanan & Ketertiban">Keamanan & Ketertiban</option>
-                    <option value="Etika & Akhlaq">Etika & Akhlaq</option>
+                    <option value="Kedisiplinan">Kedisiplinan</option>
+                    <option value="Ibadah">Ibadah</option>
+                    <option value="Bahasa">Bahasa</option>
+                    <option value="Kebersihan">Kebersihan</option>
+                    <option value="Kerapian">Kerapian</option>
+                    <option value="Adab & Akhlak">Adab & Akhlak</option>
+                    <option value="Lainnya">Lainnya</option>
                   </select>
                 </div>
               </div>
 
-              {/* Row 2: Range Slider Bobot Poin & Kategori Plain Text */}
-              <div className="p-4 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] space-y-3">
+              {/* Row 2: Tingkat & Status */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
+                    Tingkat Pelanggaran *
+                  </label>
+                  <select
+                    value={editSeverity}
+                    onChange={(e) => setEditSeverity(e.target.value as any)}
+                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none"
+                  >
+                    <option value="ringan">Ringan (1-12 Poin)</option>
+                    <option value="sedang">Sedang (13-25 Poin)</option>
+                    <option value="berat">Berat (26-38 Poin)</option>
+                    <option value="sangat_berat">Sangat Berat (39-50 Poin)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
+                    Status Sidang / Penyelesaian *
+                  </label>
+                  <select
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value as any)}
+                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none font-medium"
+                  >
+                    <option value="pending">Belum Selesai (Pending)</option>
+                    <option value="selesai">Selesai (Sudah Takzir)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Row 3: Bobot Poin Slider */}
+              <div className="p-4 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] space-y-2.5">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-semibold text-[#0F172A] font-headline">
-                    Tingkat Keparahan Kasus & Bobot Poin
+                    Bobot Poin Pelanggaran (PK)
                   </label>
-
-                  {/* Dynamic Jackpot Rolling Number & Plain Text Category */}
-                  <div className="flex items-center gap-1.5 text-xs font-bold font-headline">
-                    <span className="text-[#0F172A] flex items-center font-mono gap-0.5">
-                      +<RollingNumber value={editPoints} className="text-sm font-bold text-[#0F172A] mx-0.5" />
-                      <PKIcon className="w-3.5 h-3.5" />
-                    </span>
-                    <span className="text-[#64748B]">•</span>
-                    <span className={getSeverityInfo(editPoints).colorClass}>
-                      {getSeverityInfo(editPoints).label}
-                    </span>
-                  </div>
+                  <span className="px-2.5 py-1 bg-white border border-[#E2E8F0] rounded font-bold font-mono text-sm text-[#0F172A] inline-flex items-center gap-1">
+                    <span>+{editPoints}</span>
+                    <PKIcon className="w-3.5 h-3.5" />
+                  </span>
                 </div>
-
-                {/* Interactive Smooth Slider */}
-                <div className="relative pt-1">
-                  <input
-                    type="range"
-                    min={1}
-                    max={50}
-                    step={1}
-                    value={editPoints}
-                    onChange={(e) => setEditPoints(Number(e.target.value))}
-                    className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-[#0F172A]"
-                    style={{
-                      background: `linear-gradient(to right, #0F172A 0%, #0F172A ${sliderFillPercent(editPoints)}%, #E2E8F0 ${sliderFillPercent(editPoints)}%, #E2E8F0 100%)`
-                    }}
-                  />
-                  <div className="flex justify-between text-[10px] text-[#64748B] font-body mt-1">
-                    <span>1 (Ringan)</span>
-                    <span>13 (Sedang)</span>
-                    <span>26 (Berat)</span>
-                    <span>39+ (Sangat Berat)</span>
-                  </div>
-                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="50"
+                  value={editPoints}
+                  onChange={(e) => setEditPoints(Number(e.target.value))}
+                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#0F172A]"
+                />
               </div>
 
-              {/* Row 3: Status Eksekusi Hukuman */}
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
-                  Status Eksekusi Hukuman
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['belum_dihukum', 'dalam_proses', 'selesai'] as PenaltyStatus[]).map((st) => (
-                    <button
-                      key={st}
-                      type="button"
-                      onClick={() => setEditStatus(st)}
-                      className={`h-9 px-3 rounded-md text-xs font-semibold border transition-all cursor-pointer ${
-                        editStatus === st
-                          ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-xs'
-                          : 'bg-white border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A]'
-                      }`}
-                    >
-                      <span className="capitalize">{st.replace('_', ' ')}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Row 4: Rekomendasi Hukuman / Takzir */}
+              {/* Row 4: Rekomendasi Takzir */}
               <div>
                 <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
                   Rekomendasi Hukuman / Takzir
@@ -890,8 +885,8 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
                 />
               </div>
 
-              {/* Modal Footer */}
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E2E8F0]">
+              {/* Modal Footer with Mobile Safe Bottom Padding */}
+              <div className="flex items-center justify-end gap-3 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
                 <Button type="button" variant="ghost" size="sm" onClick={() => setEditingViolation(null)}>
                   Batal
                 </Button>
@@ -907,8 +902,13 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
 
       {/* MODAL: KONFIRMASI HAPUS PELANGGARAN */}
       {deletingViolation && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-md max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
+        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          <div className="bg-white w-full max-w-md max-h-[90dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
+
             {/* Modal Header */}
             <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
               <h3 className="text-base font-bold text-[#0F172A] font-headline">Hapus Catatan Pelanggaran?</h3>
@@ -931,7 +931,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
                 </p>
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-2">
+              <div className="flex items-center justify-end gap-2.5 pt-2 pb-8 sm:pb-0">
                 <Button
                   type="button"
                   variant="secondary"

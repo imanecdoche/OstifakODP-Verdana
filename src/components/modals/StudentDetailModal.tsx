@@ -2369,8 +2369,13 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
       {/* 2. NESTED MODAL: REKAM IZIN SANTRI */}
       {isIzinModalOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-lg max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
+        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          <div className="bg-white w-full max-w-lg max-h-[90dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
+
             {/* Header Modal */}
             <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
               <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
@@ -2430,7 +2435,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               </div>
             </div>
 
-            <div className="bg-[#F8FAFC] px-6 py-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
+            <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
@@ -2455,8 +2460,13 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
       {/* 3. NESTED MODAL: PINDAH KAMAR ASRAMA */}
       {isMoveKamarModalOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-md max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
+        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          <div className="bg-white w-full max-w-md max-h-[90dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
+
             {/* Header Modal */}
             <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
               <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
@@ -2489,7 +2499,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               </div>
             </div>
 
-            <div className="bg-[#F8FAFC] px-6 py-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
+            <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
@@ -2514,8 +2524,13 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
       {/* 4. NESTED MODAL: PINDAH KELAS */}
       {isMoveKelasModalOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-md max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
+        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          <div className="bg-white w-full max-w-md max-h-[90dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
+
             {/* Header Modal */}
             <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
               <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
@@ -2548,7 +2563,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               </div>
             </div>
 
-            <div className="bg-[#F8FAFC] px-6 py-3.5 border-t border-slate-200/80 flex items-center justify-end gap-3 shrink-0">
+            <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-slate-200/80 flex items-center justify-end gap-3 shrink-0">
               <Button
                 variant="secondary"
                 size="sm"
@@ -2571,8 +2586,12 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
       {/* 5. NESTED MODAL: CATAT SETORAN SANTRI (114 SURAHS & DYNAMIC PAGES) */}
       {isSetoranModalOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-2xl max-h-[92dvh] sm:max-h-[90vh] flex flex-col rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto animate-in fade-in zoom-in-95">
+        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          <div className="bg-white w-full max-w-2xl max-h-[90dvh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
             
             {/* Header Modal */}
             <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
@@ -2917,7 +2936,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               </div>
             </ScrollArea>
 
-            <div className="bg-[#F8FAFC] px-6 py-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
+            <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
@@ -2951,8 +2970,12 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
       {/* 6. NESTED MODAL: STATISTIK & TREN GRAFIK HAFALAN (SMOOTH MONOTONE SPLINE) */}
       {isHafalanChartModalOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-3xl max-h-[92dvh] sm:max-h-[90vh] flex flex-col rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto animate-in fade-in zoom-in-95">
+        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          <div className="bg-white w-full max-w-3xl max-h-[90dvh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
             
             {/* Header Modal */}
             <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
@@ -3362,7 +3385,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               </div>
             </ScrollArea>
 
-            <div className="bg-[#F8FAFC] px-6 py-3.5 border-t border-slate-200/80 flex items-center justify-end gap-3 shrink-0">
+            <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-slate-200/80 flex items-center justify-end gap-3 shrink-0">
               <Button
                 variant="secondary"
                 size="sm"
@@ -3447,8 +3470,13 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
       {/* 8. CONFIRMATION DIALOG FOR DELETE SETORAN */}
       {setoranToDelete && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-md rounded-xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto p-6 space-y-4 animate-in fade-in zoom-in-95">
+        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          <div className="bg-white w-full max-w-md rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden p-6 space-y-4 animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95 flex flex-col">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden -mt-2 mb-1 flex justify-center shrink-0">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
+
             <div className="space-y-1.5">
               <h3 className="text-base font-bold text-[#0F172A] font-headline">
                 Hapus Rekam Setoran Mutaba'ah?
@@ -3458,7 +3486,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               </p>
             </div>
 
-            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#E2E8F0]">
+            <div className="flex items-center justify-end gap-2.5 pt-2 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
               <Button
                 variant="ghost"
                 size="sm"

@@ -1663,8 +1663,12 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
       {/* FIXED-DIMENSION ADD STUDENT POPUP MODAL (Dynamic Mobile Keyboard Height)  */}
       {/* ========================================================================= */}
       {isAdding && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-1 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="w-[800px] max-w-full h-[calc(var(--modal-viewport-height,100dvh)-8px)] max-h-[calc(var(--modal-viewport-height,100dvh)-8px)] sm:h-[620px] sm:max-h-[90vh] bg-white rounded-md sm:rounded-lg shadow-[0_12px_40px_rgba(15,23,42,0.22)] border border-[#E2E8F0] flex flex-col overflow-hidden my-auto animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          <div className="w-[800px] max-w-full h-[calc(var(--modal-viewport-height,100dvh)-8px)] max-h-[calc(var(--modal-viewport-height,100dvh)-8px)] sm:h-[620px] sm:max-h-[90vh] bg-white rounded-t-2xl sm:rounded-lg shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_12px_40px_rgba(15,23,42,0.22)] border-t sm:border border-[#E2E8F0] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
             
             {/* 1. Modal Fixed Header (Clean Flat Header, Zero Icon Policy) */}
             <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
@@ -1838,8 +1842,8 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               </form>
             </ScrollArea>
 
-            {/* 3. Modal Fixed Footer (Height: 64px) */}
-            <div className="h-16 shrink-0 bg-[#F8FAFC] border-t border-[#E2E8F0] px-6 flex items-center justify-between">
+            {/* 3. Modal Fixed Footer (Height: 64px on Desktop, safe bottom padding on Mobile) */}
+            <div className="h-auto sm:h-16 shrink-0 bg-[#F8FAFC] border-t border-[#E2E8F0] px-6 py-3.5 pb-8 sm:pb-3.5 flex items-center justify-between">
               <span className="text-[11px] text-[#64748B]">
                 Data Pokok & Akademik
               </span>
@@ -1877,9 +1881,13 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
       {/* FIXED-DIMENSION STUDENT EDIT MODAL (Strict Width & Height, 2 Tabs Layout) */}
       {/* ========================================================================= */}
       {editingStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-1 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          {/* Strict Fixed Size Window: 800px x 620px (Dynamic Mobile Keyboard Height) */}
-          <div className="w-[800px] max-w-full h-[calc(var(--modal-viewport-height,100dvh)-8px)] max-h-[calc(var(--modal-viewport-height,100dvh)-8px)] sm:h-[620px] sm:max-h-[90vh] bg-white rounded-md sm:rounded-lg shadow-[0_12px_40px_rgba(15,23,42,0.22)] border border-[#E2E8F0] flex flex-col overflow-hidden my-auto animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          {/* Strict Fixed Size Window: 800px x 620px on Desktop, Bottom Sheet on Mobile */}
+          <div className="w-[800px] max-w-full h-[calc(var(--modal-viewport-height,100dvh)-8px)] max-h-[calc(var(--modal-viewport-height,100dvh)-8px)] sm:h-[620px] sm:max-h-[90vh] bg-white rounded-t-2xl sm:rounded-lg shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_12px_40px_rgba(15,23,42,0.22)] border-t sm:border border-[#E2E8F0] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
             
             {/* 1. Modal Fixed Header (Clean Flat Header, Zero Icon Policy) */}
             <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
@@ -2317,8 +2325,13 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
 
       {/* Delete Student Confirmation Dialog */}
       {studentToDelete && (
-        <div data-lenis-prevent className="fixed inset-0 z-[60] flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-md max-h-[92dvh] sm:max-h-[90vh] my-auto overflow-hidden rounded-lg shadow-[0_12px_40px_rgba(15,23,42,0.25)] border border-[#E2E8F0] animate-in fade-in zoom-in-95 flex flex-col">
+        <div data-lenis-prevent className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          <div className="bg-white w-full max-w-md max-h-[90dvh] sm:max-h-[90vh] overflow-hidden rounded-t-2xl sm:rounded-lg shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_12px_40px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95 flex flex-col">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
+
             {/* Modal Header */}
             <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
               <h3 className="text-base font-bold text-[#0F172A] font-headline">Konfirmasi Hapus Data Santri</h3>
@@ -2330,7 +2343,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 Apakah Anda yakin ingin menghapus data <strong className="text-[#0F172A]">{studentToDelete.studentName}</strong>? Seluruh catatan akademik dan disiplin akan dihapus dari sistem.
               </p>
 
-              <div className="flex items-center justify-end gap-3 pt-2">
+              <div className="flex items-center justify-end gap-3 pt-2 pb-8 sm:pb-0">
                 <Button type="button" variant="ghost" size="sm" onClick={() => setStudentToDelete(null)}>
                   Batal
                 </Button>

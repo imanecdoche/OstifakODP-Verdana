@@ -177,9 +177,14 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
   };
 
   return (
-    <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-      <div className="bg-white w-full max-w-2xl md:max-w-3xl rounded-xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto max-h-[92dvh] sm:max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95">
+    <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
+      <div className="bg-white w-full max-w-2xl md:max-w-3xl rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden max-h-[90dvh] sm:max-h-[90vh] flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
         
+        {/* Mobile Top Drag Handle */}
+        <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+          <div className="w-10 h-1 bg-slate-300 rounded-full" />
+        </div>
+
         {/* Header Modal (Clean Flat Header, Zero Icon Policy) */}
         <div className="px-6 sm:px-8 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
           <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">Catat Pelanggaran Santri</h3>
@@ -382,8 +387,8 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
             />
           </div>
 
-          {/* Modal Footer */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E2E8F0]">
+          {/* Modal Footer with Safe Mobile Padding */}
+          <div className="flex items-center justify-end gap-3 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
             <Button type="button" variant="ghost" size="sm" onClick={onClose}>
               Batal
             </Button>

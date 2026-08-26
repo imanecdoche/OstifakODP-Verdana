@@ -887,8 +887,13 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
 
       {/* MODAL 1: CATAT PRESTASI MANUAL */}
       {isNewModalOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-lg max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
+        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          <div className="bg-white w-full max-w-lg max-h-[90dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
+
             <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
               <h3 className="text-base font-bold text-[#0F172A] font-headline">Catat Rekam Jejak Prestasi Baru</h3>
               <p className="text-xs text-[#64748B] mt-0.5 font-body">Input penghargaan santri dan alokasi Poin Prestasi (PP)</p>
@@ -1102,10 +1107,10 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0]">
+              <div className="flex items-center justify-end gap-3 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
                 <Button
                   type="button"
-                  variant="secondary"
+                  variant="ghost"
                   size="sm"
                   onClick={() => setIsNewModalOpen(false)}
                 >
@@ -1128,8 +1133,13 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
 
       {/* MODAL 2: EDIT PRESTASI */}
       {editingAchievement && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-lg max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
+        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          <div className="bg-white w-full max-w-lg max-h-[90dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
+
             <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0 flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-[#0F172A] font-headline">Edit Rekam Jejak Prestasi</h3>
@@ -1250,7 +1260,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0]">
+              <div className="flex items-center justify-end gap-2.5 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
                 <Button
                   type="button"
                   variant="secondary"
@@ -1276,8 +1286,13 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
 
       {/* MODAL 3: HAPUS PRESTASI CONFIRMATION */}
       {deletingAchievement && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-md rounded-xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto animate-in fade-in zoom-in-95">
+        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          <div className="bg-white w-full max-w-md rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-white">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
+
             <div className="p-6 space-y-4">
               <div className="flex items-start gap-3.5">
                 <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-200">
@@ -1305,7 +1320,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-2">
+              <div className="flex items-center justify-end gap-2.5 pt-2 pb-8 sm:pb-0">
                 <Button
                   type="button"
                   variant="secondary"
@@ -1333,8 +1348,13 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
 
       {/* MODAL 4: PREVIEW & EKSEKUSI OTOMASI PP BULANAN (21:00 WIB) */}
       {isAutoPreviewOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-2xl max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
+        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          <div className="bg-white w-full max-w-2xl max-h-[90dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
+
             <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
               <h3 className="text-base font-bold text-[#0F172A] font-headline">Otomasi Poin Prestasi Akhir Bulan</h3>
               <p className="text-xs text-[#64748B] mt-0.5 font-body">
@@ -1395,7 +1415,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-3 border-t border-[#E2E8F0]">
+              <div className="flex items-center justify-between pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
                 <p className="text-[11px] text-[#64748B]">
                   {executionStatus.lastExecutedDate ? `Terakhir dieksekusi: ${new Date(executionStatus.lastExecutedDate).toLocaleDateString('id-ID')}` : 'Belum dieksekusi untuk bulan ini.'}
                 </p>

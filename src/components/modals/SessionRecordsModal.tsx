@@ -261,7 +261,7 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
       {/* 3. Table & Nested Action Logs Body */}
       <ScrollArea 
         className="flex-1 min-h-0 bg-white"
-        viewportClassName="p-4 sm:p-6 space-y-4 max-w-7xl mx-auto w-full"
+        viewportClassName="p-4 sm:p-6 pb-8 sm:pb-6 space-y-4 max-w-7xl mx-auto w-full"
         topOffset="top-3"
         bottomOffset="bottom-3"
       >

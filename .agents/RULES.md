@@ -7,6 +7,12 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Transformasi Seluruh Komponen Popup/Overlay Menjadi Bottom Sheet Panel pada Mode Mobile (Versi v1.1.0.70b):
+  - 1. BOTTOM SHEET PANEL RESPONSIF MOBILE:
+    * Mengonfigurasi seluruh modal/popup/dialog overlay (`Modal.tsx`, `NewViolationModal.tsx`, `LoginModal.tsx`, `AchievementsView.tsx`, `ViolationsView.tsx`, `StudentsView.tsx`, `ClassesView.tsx`, `DormitoryView.tsx`, `DirectivesView.tsx`, `TreasuryView.tsx`, dan `StudentDetailModal.tsx`) agar pada tampilan mobile (`<640px` / ponsel) otomatis berubah menjadi *bottom sheet panel*.
+    * Panel menempel dari tepi bawah layar (`items-end sm:items-center`), memiliki sudut lengkung atas (`rounded-t-2xl sm:rounded-xl`), bilah pegangan geser (*drag handle pill*), transisi meluncur ke atas (*slide-in-from-bottom*), serta ruang *safe-area bottom padding* (`pb-8 sm:pb-3.5`) agar tombol aksi tidak tertutup oleh navigasi bawah ponsel.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Menghadirkan UX native mobile standar tinggi yang konsisten, ergonomis dioperasikan dengan satu jempol, dan bersih di seluruh modul aplikasi.
 - **[2026-08-27]**: Penambahan Bottom Padding & Animasi Spring Exit pada Action Sheet Mobile (Versi v1.1.0.69b):
   - 1. BOTTOM SAFE PADDING ACTION SHEET:
     * Menambahkan padding bawah ekstra `pt-3 pb-8 px-4 sm:pb-5` pada kontainer tombol batal di [`src/components/ui/ActionSheet.tsx`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/components/ui/ActionSheet.tsx) untuk memastikan tombol dan opsi aksi tidak tertutup oleh navigasi bawah ponsel, sistem gesture bar, atau navbar browser.

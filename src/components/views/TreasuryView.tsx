@@ -525,11 +525,15 @@ export const TreasuryView: React.FC<TreasuryViewProps> = () => {
 
       {/* 5. Modal Form Pencatatan Transaksi Baru (Clean Anti-Gravity UI) */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F172A]/40 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-lg max-w-lg w-full p-6 space-y-6 shadow-xl">
-            
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[#0F172A]/40 backdrop-blur-xs overflow-y-auto font-body">
+          <div className="bg-[#FFFFFF] border-t sm:border border-[#E2E8F0] rounded-t-2xl sm:rounded-lg max-w-lg w-full p-6 space-y-6 shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-xl max-h-[90dvh] sm:max-h-[90vh] flex flex-col overflow-y-auto animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden -mt-2 mb-1 flex justify-center shrink-0">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
+
             {/* Header Modal Bersih Tanpa Tombol Tutup */}
-            <div className="border-b border-[#E2E8F0] pb-4">
+            <div className="border-b border-[#E2E8F0] pb-4 shrink-0">
               <h3 className="text-lg font-bold text-[#0F172A] font-headline tracking-tight">
                 Pencatatan Transaksi Kas Baru
               </h3>
@@ -538,7 +542,7 @@ export const TreasuryView: React.FC<TreasuryViewProps> = () => {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5 text-xs font-body">
+            <form onSubmit={handleSubmit} className="space-y-5 text-xs font-body flex-1 min-h-0">
               
               {/* 1. Toggle Button Jenis Transaksi (MASUK vs KELUAR) */}
               <div>
@@ -571,7 +575,7 @@ export const TreasuryView: React.FC<TreasuryViewProps> = () => {
                 </div>
               </div>
 
-              {/* 2. Tanggal Transaksi (Custom Date Input) */}
+              {/* 2. Tanggal Transaksi */}
               <div>
                 <label className="block font-semibold text-[#0F172A] mb-1.5 font-headline">
                   Tanggal Transaksi
@@ -579,53 +583,51 @@ export const TreasuryView: React.FC<TreasuryViewProps> = () => {
                 <input
                   type="date"
                   required
-                  value={inputDate}
-                  onChange={(e) => setInputDate(e.target.value)}
-                  className="w-full h-9 px-3 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A] font-body"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full h-10 px-3.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A]"
                 />
               </div>
 
-              {/* 3. Nominal Transaksi (Prefix "Rp" Permanen & Pemisah Titik Ribuan Otomatis) */}
+              {/* 3. Jumlah Nominal (Rupiah) */}
               <div>
                 <label className="block font-semibold text-[#0F172A] mb-1.5 font-headline">
-                  Nominal Transaksi
+                  Nominal Transaksi (Rp)
                 </label>
-                <div className="relative flex items-center">
-                  <span className="absolute left-3 text-xs font-bold text-[#64748B] font-mono select-none pointer-events-none">
-                    Rp
-                  </span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    required
-                    value={displayAmount}
-                    onChange={handleAmountChange}
-                    className="w-full h-9 pl-10 pr-3 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] font-mono font-bold focus:outline-none focus:border-[#0F172A]"
-                    placeholder="0"
-                  />
-                </div>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  step="1"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="Contoh: 150000"
+                  className="w-full h-10 px-3.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A] font-mono"
+                />
               </div>
 
-              {/* 4. Divisi Terkait */}
+              {/* 4. Pilihan Kategori */}
               <div>
                 <label className="block font-semibold text-[#0F172A] mb-1.5 font-headline">
-                  Divisi Terkait
+                  Kategori Anggaran
                 </label>
                 <select
-                  value={divisionId}
-                  onChange={(e) => setDivisionId(e.target.value)}
-                  className="w-full h-9 px-3 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A]"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full h-10 px-3.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A]"
                 >
-                  <option value="bph">BPH & Kas Organisasi (Umum)</option>
-                  {mockDivisions.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name}
-                    </option>
-                  ))}
+                  <option value="Iuran Kas">Iuran Kas</option>
+                  <option value="Dana Santri">Dana Santri</option>
+                  <option value="Infaq / Donasi">Infaq / Donasi</option>
+                  <option value="Konsumsi">Konsumsi</option>
+                  <option value="Perlengkapan">Perlengkapan</option>
+                  <option value="ATK & Administrasi">ATK & Administrasi</option>
+                  <option value="Kebersihan">Kebersihan</option>
+                  <option value="Lainnya">Lainnya</option>
                 </select>
               </div>
 
-              {/* 5. Keterangan / Keperluan */}
+              {/* 5. Deskripsi & Keterangan */}
               <div>
                 <label className="block font-semibold text-[#0F172A] mb-1.5 font-headline">
                   Keterangan & Keperluan
@@ -640,8 +642,8 @@ export const TreasuryView: React.FC<TreasuryViewProps> = () => {
                 />
               </div>
 
-              {/* 6. Action Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E2E8F0]">
+              {/* 6. Action Buttons with Mobile Safe Bottom Padding */}
+              <div className="flex items-center justify-end gap-3 pt-4 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
