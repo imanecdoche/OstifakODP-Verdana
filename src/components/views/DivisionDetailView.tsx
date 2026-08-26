@@ -20,7 +20,8 @@ export const DivisionDetailView: React.FC<DivisionDetailViewProps> = ({ division
       {/* 1. Ikon Roda Gigi (Gear) dengan Animasi Putar Halus */}
       <div className="relative mb-6 flex items-center justify-center">
         <Settings 
-          className="w-16 h-16 sm:w-20 sm:h-20 text-[#0F172A] stroke-[1.5] animate-[spin_6s_linear_infinite]" 
+          className="w-16 h-16 sm:w-20 sm:h-20 text-[#0F172A] stroke-[1.5] animate-spin" 
+          style={{ animationDuration: '4s', animationTimingFunction: 'linear' }}
         />
       </div>
 

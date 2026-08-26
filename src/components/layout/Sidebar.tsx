@@ -183,7 +183,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     key={div.id}
                     onClick={() => {
                       onSelectDivision(div.id);
-                      onSelectView('division_detail');
                       onCloseMobile();
                     }}
                     className={`w-full h-9 flex items-center justify-between px-3 rounded-md text-xs transition-all duration-160 cursor-pointer active:scale-[0.97] ${
