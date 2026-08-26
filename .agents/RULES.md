@@ -7,6 +7,8 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Konfigurasi Vercel-Ready & Push Repository:
+  - VERCEL SPA & PWA ROUTING: Ditambahkan file konfigurasi `vercel.json` dengan dukungan rewrite routing SPA (`index.html`), caching header optimal untuk assets, PWA updates immediate header untuk `sw.js` & `manifest.json`, serta header keamanan browser standar.
 - **[2026-08-26]**: Isolasi Swipe Gestures Sidebar dari Scroll Horizontal & Geser Tutup Right Panel:
   - ISOLASI SCROLL ELEMEN HORIZONTAL: Saat pengguna melakukan scrolling pada elemen horizontal (tabel, deretan tab segmented button, daftar kartu/overflow-x), gesture swipe TIDAK akan memicu pembukaan sidebar kiri maupun panel kanan.
   - PEMBUKAAN SIDEBAR MURNI: Sidebar kiri / panel kanan hanya terbuka dengan gesture swipe horizontal saat interaksi terjadi di luar elemen yang terscroll.
