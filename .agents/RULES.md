@@ -7,6 +7,12 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Pengaturan Durasi Tampil GooeyToast Deskripsi Menjadi 3.5 Detik (Versi v1.1.0.68b):
+  - 1. DURASI TOAST DENGAN DESKRIPSI:
+    * Mengatur durasi tampil toast yang memuat deskripsi (`options.description`) menjadi tepat 3.5 detik (`3500ms`) sebelum menghilang secara otomatis, sedangkan toast ringkas tanpa deskripsi tetap berdurasi 3 detik (`3000ms`).
+    * Dikonfigurasi secara otomatis pada modul [`src/lib/toast.ts`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/lib/toast.ts) melalui konstanta `DESCRIPTION_TOAST_DURATION = 3500` dan `DEFAULT_TOAST_DURATION = 3000`.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Memberikan jeda waktu membaca yang ideal dan proporsional untuk konten informasi yang lebih mendalam tanpa memperlambat interaktivitas pengguna.
 - **[2026-08-27]**: Adaptasi Lebar GooeyToast Mengikuti Panjang Konten Deskripsi (Versi v1.1.0.67b):
   - 1. LEBAR MENYESUAIKAN KONTEN (FIT CONTENT / MAX CONTENT):
     * Menerapkan aturan CSS `min-width: unset !important; width: max-content !important; max-width: min(90vw, 560px) !important;` pada `.gooey-contentExpanded` dan `.gooey-description` di [`src/index.css`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/index.css).
