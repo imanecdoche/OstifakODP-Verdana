@@ -7,6 +7,14 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Eliminasi Backdrop Blur & Animasi Diagonal Arrow Shutter pada Tombol Bulat Kartu Santri (Versi v1.1.0.39b):
+  - 1. PENGHAPUSAN TOTAL OVERLAY HITAM BLUR:
+    * Menghapus total lapisan backdrop hitam blur (`bg-slate-950/60 backdrop-blur-[2px]`) dari seluruh kartu santri di `StudentsView.tsx`, `DormitoryView.tsx`, dan `ClassesView.tsx` agar permukaan kartu tetap bersih dan dapat terbaca langsung saat kursor diarahkan ke kartu.
+  - 2. ANIMASI PERGERAKAN IKON DIAGONAL PADA TOMBOL BULAT:
+    * Saat kursor mengarah ke kartu (*card hover*), tombol bulat di pojok kanan atas bertransformasi warna menjadi hijau (`group-hover:bg-[#059669] group-hover:border-[#059669] group-hover:text-white`).
+    * Menerapkan animasi pergerakan diagonal: ikon panah aktif meluncur keluar ke arah atas-kanan (`translate-x-4 -translate-y-4`), dan secara bersamaan ikon panah baru meluncur masuk dari arah diagonal bawah-kiri (`group-hover:translate-x-0 group-hover:translate-y-0`) dengan masking rapi di dalam lingkaran `overflow-hidden`.
+  - 3. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Desain kartu kembali ke format minimalis clean-flat murni tanpa penutup pandangan, transisi sangat halus dan elegan.
 - **[2026-08-26]**: Penyesuaian Posisi Absolut Overlay Kartu Santri Full Bounding Box Bebas Hambatan Padding (Versi v1.1.0.38b):
   - 1. PENYESUAIAN POSISI ABSOLUT OVERLAY (FULL BOUNDING BOX):
     * Merekonstruksi hierarki DOM kartu santri di `StudentsView.tsx`, `DormitoryView.tsx`, dan `ClassesView.tsx` dengan memisahkan kontainer terluar `relative overflow-hidden p-0` dari pembungkus konten dalam yang memiliki padding (`p-6` / `p-3`).

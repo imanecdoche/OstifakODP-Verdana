@@ -381,45 +381,25 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
                       <div
                         key={res.id}
                         onClick={() => setSelectedDetailStudent(res)}
-                        className="bg-white rounded-xl border border-slate-200/80 hover:bg-slate-50/80 shadow-2xs transition-all relative overflow-hidden group cursor-pointer flex flex-col justify-between"
+                        className="bg-white rounded-xl border border-slate-200/80 hover:border-[#059669] hover:bg-slate-50/80 shadow-2xs transition-all relative overflow-hidden group cursor-pointer flex flex-col justify-between p-3"
                       >
-                        {/* Overlay Shutter Shortcut */}
-                        <div 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedDetailStudent(res);
-                          }}
-                          className="absolute inset-0 z-20 bg-slate-950/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto flex items-center justify-center cursor-pointer"
-                          style={{ top: 0, bottom: 0, left: 0, right: 0 }}
-                        >
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedDetailStudent(res);
-                            }}
-                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white text-[#142A18] font-bold text-[11px] shadow-lg hover:bg-emerald-50 hover:scale-105 transition-all duration-200 cursor-pointer active:scale-95"
-                          >
-                            <span>Buka Detail Santri</span>
-                            <ArrowUpRight className="w-3.5 h-3.5 text-[#059669]" />
-                          </button>
-                        </div>
-
-                        <div className="p-3 flex flex-col justify-between h-full">
-                          <div className="flex items-center justify-between">
-                            <div className="min-w-0">
-                              <span className="font-bold text-[#0F172A] text-xs truncate">{res.studentName}</span>
+                        <div className="flex items-center justify-between">
+                          <div className="min-w-0 pr-2">
+                            <span className="font-bold text-[#0F172A] text-xs truncate block group-hover:text-[#059669] transition-colors">{res.studentName}</span>
+                            <span className="text-[10px] text-[#64748B]">{res.kamar || 'Kamar -'}</span>
+                          </div>
+                          <div className="w-6 h-6 rounded-full overflow-hidden bg-[#F8FAFC] border border-[#E2E8F0] group-hover:bg-[#059669] group-hover:border-[#059669] text-[#475569] group-hover:text-white flex items-center justify-center transition-all duration-300 shrink-0">
+                            <div className="relative w-3.5 h-3.5 overflow-hidden flex items-center justify-center">
+                              <ArrowUpRight className="w-3.5 h-3.5 text-inherit transition-transform duration-300 ease-out transform group-hover:translate-x-3.5 group-hover:-translate-y-3.5 shrink-0" />
+                              <ArrowUpRight className="w-3.5 h-3.5 text-inherit absolute inset-0 transition-transform duration-300 ease-out transform -translate-x-3.5 translate-y-3.5 group-hover:translate-x-0 group-hover:translate-y-0 shrink-0" />
                             </div>
-                            <span className="text-[10px] font-semibold px-1.5 py-0.5 bg-[#F1F5F9] text-[#475569] rounded shrink-0">
-                              {res.kamar || 'Kamar -'}
-                            </span>
                           </div>
-                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#F1F5F9] text-[11px] text-[#64748B]">
-                            <span>{res.hafalan || '0 Juz'}</span>
-                            <span className={res.isTahsinPassed ? 'text-[#059669] font-medium' : 'text-[#D97706] font-medium'}>
-                              {res.isTahsinPassed ? 'Lulus Tahsin' : 'Bimbingan'}
-                            </span>
-                          </div>
+                        </div>
+                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#F1F5F9] text-[11px] text-[#64748B]">
+                          <span>{res.hafalan || '0 Juz'}</span>
+                          <span className={res.isTahsinPassed ? 'text-[#059669] font-medium' : 'text-[#D97706] font-medium'}>
+                            {res.isTahsinPassed ? 'Lulus Tahsin' : 'Bimbingan'}
+                          </span>
                         </div>
                       </div>
                     ))}

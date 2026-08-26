@@ -1505,41 +1505,23 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
           {filteredStudents.map((st) => (
             <div 
               key={st.id} 
+              onClick={() => {
+                if (!isEditMode) {
+                  setSelectedDetailStudent(st);
+                  setDetailActiveTab('bio');
+                }
+              }}
               className={`bg-white border border-[#E2E8F0] shadow-[0_2px_6px_rgba(15,23,42,0.05)] rounded-md transition-all relative overflow-hidden group flex flex-col justify-between ${
                 isEditMode 
                   ? 'ring-2 ring-[#059669]/30 border-[#059669]' 
-                  : 'hover:border-[#0F172A] hover:shadow-[0_4px_16px_rgba(15,23,42,0.07)]'
+                  : 'hover:border-[#059669] hover:shadow-[0_4px_16px_rgba(5,150,105,0.08)] cursor-pointer'
               }`}
             >
-              {/* Full Bounding-Box Overlay (Directly positioned to card outer container edges: top: 0, bottom: 0, left: 0, right: 0) */}
-              {!isEditMode && (
-                <div 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedDetailStudent(st);
-                  }}
-                  className="absolute inset-0 z-20 bg-slate-950/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto flex items-center justify-center cursor-pointer"
-                  style={{ top: 0, bottom: 0, left: 0, right: 0 }}
-                >
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedDetailStudent(st);
-                    }}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-[#142A18] font-bold text-xs shadow-lg hover:bg-emerald-50 hover:scale-105 transition-all duration-200 cursor-pointer active:scale-95"
-                  >
-                    <span>Buka Detail Santri</span>
-                    <ArrowUpRight className="w-4 h-4 text-[#059669]" />
-                  </button>
-                </div>
-              )}
-
-              {/* Inner Card Content Padding Container */}
+              {/* Inner Card Content Container */}
               <div className="p-6 space-y-4 flex flex-col justify-between h-full">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h3 className="text-lg font-bold text-[#0F172A] font-headline tracking-tight">
+                    <h3 className="text-lg font-bold text-[#0F172A] font-headline tracking-tight group-hover:text-[#059669] transition-colors">
                       {st.studentName}
                     </h3>
                     <p className="text-xs text-[#64748B] mt-0.5">
@@ -1557,10 +1539,16 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                         setDetailActiveTab('bio');
                       }}
                       aria-label="Lihat Detail Santri"
-                      className="w-8 h-8 rounded-full bg-[#F8FAFC] border border-[#E2E8F0] hover:bg-[#142A18] hover:text-white text-[#475569] flex items-center justify-center transition-all cursor-pointer shadow-2xs hover:shadow-sm"
+                      className="w-8 h-8 rounded-full overflow-hidden bg-[#F8FAFC] border border-[#E2E8F0] group-hover:bg-[#059669] group-hover:border-[#059669] text-[#475569] group-hover:text-white flex items-center justify-center transition-all duration-300 cursor-pointer shadow-2xs group-hover:shadow-sm"
                       title="Buka Detail Lengkap Santri"
                     >
-                      <ArrowUpRight className="w-4 h-4" />
+                      <div className="relative w-4 h-4 overflow-hidden flex items-center justify-center">
+                        {/* 1. Outgoing Arrow (Diagonal Slide to Top-Right) */}
+                        <ArrowUpRight className="w-4 h-4 text-inherit transition-transform duration-300 ease-out transform group-hover:translate-x-4 group-hover:-translate-y-4 shrink-0" />
+                        
+                        {/* 2. Incoming Arrow (Diagonal Slide In from Bottom-Left) */}
+                        <ArrowUpRight className="w-4 h-4 text-inherit absolute inset-0 transition-transform duration-300 ease-out transform -translate-x-4 translate-y-4 group-hover:translate-x-0 group-hover:translate-y-0 shrink-0" />
+                      </div>
                     </button>
 
                     {/* Edit & Delete Action Buttons (Visible when isEditMode is true) */}
