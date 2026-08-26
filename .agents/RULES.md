@@ -7,6 +7,14 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Penambahan Tiga Metrik Kartu Santri (Hafalan | Prestasi | Pelanggaran) & Fleksibilitas Filter/Sorting PP & PK (Versi v1.1.0.36b):
+  - 1. PENAMBAHAN METRIK PRESTASI PADA KARTU SANTRI:
+    * Memperbarui kartu ringkasan santri di direktori (`StudentsView.tsx`) menjadi 3 kolom metrik simetris dengan garis pemisah tipis (*divider*): **Hafalan | Prestasi | Pelanggaran** (menampilkan kuantitas Juz Hafalan, akumulasi Poin Prestasi `+X PP`, dan akumulasi Poin Pelanggaran `X PK`).
+  - 2. PEMBARUAN FILTERING & SORTING KOMPREHENSIF (PP & PK):
+    * Menambahkan opsi *sorting* baru: `Prestasi (Tertinggi / Max PP)` dan `Prestasi (Terendah / Min PP)` melengkapi pengurutan nama, kelas, hafalan, dan pelanggaran (PK).
+    * Menambahkan filter rentang nilai `Prestasi (PP): Min - Maks` di samping filter `Hafalan (Juz)` dan `Pelanggaran (PK)`.
+  - 3. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Desain clean-flat tanpa kontainer card bertumpuk, divider garis tipis yang simetris, bebas ikon dekoratif, dan anti-text-wrapping di perangkat mobile.
 - **[2026-08-26]**: Fitur Edit & Hapus Rekam Prestasi serta Pelanggaran dengan Menu Kontekstual & Sinkronisasi Poin (Versi v1.1.0.35b):
   - 1. KOLOM AKSI & MENU KONTEKSTUAL (TITIK TIGA & KLIK KANAN):
     * Menambahkan kolom resmi **AKSI** pada tabel rekam prestasi (`AchievementsView.tsx`) dan tabel rekam pelanggaran (`ViolationsView.tsx`).

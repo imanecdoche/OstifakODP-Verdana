@@ -70,6 +70,8 @@ type SortOption =
   | 'class_asc' 
   | 'hafalan_desc' 
   | 'hafalan_asc' 
+  | 'prestasi_desc' 
+  | 'prestasi_asc' 
   | 'points_desc' 
   | 'points_asc';
 
@@ -102,6 +104,8 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
   const [filterClass, setFilterClass] = useState<string>('all');
   const [minHafalan, setMinHafalan] = useState<string>('');
   const [maxHafalan, setMaxHafalan] = useState<string>('');
+  const [minPP, setMinPP] = useState<string>('');
+  const [maxPP, setMaxPP] = useState<string>('');
   const [minPoints, setMinPoints] = useState<string>('');
   const [maxPoints, setMaxPoints] = useState<string>('');
 
@@ -1069,11 +1073,19 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
     return Array.from(new Set([...defaults, ...fromData]));
   }, [students]);
 
+  // Helper to compute total PP for a student
+  const getStudentPP = (s: SantriRecord): number => {
+    if (s.poinPrestasi !== undefined) return s.poinPrestasi;
+    return (s.achievementsHistory || []).reduce((acc, a) => acc + (a.points !== undefined ? a.points : 10), 0);
+  };
+
   // Check if any filter is active
   const isFilterActive = 
     filterClass !== 'all' || 
     minHafalan !== '' || 
     maxHafalan !== '' || 
+    minPP !== '' || 
+    maxPP !== '' || 
     minPoints !== '' || 
     maxPoints !== '' || 
     sortBy !== 'name_asc' || 
@@ -1085,6 +1097,8 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
     setFilterClass('all');
     setMinHafalan('');
     setMaxHafalan('');
+    setMinPP('');
+    setMaxPP('');
     setMinPoints('');
     setMaxPoints('');
     gooeyToast.info('Filter & Urutan Direset', {
@@ -1117,7 +1131,12 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
         if (minHafalan !== '' && hVal < parseFloat(minHafalan)) return false;
         if (maxHafalan !== '' && hVal > parseFloat(maxHafalan)) return false;
 
-        // 4. Filter Range Poin Pelanggaran (Min & Max)
+        // 4. Filter Range Poin Prestasi (PP)
+        const ppVal = getStudentPP(s);
+        if (minPP !== '' && ppVal < parseFloat(minPP)) return false;
+        if (maxPP !== '' && ppVal > parseFloat(maxPP)) return false;
+
+        // 5. Filter Range Poin Pelanggaran (PK)
         const pVal = s.poinPelanggaran || 0;
         if (minPoints !== '' && pVal < parseFloat(minPoints)) return false;
         if (maxPoints !== '' && pVal > parseFloat(maxPoints)) return false;
@@ -1130,11 +1149,13 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
         if (sortBy === 'class_asc') return a.kelas.localeCompare(b.kelas);
         if (sortBy === 'hafalan_desc') return parseHafalan(b.hafalan) - parseHafalan(a.hafalan);
         if (sortBy === 'hafalan_asc') return parseHafalan(a.hafalan) - parseHafalan(b.hafalan);
+        if (sortBy === 'prestasi_desc') return getStudentPP(b) - getStudentPP(a);
+        if (sortBy === 'prestasi_asc') return getStudentPP(a) - getStudentPP(b);
         if (sortBy === 'points_desc') return (b.poinPelanggaran || 0) - (a.poinPelanggaran || 0);
         if (sortBy === 'points_asc') return (a.poinPelanggaran || 0) - (b.poinPelanggaran || 0);
         return 0;
       });
-  }, [students, searchTerm, filterClass, minHafalan, maxHafalan, minPoints, maxPoints, sortBy]);
+  }, [students, searchTerm, filterClass, minHafalan, maxHafalan, minPP, maxPP, minPoints, maxPoints, sortBy]);
 
   if (selectedDetailStudent) {
     return (
@@ -1292,8 +1313,10 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               <option value="class_asc">Kelas</option>
               <option value="hafalan_desc">Hafalan (Terbanyak)</option>
               <option value="hafalan_asc">Hafalan (Tersedikit)</option>
-              <option value="points_desc">Poin (Tertinggi)</option>
-              <option value="points_asc">Poin (Zero / Terendah)</option>
+              <option value="prestasi_desc">Prestasi (Tertinggi / Max PP)</option>
+              <option value="prestasi_asc">Prestasi (Terendah / Min PP)</option>
+              <option value="points_desc">Pelanggaran (Tertinggi / Max PK)</option>
+              <option value="points_asc">Pelanggaran (Zero / Terendah PK)</option>
             </select>
           </div>
 
@@ -1354,9 +1377,51 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
             </div>
           </div>
 
-          {/* Filter Range Poin Pelanggaran (Min - Max Poin) */}
+          {/* Filter Range Prestasi (Min - Max PP) */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[#64748B] font-medium">Poin:</span>
+            <span className="text-[#64748B] font-medium">Prestasi (PP):</span>
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                min={0}
+                max={500}
+                placeholder="Min"
+                value={minPP}
+                onChange={(e) => setMinPP(e.target.value)}
+                onWheel={(e) => {
+                  e.preventDefault();
+                  const delta = e.deltaY;
+                  setMinPP((prev) => {
+                    const num = parseInt(prev) || 0;
+                    return String(delta < 0 ? Math.min(500, num + 5) : Math.max(0, num - 5));
+                  });
+                }}
+                className="w-14 h-8 px-2 bg-white border border-[#E2E8F0] rounded text-xs text-[#0F172A] text-center focus:border-[#0F172A] focus:outline-none"
+              />
+              <span className="text-[#64748B]">-</span>
+              <input
+                type="number"
+                min={0}
+                max={500}
+                placeholder="Maks"
+                value={maxPP}
+                onChange={(e) => setMaxPP(e.target.value)}
+                onWheel={(e) => {
+                  e.preventDefault();
+                  const delta = e.deltaY;
+                  setMaxPP((prev) => {
+                    const num = parseInt(prev) || 500;
+                    return String(delta < 0 ? Math.min(500, num + 5) : Math.max(0, num - 5));
+                  });
+                }}
+                className="w-14 h-8 px-2 bg-white border border-[#E2E8F0] rounded text-xs text-[#0F172A] text-center focus:border-[#0F172A] focus:outline-none"
+              />
+            </div>
+          </div>
+
+          {/* Filter Range Pelanggaran (Min - Max PK) */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[#64748B] font-medium">Pelanggaran (PK):</span>
             <div className="flex items-center gap-1">
               <input
                 type="number"
@@ -1521,16 +1586,24 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-3 border-t border-[#E2E8F0] text-xs">
-                <div>
-                  <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide">Hafalan Al-Quran</p>
-                  <p className="text-sm font-bold text-[#0F172A] mt-0.5">{st.hafalan}</p>
+              {/* Symmetrical 3-Column Metrics (Hafalan | Prestasi | Pelanggaran) with Thin Dividers */}
+              <div className="grid grid-cols-3 divide-x divide-[#E2E8F0] pt-3 border-t border-[#E2E8F0] text-xs">
+                <div className="pr-2">
+                  <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Hafalan</p>
+                  <p className="text-sm font-bold text-[#0F172A] mt-0.5 truncate font-headline">{st.hafalan}</p>
                 </div>
 
-                <div>
-                  <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide">Poin Pelanggaran</p>
-                  <p className={`text-sm font-bold mt-0.5 ${st.poinPelanggaran > 0 ? 'text-[#EF4444]' : 'text-[#16A34A]'}`}>
-                    {st.poinPelanggaran} PK
+                <div className="px-2">
+                  <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Prestasi</p>
+                  <p className="text-sm font-bold text-[#059669] mt-0.5 truncate font-headline font-mono">
+                    +{getStudentPP(st)} PP
+                  </p>
+                </div>
+
+                <div className="pl-2">
+                  <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Pelanggaran</p>
+                  <p className={`text-sm font-bold mt-0.5 truncate font-headline font-mono ${st.poinPelanggaran > 0 ? 'text-[#EF4444]' : 'text-[#16A34A]'}`}>
+                    {st.poinPelanggaran || 0} PK
                   </p>
                 </div>
               </div>
