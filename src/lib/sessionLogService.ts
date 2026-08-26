@@ -1,4 +1,17 @@
+import { 
+  collection, 
+  doc, 
+  setDoc, 
+  updateDoc, 
+  onSnapshot, 
+  query, 
+  orderBy, 
+  limit,
+  serverTimestamp 
+} from 'firebase/firestore';
+import { db } from './firebase';
 import { UserProfile } from '../types';
+import { broadcastSync, subscribeToSyncMessages } from './realtimeSync';
 
 export interface SessionActionLog {
   id: string;
@@ -146,7 +159,7 @@ const sanitizeRecord = (rec: SessionRecord): SessionRecord => {
   };
 };
 
-// Read all stored real session records
+// Read all stored real session records from local cache
 export const getStoredSessionRecords = (): SessionRecord[] => {
   if (typeof window === 'undefined') return [];
   try {
@@ -173,6 +186,90 @@ export const saveSessionRecords = (records: SessionRecord[]): void => {
   }
 };
 
+/**
+ * Real-time multi-device subscription to session records.
+ * Uses Cloud Firestore with local optimistic fallback and BroadcastChannel.
+ */
+export const subscribeToSessionRecords = (callback: (records: SessionRecord[]) => void): (() => void) => {
+  // 1. Emit local cached records immediately
+  callback(getStoredSessionRecords());
+
+  // 2. Listen to cross-tab / local network sync events
+  const handleLocalSync = () => {
+    callback(getStoredSessionRecords());
+  };
+
+  const unsubSync = subscribeToSyncMessages((msg) => {
+    if (msg.module === 'sessions') {
+      callback(getStoredSessionRecords());
+    }
+  });
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('ostifak_session_records_updated', handleLocalSync);
+    window.addEventListener('storage', handleLocalSync);
+  }
+
+  // 3. Listen to Firestore Cloud 'sessions' collection real-time
+  const q = query(collection(db, 'sessions'), orderBy('loginTimestamp', 'desc'), limit(100));
+  const unsubFirestore = onSnapshot(
+    q,
+    (snapshot) => {
+      if (!snapshot.empty) {
+        const remoteSessions: SessionRecord[] = snapshot.docs.map((d) => {
+          const data = d.data();
+          return sanitizeRecord({
+            id: d.id,
+            accountEmail: data.accountEmail || '-',
+            accountName: data.accountName || 'Pengguna',
+            roleTitle: data.roleTitle || 'Pengurus',
+            dateDay: data.dateDay || '',
+            loginTime: data.loginTime || '',
+            loginTimestamp: Number(data.loginTimestamp) || Date.now(),
+            logoutTime: data.logoutTime,
+            duration: data.duration || 'Sesi Sedang Aktif',
+            isActive: Boolean(data.isActive),
+            devicePc: data.devicePc || getRealDeviceName(),
+            browser: data.browser || getRealBrowserName(),
+            ipAddress: data.ipAddress || '-',
+            macAddress: data.macAddress || '-',
+            locationName: data.locationName || '-',
+            coordinates: data.coordinates || '-',
+            actions: Array.isArray(data.actions) ? data.actions : [],
+          });
+        });
+
+        // Merge remote with local active session
+        const localActiveId = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY_ACTIVE_ID) : null;
+        const localRecords = getStoredSessionRecords();
+        const activeLocal = localRecords.find((s) => s.id === localActiveId && s.isActive);
+
+        const mergedMap = new Map<string, SessionRecord>();
+        remoteSessions.forEach((s) => mergedMap.set(s.id, s));
+        if (activeLocal) {
+          mergedMap.set(activeLocal.id, activeLocal);
+        }
+
+        const mergedList = Array.from(mergedMap.values()).sort((a, b) => b.loginTimestamp - a.loginTimestamp);
+        saveSessionRecords(mergedList);
+        callback(mergedList);
+      }
+    },
+    (err) => {
+      console.warn('Firestore session sync listener notice:', err);
+    }
+  );
+
+  return () => {
+    unsubFirestore();
+    unsubSync();
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('ostifak_session_records_updated', handleLocalSync);
+      window.removeEventListener('storage', handleLocalSync);
+    }
+  };
+};
+
 // Optional real geolocation capture without guessing or hallucinating
 export const fetchRealGeolocationIfAllowed = (sessionId: string): void => {
   if (typeof window === 'undefined' || !navigator.geolocation) return;
@@ -183,18 +280,32 @@ export const fetchRealGeolocationIfAllowed = (sessionId: string): void => {
         if (!pos || !pos.coords) return;
         const { latitude, longitude } = pos.coords;
         const coordStr = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+        const locStr = `Koordinat GPS (${latitude.toFixed(4)}°, ${longitude.toFixed(4)}°)`;
+        
         const records = getStoredSessionRecords();
         const updated = records.map((rec) => {
           if (rec.id === sessionId) {
             return {
               ...rec,
               coordinates: coordStr,
-              locationName: `Koordinat GPS (${latitude.toFixed(4)}°, ${longitude.toFixed(4)}°)`,
+              locationName: locStr,
             };
           }
           return rec;
         });
         saveSessionRecords(updated);
+
+        // Sync to cloud Firestore
+        try {
+          const docRef = doc(db, 'sessions', sessionId);
+          updateDoc(docRef, {
+            coordinates: coordStr,
+            locationName: locStr,
+            updatedAt: serverTimestamp(),
+          }).catch(() => {});
+        } catch {}
+
+        broadcastSync({ module: 'sessions', action: 'UPDATE', id: sessionId });
       },
       () => {
         // Fallback: If permission is denied or unavailable, stay as '-'
@@ -265,6 +376,21 @@ export const recordLoginSession = (user: UserProfile): SessionRecord => {
   saveSessionRecords(finalRecords);
   localStorage.setItem(STORAGE_KEY_ACTIVE_ID, sessionId);
 
+  // Sync new session to Firestore cloud
+  try {
+    const docRef = doc(db, 'sessions', sessionId);
+    setDoc(docRef, {
+      ...newSession,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    }).catch((err) => {
+      console.warn('Remote session setDoc notice:', err);
+    });
+  } catch {}
+
+  // Broadcast to other open tabs / devices
+  broadcastSync({ module: 'sessions', action: 'CREATE', payload: newSession });
+
   // Attempt real geolocation if user grants permission
   fetchRealGeolocationIfAllowed(sessionId);
 
@@ -294,13 +420,15 @@ export const recordSessionAction = (
 
   const records = getStoredSessionRecords();
   let found = false;
+  let updatedActions: SessionActionLog[] = [];
 
   const updatedRecords = records.map((rec) => {
     if (rec.id === activeId && rec.isActive) {
       found = true;
+      updatedActions = [...rec.actions, newAction];
       return {
         ...rec,
-        actions: [...rec.actions, newAction],
+        actions: updatedActions,
       };
     }
     return rec;
@@ -308,6 +436,19 @@ export const recordSessionAction = (
 
   if (found) {
     saveSessionRecords(updatedRecords);
+
+    // Sync action log to Firestore cloud
+    try {
+      const docRef = doc(db, 'sessions', activeId);
+      updateDoc(docRef, {
+        actions: updatedActions,
+        updatedAt: serverTimestamp(),
+      }).catch((err) => {
+        console.warn('Remote session action updateDoc notice:', err);
+      });
+    } catch {}
+
+    broadcastSync({ module: 'sessions', action: 'UPDATE', id: activeId, payload: { newAction } });
   }
 };
 
@@ -320,9 +461,11 @@ export const recordLogoutSession = (): void => {
 
   if (activeId) {
     const records = getStoredSessionRecords();
+    let updatedTarget: SessionRecord | null = null;
+
     const updatedRecords = records.map((rec) => {
       if (rec.id === activeId && rec.isActive) {
-        return {
+        updatedTarget = {
           ...rec,
           isActive: false,
           logoutTime: formatTimeWithSeconds(now),
@@ -339,11 +482,30 @@ export const recordLogoutSession = (): void => {
             },
           ],
         };
+        return updatedTarget;
       }
       return rec;
     });
 
     saveSessionRecords(updatedRecords);
     localStorage.removeItem(STORAGE_KEY_ACTIVE_ID);
+
+    if (updatedTarget) {
+      // Sync logout status to Firestore cloud
+      try {
+        const docRef = doc(db, 'sessions', activeId);
+        updateDoc(docRef, {
+          isActive: false,
+          logoutTime: (updatedTarget as SessionRecord).logoutTime,
+          duration: (updatedTarget as SessionRecord).duration,
+          actions: (updatedTarget as SessionRecord).actions,
+          updatedAt: serverTimestamp(),
+        }).catch((err) => {
+          console.warn('Remote session logout updateDoc notice:', err);
+        });
+      } catch {}
+
+      broadcastSync({ module: 'sessions', action: 'UPDATE', id: activeId });
+    }
   }
 };

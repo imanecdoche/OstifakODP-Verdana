@@ -7,6 +7,13 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Real-time Multi-device Sync untuk Seluruh Modul (Firestore Cloud & Real-time Listeners):
+  - SINKRONISASI REAL-TIME CLOUD:
+    * Hubungkan seluruh modul data (Santri, Pelanggaran, Proposal Program Kerja, Asrama/Kamar, Kelas, dan Rekam Sesi Login) ke Cloud Firestore real-time listeners (`onSnapshot`) dan `BroadcastChannel` instan.
+    * Setiap mutasi data (CREATE, UPDATE, DELETE) disinkronkan langsung ke cloud backend dan disiarkan real-time ke semua perangkat yang sedang terhubung.
+  - AUTO-UPDATE & REVALIDATION TANPA REFRESH:
+    * Seluruh view dan modul UI memperbarui tampilan secara otomatis seketika saat ada perubahan dari perangkat mana pun.
+    * Menggunakan mekanisme *optimistic updates* dan *last-write-wins* untuk memastikan data selalu konsisten.
 - **[2026-08-26]**: Perbaikan Blank Screen pada Vercel Deployment & Service Worker:
   - PERBAIKAN PWA SERVICE WORKER: Handler fetch pada `sw.js` diperbaiki agar selalu mengembalikan objek `Response` valid (tidak menghasilkan unhandled undefined response error pada asset bundle).
   - SAFE WEBGL & UNIFORMS: Ditambahkan guard dan error catch pada rendering WebGL background (`GradientWaves.tsx`) untuk memastikan kompatibilitas di seluruh browser mobile/desktop.

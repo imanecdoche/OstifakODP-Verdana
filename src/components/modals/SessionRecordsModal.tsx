@@ -4,6 +4,7 @@ import {
   getStoredSessionRecords, 
   recordLoginSession, 
   formatDurationFromTimestamps,
+  subscribeToSessionRecords,
   SessionRecord 
 } from '../../lib/sessionLogService';
 import { ScrollArea } from '../ui/ScrollArea';
@@ -86,36 +87,24 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
   const [nowTimestamp, setNowTimestamp] = useState<number>(Date.now());
 
-  // Load real records & keep updated
-  const loadRecords = () => {
-    let list = getStoredSessionRecords();
-    // If no records stored yet but user is active, initialize real session
-    if (list.length === 0 && currentUser) {
-      const live = recordLoginSession(currentUser);
-      list = [live];
-    }
-    setRecords(list);
-
-    // Expand the first active session by default if not set
-    if (list.length > 0) {
-      setExpandedSessionId((prev) => prev ?? list[0].id);
-    }
-  };
-
+  // Real-time live subscription to multi-device session records
   useEffect(() => {
-    if (isOpen) {
-      loadRecords();
-    }
+    if (!isOpen) return;
+
+    const unsub = subscribeToSessionRecords((liveList) => {
+      let list = liveList;
+      if (list.length === 0 && currentUser) {
+        const live = recordLoginSession(currentUser);
+        list = [live];
+      }
+      setRecords(list);
+      if (list.length > 0) {
+        setExpandedSessionId((prev) => prev ?? list[0].id);
+      }
+    });
+
+    return () => unsub();
   }, [isOpen, currentUser]);
-
-  // Listen to window events when real action logs are added
-  useEffect(() => {
-    const handleUpdate = () => {
-      loadRecords();
-    };
-    window.addEventListener('ostifak_session_records_updated', handleUpdate);
-    return () => window.removeEventListener('ostifak_session_records_updated', handleUpdate);
-  }, [currentUser]);
 
   // Live timer for active session duration counter
   useEffect(() => {

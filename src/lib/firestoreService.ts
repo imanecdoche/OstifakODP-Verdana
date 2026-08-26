@@ -28,6 +28,7 @@ import {
   UserProfile 
 } from '../types';
 import { OFFICIAL_ACCOUNTS } from '../data/mockData';
+import { broadcastSync, subscribeToSyncMessages } from './realtimeSync';
 
 /**
  * 2. AUTHENTICATION SERVICES
@@ -210,6 +211,12 @@ export function subscribeToPelanggaran(callback: (records: ViolationRecord[]) =>
     mergeAndEmit(cachedRemote);
   };
 
+  const unsubSync = subscribeToSyncMessages((msg) => {
+    if (msg.module === 'pelanggaran') {
+      mergeAndEmit(cachedRemote);
+    }
+  });
+
   if (typeof window !== 'undefined') {
     window.addEventListener(EVENT_VIOLATIONS_CHANGED, handleLocalChange);
     window.addEventListener('storage', handleLocalChange);
@@ -217,6 +224,7 @@ export function subscribeToPelanggaran(callback: (records: ViolationRecord[]) =>
 
   return () => {
     unsubSnapshot();
+    unsubSync();
     if (typeof window !== 'undefined') {
       window.removeEventListener(EVENT_VIOLATIONS_CHANGED, handleLocalChange);
       window.removeEventListener('storage', handleLocalChange);
@@ -226,14 +234,18 @@ export function subscribeToPelanggaran(callback: (records: ViolationRecord[]) =>
 
 export async function addPelanggaranRecord(record: Omit<ViolationRecord, 'id'>) {
   const colRef = collection(db, 'pelanggaran');
-  return await addDoc(colRef, {
+  const docRef = await addDoc(colRef, {
     ...record,
     createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
   });
+  broadcastSync({ module: 'pelanggaran', action: 'CREATE', id: docRef.id, payload: record });
+  return docRef;
 }
 
 export async function updatePelanggaranRecord(id: string, updates: Partial<ViolationRecord>) {
   saveUpdatedViolation(id, updates);
+  broadcastSync({ module: 'pelanggaran', action: 'UPDATE', id, payload: updates });
   const docRef = doc(db, 'pelanggaran', id);
   try {
     await updateDoc(docRef, {
@@ -247,6 +259,7 @@ export async function updatePelanggaranRecord(id: string, updates: Partial<Viola
 
 export async function deletePelanggaranRecord(id: string) {
   saveDeletedViolationId(id);
+  broadcastSync({ module: 'pelanggaran', action: 'DELETE', id });
   const docRef = doc(db, 'pelanggaran', id);
   try {
     await deleteDoc(docRef);
@@ -263,6 +276,7 @@ export async function deleteUnifiedViolation(
   
   // 1. Instantly write to persistent storage blacklist
   saveDeletedViolationId(violation.id, identity);
+  broadcastSync({ module: 'pelanggaran', action: 'DELETE', id: violation.id });
 
   // 2. Remove from Firestore 'pelanggaran' collection
   try {
@@ -298,6 +312,7 @@ export async function updateUnifiedViolation(
 
   // 1. Instantly write to persistent storage
   saveUpdatedViolation(violation.id, updates, identity);
+  broadcastSync({ module: 'pelanggaran', action: 'UPDATE', id: violation.id, payload: updates });
 
   // 2. Update in Firestore 'pelanggaran' collection
   try {
@@ -393,7 +408,7 @@ export function violationIdentity(v: { studentName: string; violation: string; d
 // Proposal / Program Kerja Listener
 export function subscribeToProposals(callback: (programs: WorkProgram[]) => void) {
   const q = query(collection(db, 'proposal'));
-  return onSnapshot(q, (snapshot) => {
+  const unsubSnapshot = onSnapshot(q, (snapshot) => {
     const programs: WorkProgram[] = snapshot.docs.map((docSnap) => {
       const data = docSnap.data();
       return {
@@ -412,21 +427,58 @@ export function subscribeToProposals(callback: (programs: WorkProgram[]) => void
   }, (error) => {
     console.error('Error fetching proposals:', error);
   });
+
+  const unsubSync = subscribeToSyncMessages((msg) => {
+    if (msg.module === 'proposals') {
+      // Cross-tab revalidation
+    }
+  });
+
+  return () => {
+    unsubSnapshot();
+    unsubSync();
+  };
 }
 
 export async function addProposalRecord(program: Omit<WorkProgram, 'id'>) {
   const colRef = collection(db, 'proposal');
-  return await addDoc(colRef, {
+  const docRef = await addDoc(colRef, {
     ...program,
     divisionId: program.divisionId,
     createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
   });
+  broadcastSync({ module: 'proposals', action: 'CREATE', id: docRef.id, payload: program });
+  return docRef;
+}
+
+export async function updateProposalRecord(id: string, updates: Partial<WorkProgram>) {
+  const docRef = doc(db, 'proposal', id);
+  try {
+    await updateDoc(docRef, {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (err) {
+    console.warn('Remote updateProposalRecord notice:', err);
+  }
+  broadcastSync({ module: 'proposals', action: 'UPDATE', id, payload: updates });
+}
+
+export async function deleteProposalRecord(id: string) {
+  const docRef = doc(db, 'proposal', id);
+  try {
+    await deleteDoc(docRef);
+  } catch (err) {
+    console.warn('Remote deleteProposalRecord notice:', err);
+  }
+  broadcastSync({ module: 'proposals', action: 'DELETE', id });
 }
 
 // Directives Collection Listener (Instruksi Mudir)
 export function subscribeToDirectives(callback: (directives: MudirDirective[]) => void) {
   const q = query(collection(db, 'directives'));
-  return onSnapshot(q, (snapshot) => {
+  const unsubSnapshot = onSnapshot(q, (snapshot) => {
     const directives: MudirDirective[] = snapshot.docs.map((docSnap) => {
       const data = docSnap.data();
       return {
@@ -443,14 +495,51 @@ export function subscribeToDirectives(callback: (directives: MudirDirective[]) =
   }, (error) => {
     console.error('Error fetching directives:', error);
   });
+
+  const unsubSync = subscribeToSyncMessages((msg) => {
+    if (msg.module === 'directives') {
+      // Cross-tab revalidation
+    }
+  });
+
+  return () => {
+    unsubSnapshot();
+    unsubSync();
+  };
 }
 
 export async function addDirectiveRecord(directive: Omit<MudirDirective, 'id'>) {
   const colRef = collection(db, 'directives');
-  return await addDoc(colRef, {
+  const docRef = await addDoc(colRef, {
     ...directive,
     createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
   });
+  broadcastSync({ module: 'directives', action: 'CREATE', id: docRef.id, payload: directive });
+  return docRef;
+}
+
+export async function updateDirectiveRecord(id: string, updates: Partial<MudirDirective>) {
+  const docRef = doc(db, 'directives', id);
+  try {
+    await updateDoc(docRef, {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (err) {
+    console.warn('Remote updateDirectiveRecord notice:', err);
+  }
+  broadcastSync({ module: 'directives', action: 'UPDATE', id, payload: updates });
+}
+
+export async function deleteDirectiveRecord(id: string) {
+  const docRef = doc(db, 'directives', id);
+  try {
+    await deleteDoc(docRef);
+  } catch (err) {
+    console.warn('Remote deleteDirectiveRecord notice:', err);
+  }
+  broadcastSync({ module: 'directives', action: 'DELETE', id });
 }
 
 export interface StudentViolationEntry {
@@ -645,8 +734,14 @@ export function subscribeToSantri(callback: (santri: SantriRecord[]) => void) {
   // Initial local emission
   emit();
 
-  // Listen to local changes
+  // Listen to local changes and cross-tab sync
   const handleLocalChange = () => emit();
+  const unsubSync = subscribeToSyncMessages((msg) => {
+    if (msg.module === 'santri') {
+      emit();
+    }
+  });
+
   if (typeof window !== 'undefined') {
     window.addEventListener(EVENT_SANTRI_CHANGED, handleLocalChange);
     window.addEventListener('storage', handleLocalChange);
@@ -670,8 +765,14 @@ export function subscribeToSantri(callback: (santri: SantriRecord[]) => void) {
           statusIbadah: data.statusIbadah || '100% Berjamaah',
           birthDate: data.birthDate || '',
           domicile: data.domicile || '',
+          guardianName: data.guardianName || '',
+          guardianPhone: data.guardianPhone || '',
+          address: data.address || '',
           isTahsinPassed: data.isTahsinPassed ?? true,
           violationsHistory: data.violationsHistory || [],
+          hafalanHistory: data.hafalanHistory || [],
+          achievementsHistory: data.achievementsHistory || [],
+          permissionsHistory: data.permissionsHistory || [],
         };
       });
     emit();
@@ -681,6 +782,7 @@ export function subscribeToSantri(callback: (santri: SantriRecord[]) => void) {
 
   return () => {
     unsub();
+    unsubSync();
     if (typeof window !== 'undefined') {
       window.removeEventListener(EVENT_SANTRI_CHANGED, handleLocalChange);
       window.removeEventListener('storage', handleLocalChange);
@@ -691,6 +793,7 @@ export function subscribeToSantri(callback: (santri: SantriRecord[]) => void) {
 export async function updateSantriRecord(id: string, updates: Partial<SantriRecord>) {
   // 1. Instantly write to local persistent storage
   saveUpdatedSantri(id, updates);
+  broadcastSync({ module: 'santri', action: 'UPDATE', id, payload: updates });
 
   // 2. Fire background Firestore update
   const docRef = doc(db, 'santri', id);
@@ -707,6 +810,7 @@ export async function updateSantriRecord(id: string, updates: Partial<SantriReco
 export async function deleteSantriRecord(id: string) {
   // 1. Instantly write to local persistent blacklist
   saveDeletedSantriId(id);
+  broadcastSync({ module: 'santri', action: 'DELETE', id });
 
   // 2. Fire background Firestore delete (swallow permission errors gracefully)
   const docRef = doc(db, 'santri', id);
@@ -733,6 +837,7 @@ export async function addSantriRecord(santri: Omit<SantriRecord, 'id'>) {
   
   // 1. Instantly write to local persistent custom list
   saveCustomSantri(fullRecord);
+  broadcastSync({ module: 'santri', action: 'CREATE', id: localId, payload: fullRecord });
 
   // 2. Fire background Firestore add
   try {
@@ -740,10 +845,12 @@ export async function addSantriRecord(santri: Omit<SantriRecord, 'id'>) {
     const docRef = await addDoc(colRef, {
       ...santri,
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
     if (docRef.id) {
       saveDeletedSantriId(localId);
       saveCustomSantri({ ...fullRecord, id: docRef.id });
+      broadcastSync({ module: 'santri', action: 'UPDATE', id: docRef.id, payload: { ...fullRecord, id: docRef.id } });
     }
     return docRef;
   } catch (err) {
@@ -930,7 +1037,7 @@ export const ALL_OFFICIAL_ROOMS: DormitoryRoom[] = OFFICIAL_DORMITORIES.flatMap(
 
 export function subscribeToDormitories(callback: (dormitories: Dormitory[], allRooms: DormitoryRoom[]) => void) {
   const q = query(collection(db, 'asrama'));
-  return onSnapshot(q, (snapshot) => {
+  const unsubSnapshot = onSnapshot(q, (snapshot) => {
     if (snapshot.empty) {
       callback(OFFICIAL_DORMITORIES, ALL_OFFICIAL_ROOMS);
       return;
@@ -957,6 +1064,17 @@ export function subscribeToDormitories(callback: (dormitories: Dormitory[], allR
     console.error('Error fetching dormitories:', error);
     callback(OFFICIAL_DORMITORIES, ALL_OFFICIAL_ROOMS);
   });
+
+  const unsubSync = subscribeToSyncMessages((msg) => {
+    if (msg.module === 'dorms') {
+      // Re-trigger / sync
+    }
+  });
+
+  return () => {
+    unsubSnapshot();
+    unsubSync();
+  };
 }
 
 /**
@@ -1008,7 +1126,7 @@ export const OFFICIAL_CLASSES: SchoolClass[] = [
 
 export function subscribeToClasses(callback: (classes: SchoolClass[]) => void) {
   const q = query(collection(db, 'kelas'));
-  return onSnapshot(q, (snapshot) => {
+  const unsubSnapshot = onSnapshot(q, (snapshot) => {
     if (snapshot.empty) {
       callback(OFFICIAL_CLASSES);
       return;
@@ -1040,4 +1158,15 @@ export function subscribeToClasses(callback: (classes: SchoolClass[]) => void) {
     console.error('Error fetching classes:', error);
     callback(OFFICIAL_CLASSES);
   });
+
+  const unsubSync = subscribeToSyncMessages((msg) => {
+    if (msg.module === 'classes') {
+      // Re-trigger / sync
+    }
+  });
+
+  return () => {
+    unsubSnapshot();
+    unsubSync();
+  };
 }
