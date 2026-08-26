@@ -475,7 +475,6 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   };
 
   useLenisModalLock(
-    !!student ||
     isIzinModalOpen ||
     isMoveKamarModalOpen ||
     isMoveKelasModalOpen ||
@@ -1050,90 +1049,138 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
   return (
     <>
-      {/* 1. MODAL UTAMA DETAIL SANTRI (MULTI-TAB VIEW) */}
-      {!isIzinModalOpen && !isMoveKamarModalOpen && !isMoveKelasModalOpen && !isSetoranModalOpen && !isHafalanChartModalOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-4xl h-[92dvh] sm:h-[85vh] max-h-[95dvh] sm:max-h-[90vh] flex flex-col rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto animate-in fade-in zoom-in-95">
-            
-            {/* Header Modal (Clean Flat Header, Zero Icon Policy) */}
-            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A] truncate">
-                {currentStudent.studentName}
-              </h3>
-              <p className="text-xs text-[#64748B] truncate mt-0.5 font-body">
-                NIS: {currentStudent.nis || '-'} • {currentStudent.kamar} • {currentStudent.kelas}
-              </p>
-            </div>
+      {/* 1. HALAMAN UTAMA DETAIL SANTRI (FULL PAGE VIEW) */}
+      <div className="space-y-6 font-body pb-16 animate-in fade-in duration-200">
+        
+        {/* Top Back Navigation Bar */}
+        <div className="flex items-center justify-between gap-4 pb-4 border-b border-[#E2E8F0]">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#0F172A] rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-2xs active:scale-[0.98] flex items-center gap-2"
+          >
+            <span>← Kembali ke Direktori Santri</span>
+          </button>
 
-            {/* Navigasi Tab (Segmented Button 1 Row dengan Shadow Edge & Auto-Centering) */}
-            <div className="relative border-b border-slate-200/80 bg-white shrink-0">
-              {/* Left Shadow Indicator */}
-              <div
-                className={`pointer-events-none absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white via-white/80 to-transparent z-10 transition-opacity duration-200 ${
-                  showLeftShadow ? 'opacity-100' : 'opacity-0'
-                }`}
-              />
+          <div className="text-right">
+            <span className="text-xs font-semibold text-[#64748B] font-headline uppercase tracking-wider">
+              Profil & Rekam Jejak Santri
+            </span>
+          </div>
+        </div>
 
-              {/* Scrollable Tab Track */}
-              <div
-                ref={tabContainerRef}
-                onScroll={checkTabScroll}
-                className="px-4 sm:px-6 pt-3 pb-2.5 flex flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth"
-              >
-                {[
-                  { id: 'bio', label: 'Bio' },
-                  { id: 'hafalan', label: 'Hafalan' },
-                  { id: 'pelanggaran', label: 'Pelanggaran' },
-                  { id: 'mahkamah', label: 'Rekam Mahkamah' },
-                  { id: 'prestasi', label: 'Prestasi' },
-                  { id: 'izin', label: 'Riwayat Izin' },
-                ].map((t) => {
-                  const isActive = detailActiveTab === t.id;
-                  return (
-                    <button
-                      key={t.id}
-                      ref={(el) => {
-                        tabRefs.current[t.id] = el;
-                      }}
-                      type="button"
-                      onClick={() => setDetailActiveTab(t.id as any)}
-                      className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 flex items-center gap-1.5 transition-all cursor-pointer select-none ${
-                        isActive
-                          ? 'bg-[#142A18] text-white shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium'
-                      }`}
-                    >
-                      <span>{t.label}</span>
-                      {t.id === 'pelanggaran' && currentStudent.poinPelanggaran > 0 && (
-                        <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-red-500 text-white font-bold">
-                          {currentStudent.poinPelanggaran} Pts
-                        </span>
-                      )}
-                      {t.id === 'mahkamah' && currentStudent.mahkamahHistory && currentStudent.mahkamahHistory.length > 0 && (
-                        <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-900 text-white font-bold">
-                          {currentStudent.mahkamahHistory.length}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+        {/* Page Header (Clean Flat, Zero Icon Policy) */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-[#E2E8F0]">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] font-headline tracking-tight">
+              {currentStudent.studentName}
+            </h1>
+            <p className="text-xs text-[#64748B] mt-1 font-body">
+              NIS: {currentStudent.nis || '-'} • Kamar: {currentStudent.kamar} • Kelas: {currentStudent.kelas} {currentStudent.angkatan ? `• Angkatan: ${currentStudent.angkatan}` : ''}
+            </p>
+          </div>
 
-              {/* Right Shadow Indicator */}
-              <div
-                className={`pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white via-white/80 to-transparent z-10 transition-opacity duration-200 ${
-                  showRightShadow ? 'opacity-100' : 'opacity-0'
-                }`}
-              />
-            </div>
-
-            {/* Modal Body (Scrollable Multi-Tab Content) */}
-            <ScrollArea
-              className="flex-1 min-h-0"
-              viewportClassName="p-6 space-y-6 text-xs"
-              topOffset="top-3"
-              bottomOffset="bottom-3"
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setIzinType('Pulang (Sakit)');
+                setIzinReason('');
+                setIzinStartDate(new Date().toISOString().split('T')[0]);
+                setIzinEndDate(new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0]);
+                setIsIzinModalOpen(true);
+              }}
+              className="px-3.5 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] hover:bg-[#F8FAFC] transition-colors cursor-pointer shadow-2xs active:scale-[0.98]"
             >
+              Rekam Izin
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setTargetKamar(currentStudent.kamar || availableKamarOptions[0] || (liveRooms[0]?.roomName ?? 'Abu Bakar 1'));
+                setIsMoveKamarModalOpen(true);
+              }}
+              className="px-3.5 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] hover:bg-[#F8FAFC] transition-colors cursor-pointer shadow-2xs active:scale-[0.98]"
+            >
+              Pindah Kamar
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setTargetKelas(currentStudent.kelas || availableKelasOptions[0] || (liveClasses[0]?.className ?? 'Kelas 1'));
+                setIsMoveKelasModalOpen(true);
+              }}
+              className="px-3.5 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] hover:bg-[#F8FAFC] transition-colors cursor-pointer shadow-2xs active:scale-[0.98]"
+            >
+              Pindah Kelas
+            </button>
+          </div>
+        </div>
+
+        {/* Navigasi Tab (Segmented Button 1 Row dengan Shadow Edge & Auto-Centering) */}
+        <div className="relative border-b border-[#E2E8F0] bg-white">
+          {/* Left Shadow Indicator */}
+          <div
+            className={`pointer-events-none absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white via-white/80 to-transparent z-10 transition-opacity duration-200 ${
+              showLeftShadow ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+
+          {/* Scrollable Tab Track */}
+          <div
+            ref={tabContainerRef}
+            onScroll={checkTabScroll}
+            className="pt-1 pb-3 flex flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth"
+          >
+            {[
+              { id: 'bio', label: 'Bio' },
+              { id: 'hafalan', label: 'Hafalan' },
+              { id: 'pelanggaran', label: 'Pelanggaran' },
+              { id: 'mahkamah', label: 'Rekam Mahkamah' },
+              { id: 'prestasi', label: 'Prestasi' },
+              { id: 'izin', label: 'Riwayat Izin' },
+            ].map((t) => {
+              const isActive = detailActiveTab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  ref={(el) => {
+                    tabRefs.current[t.id] = el;
+                  }}
+                  type="button"
+                  onClick={() => setDetailActiveTab(t.id as any)}
+                  className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 flex items-center gap-1.5 transition-all cursor-pointer select-none ${
+                    isActive
+                      ? 'bg-[#0F172A] text-white shadow-xs'
+                      : 'text-[#64748B] hover:text-[#0F172A] hover:bg-slate-100 font-medium'
+                  }`}
+                >
+                  <span>{t.label}</span>
+                  {t.id === 'pelanggaran' && currentStudent.poinPelanggaran > 0 && (
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-red-500 text-white font-bold">
+                      {currentStudent.poinPelanggaran} Pts
+                    </span>
+                  )}
+                  {t.id === 'mahkamah' && currentStudent.mahkamahHistory && currentStudent.mahkamahHistory.length > 0 && (
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-900 text-white font-bold">
+                      {currentStudent.mahkamahHistory.length}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Right Shadow Indicator */}
+          <div
+            className={`pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white via-white/80 to-transparent z-10 transition-opacity duration-200 ${
+              showRightShadow ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+        </div>
+
+        {/* Tab Content Body */}
+        <div className="space-y-6">
               {/* TAB 1: BIO (Unboxed 2-Column Layout with Top Unified Edit Button) */}
               {detailActiveTab === 'bio' && (
                 <div className="space-y-6 animate-in fade-in duration-150">
@@ -1834,62 +1881,8 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                   </div>
                 </div>
               )}
-            </ScrollArea>
-
-            {/* Footer Aksi Cepat (Pindah Kamar / Kelas / Rekam Izin) */}
-            <div className="bg-[#F8FAFC] px-6 py-3.5 border-t border-slate-200/80 flex flex-wrap items-center justify-between gap-3 shrink-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIzinType('Pulang');
-                    setIzinReason('');
-                    setIzinStartDate(new Date().toISOString().split('T')[0]);
-                    setIzinEndDate(new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0]);
-                    setIsIzinModalOpen(true);
-                  }}
-                  className="px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                >
-                  <CalendarDays className="w-3.5 h-3.5 text-blue-600" />
-                  Rekam Izin
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTargetKamar(currentStudent.kamar || availableKamarOptions[0] || (liveRooms[0]?.roomName ?? 'Qatar 1'));
-                    setIsMoveKamarModalOpen(true);
-                  }}
-                  className="px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                >
-                  <BedDouble className="w-3.5 h-3.5 text-[#059669]" />
-                  Pindah Kamar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTargetKelas(currentStudent.kelas || availableKelasOptions[0] || (liveClasses[0]?.className ?? 'Kelas 1'));
-                    setIsMoveKelasModalOpen(true);
-                  }}
-                  className="px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                >
-                  <GraduationCap className="w-3.5 h-3.5 text-indigo-600" />
-                  Pindah Kelas
-                </button>
-              </div>
-
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={onClose}
-                className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
-              >
-                Tutup Detail
-              </Button>
-            </div>
-
-          </div>
         </div>
-      )}
+      </div>
 
       {/* 2. NESTED MODAL: REKAM IZIN SANTRI */}
       {isIzinModalOpen && (

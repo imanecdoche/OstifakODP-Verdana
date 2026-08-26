@@ -7,6 +7,15 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Rekonstruksi Komponen Detail Santri Menjadi Halaman Penuh (Full Page View) (Versi v1.1.0.29b):
+  - 1. UBAH JADI HALAMAN PENUH (FULL PAGE VIEW):
+    * Menghapus seluruh kontainer modal pop-up mengapung, backdrop overlay gelap transparan, batas tinggi modal kaku, dan tombol tutup "Tutup Detail".
+    * Merender tampilan profil dan seluruh tab rekam jejak santri (Bio, Hafalan, Pelanggaran, Rekam Mahkamah, Prestasi, dan Riwayat Izin) langsung sebagai halaman penuh (*full view page*) yang aktif di bawah layout navigasi aplikasi.
+  - 2. PENYESUAIAN TOMBOL KEMBALI & AKSI:
+    * Menyediakan bilah navigasi kembali (*back button*) yang bersih di bagian atas halaman (`← Kembali ke Direktori Santri`) untuk mengarahkan pengguna kembali ke tabel/direktori daftar santri secara instan.
+    * Memindahkan aksi fungsional (Rekam Izin, Pindah Kamar, Pindah Kelas) ke bilah aksi header bagian atas secara rapi.
+  - 3. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan gaya minimalis clean-flat (tanpa ikon dekoratif di header, garis pemisah tipis *divider*, bebas dari kontainer card bertumpuk, dan responsif anti-text-wrapping di perangkat mobile).
 - **[2026-08-26]**: Fitur Interaktif Mouse Wheel Scroll pada Field Angka Hafalan, Poin, & Dropdown Select (Versi v1.1.0.28b):
   - 1. SCROLL WHEEL UNTUK FIELD HAFALAN & ANGKA:
     * Pada field input hafalan juz, filter range angka, poin takzir, serta nomor ayat/halaman, menambahkan event handler `onWheel` dan global wheel dispatcher untuk menaikkan (scroll up / delta < 0) atau menurunkan (scroll down / delta > 0) nilai secara instan saat kursor hover di atas field input numerik, serta mencegah scroll jendela halaman window (`preventDefault`).

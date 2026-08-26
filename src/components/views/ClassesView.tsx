@@ -163,6 +163,20 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
     return classSantriMap.get(normalized) || [];
   }, [selectedClassModal, classSantriMap]);
 
+  if (selectedDetailStudent) {
+    return (
+      <StudentDetailModal
+        student={selectedDetailStudent}
+        classes={classes}
+        onClose={() => setSelectedDetailStudent(null)}
+        onStudentUpdated={(updatedStudent) => {
+          setLocalStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
+          setSelectedDetailStudent(updatedStudent);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-8 font-body">
       {/* Header (Unboxed, Zero Icon Policy) */}
@@ -447,17 +461,6 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
           </div>
         </div>
       )}
-
-      {/* Sub-Modal Detail Santri (Seamless Sub-Modal Flow) */}
-      <StudentDetailModal
-        student={selectedDetailStudent}
-        classes={classes}
-        onClose={() => setSelectedDetailStudent(null)}
-        onStudentUpdated={(updatedStudent) => {
-          setLocalStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
-          setSelectedDetailStudent(updatedStudent);
-        }}
-      />
     </div>
   );
 };

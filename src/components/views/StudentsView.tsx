@@ -1136,6 +1136,22 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
       });
   }, [students, searchTerm, filterClass, minHafalan, maxHafalan, minPoints, maxPoints, sortBy]);
 
+  if (selectedDetailStudent) {
+    return (
+      <StudentDetailModal
+        student={selectedDetailStudent}
+        dormitories={dormitories}
+        rooms={rooms}
+        classes={classes}
+        onClose={() => setSelectedDetailStudent(null)}
+        onStudentUpdated={(updatedStudent) => {
+          setStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
+          setSelectedDetailStudent(updatedStudent);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6 font-body">
       {/* Header (Unboxed, Zero Icon Policy) */}
@@ -2218,22 +2234,6 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
           </div>
         </div>
       )}
-
-      {/* ========================================================================= */}
-      {/* 4. MODAL UTAMA DETAIL SANTRI (STANDARDIZED SINGLE COMPONENT)              */}
-      {/* ========================================================================= */}
-      <StudentDetailModal
-        student={selectedDetailStudent}
-        dormitories={dormitories}
-        rooms={rooms}
-        classes={classes}
-        onClose={() => setSelectedDetailStudent(null)}
-        onStudentUpdated={(updatedStudent) => {
-          setStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
-          setSelectedDetailStudent(updatedStudent);
-        }}
-      />
-
     </div>
   );
 };

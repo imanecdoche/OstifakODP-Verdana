@@ -200,6 +200,21 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
     return roomSantriMap.get(normalized) || [];
   }, [selectedRoomModal, roomSantriMap]);
 
+  if (selectedDetailStudent) {
+    return (
+      <StudentDetailModal
+        student={selectedDetailStudent}
+        dormitories={dormitories}
+        rooms={rooms}
+        onClose={() => setSelectedDetailStudent(null)}
+        onStudentUpdated={(updatedStudent) => {
+          setLocalStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
+          setSelectedDetailStudent(updatedStudent);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Header (Unboxed, Zero Icon Policy) */}
@@ -581,18 +596,6 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
           </div>
         </div>
       )}
-
-      {/* Sub-Modal Detail Santri (Seamless Sub-Modal Flow) */}
-      <StudentDetailModal
-        student={selectedDetailStudent}
-        dormitories={dormitories}
-        rooms={rooms}
-        onClose={() => setSelectedDetailStudent(null)}
-        onStudentUpdated={(updatedStudent) => {
-          setLocalStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
-          setSelectedDetailStudent(updatedStudent);
-        }}
-      />
     </div>
   );
 };
