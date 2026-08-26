@@ -1303,7 +1303,14 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 placeholder="Min"
                 value={minHafalan}
                 onChange={(e) => setMinHafalan(e.target.value)}
-                onWheel={(e) => e.currentTarget.blur()}
+                onWheel={(e) => {
+                  e.preventDefault();
+                  const delta = e.deltaY;
+                  setMinHafalan((prev) => {
+                    const num = parseInt(prev) || 0;
+                    return String(delta < 0 ? Math.min(30, num + 1) : Math.max(0, num - 1));
+                  });
+                }}
                 className="w-14 h-8 px-2 bg-white border border-[#E2E8F0] rounded text-xs text-[#0F172A] text-center focus:border-[#0F172A] focus:outline-none"
               />
               <span className="text-[#64748B]">-</span>
@@ -1314,7 +1321,14 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 placeholder="Maks"
                 value={maxHafalan}
                 onChange={(e) => setMaxHafalan(e.target.value)}
-                onWheel={(e) => e.currentTarget.blur()}
+                onWheel={(e) => {
+                  e.preventDefault();
+                  const delta = e.deltaY;
+                  setMaxHafalan((prev) => {
+                    const num = parseInt(prev) || 30;
+                    return String(delta < 0 ? Math.min(30, num + 1) : Math.max(0, num - 1));
+                  });
+                }}
                 className="w-14 h-8 px-2 bg-white border border-[#E2E8F0] rounded text-xs text-[#0F172A] text-center focus:border-[#0F172A] focus:outline-none"
               />
             </div>
@@ -1331,7 +1345,14 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 placeholder="Min"
                 value={minPoints}
                 onChange={(e) => setMinPoints(e.target.value)}
-                onWheel={(e) => e.currentTarget.blur()}
+                onWheel={(e) => {
+                  e.preventDefault();
+                  const delta = e.deltaY;
+                  setMinPoints((prev) => {
+                    const num = parseInt(prev) || 0;
+                    return String(delta < 0 ? Math.min(500, num + 5) : Math.max(0, num - 5));
+                  });
+                }}
                 className="w-14 h-8 px-2 bg-white border border-[#E2E8F0] rounded text-xs text-[#0F172A] text-center focus:border-[#0F172A] focus:outline-none"
               />
               <span className="text-[#64748B]">-</span>
@@ -1342,7 +1363,14 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 placeholder="Maks"
                 value={maxPoints}
                 onChange={(e) => setMaxPoints(e.target.value)}
-                onWheel={(e) => e.currentTarget.blur()}
+                onWheel={(e) => {
+                  e.preventDefault();
+                  const delta = e.deltaY;
+                  setMaxPoints((prev) => {
+                    const num = parseInt(prev) || 500;
+                    return String(delta < 0 ? Math.min(500, num + 5) : Math.max(0, num - 5));
+                  });
+                }}
                 className="w-14 h-8 px-2 bg-white border border-[#E2E8F0] rounded text-xs text-[#0F172A] text-center focus:border-[#0F172A] focus:outline-none"
               />
             </div>
@@ -1622,7 +1650,14 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                         step={1}
                         value={hafalanCount}
                         onChange={(e) => setHafalanCount(e.target.value === '' ? '' : Math.min(30, Math.max(0, parseInt(e.target.value) || 0)))}
-                        onWheel={(e) => e.currentTarget.blur()}
+                        onWheel={(e) => {
+                          e.preventDefault();
+                          const delta = e.deltaY;
+                          setHafalanCount((prev) => {
+                            const num = typeof prev === 'number' ? prev : parseInt(String(prev)) || 0;
+                            return delta < 0 ? Math.min(30, num + 1) : Math.max(0, num - 1);
+                          });
+                        }}
                         placeholder="0"
                         className="w-full h-10 pl-3.5 pr-12 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-bold focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
                       />
@@ -1869,7 +1904,14 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                             step={1}
                             value={editHafalanCount}
                             onChange={(e) => setEditHafalanCount(e.target.value === '' ? '' : Math.min(30, Math.max(0, parseInt(e.target.value) || 0)))}
-                            onWheel={(e) => e.currentTarget.blur()}
+                            onWheel={(e) => {
+                              e.preventDefault();
+                              const delta = e.deltaY;
+                              setEditHafalanCount((prev) => {
+                                const num = typeof prev === 'number' ? prev : parseInt(String(prev)) || 0;
+                                return delta < 0 ? Math.min(30, num + 1) : Math.max(0, num - 1);
+                              });
+                            }}
                             placeholder="0"
                             className="w-full h-10 pl-3.5 pr-12 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-bold focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
                           />
@@ -1947,7 +1989,11 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                             min={0}
                             value={editPoin}
                             onChange={(e) => setEditPoin(Math.max(0, parseInt(e.target.value) || 0))}
-                            onWheel={(e) => e.currentTarget.blur()}
+                            onWheel={(e) => {
+                              e.preventDefault();
+                              const delta = e.deltaY;
+                              setEditPoin((prev) => delta < 0 ? Math.min(500, prev + 1) : Math.max(0, prev - 1));
+                            }}
                             className="w-20 h-9 px-2.5 bg-white border border-[#CBD5E1] rounded text-center text-sm font-bold text-[#EF4444] focus:border-[#0F172A] focus:outline-none"
                           />
                           <span className="font-bold text-xs text-[#64748B]">Pts</span>
@@ -1995,7 +2041,11 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                             max={100}
                             value={newVioPoints}
                             onChange={(e) => setNewVioPoints(parseInt(e.target.value) || 0)}
-                            onWheel={(e) => e.currentTarget.blur()}
+                            onWheel={(e) => {
+                              e.preventDefault();
+                              const delta = e.deltaY;
+                              setNewVioPoints((prev) => delta < 0 ? Math.min(100, prev + 1) : Math.max(1, prev - 1));
+                            }}
                             className="w-full h-8 px-2.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
                           />
                         </div>

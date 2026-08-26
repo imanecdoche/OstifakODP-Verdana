@@ -2265,7 +2265,14 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         max={selectedSurah?.totalAyat || 286}
                         value={setoranAyatFrom}
                         onChange={(e) => handleAyatFromChange(e.target.value)}
-                        onWheel={(e) => e.currentTarget.blur()}
+                        onWheel={(e) => {
+                          e.preventDefault();
+                          const delta = e.deltaY;
+                          const num = parseInt(String(setoranAyatFrom), 10) || 1;
+                          const max = selectedSurah?.totalAyat || 286;
+                          const next = delta < 0 ? Math.min(max, num + 1) : Math.max(1, num - 1);
+                          handleAyatFromChange(String(next));
+                        }}
                         className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
                       />
                     </div>
@@ -2277,7 +2284,15 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         max={selectedSurah?.totalAyat || 286}
                         value={setoranAyatTo}
                         onChange={(e) => handleAyatToChange(e.target.value)}
-                        onWheel={(e) => e.currentTarget.blur()}
+                        onWheel={(e) => {
+                          e.preventDefault();
+                          const delta = e.deltaY;
+                          const num = parseInt(String(setoranAyatTo), 10) || 1;
+                          const min = parseInt(String(setoranAyatFrom), 10) || 1;
+                          const max = selectedSurah?.totalAyat || 286;
+                          const next = delta < 0 ? Math.min(max, num + 1) : Math.max(min, num - 1);
+                          handleAyatToChange(String(next));
+                        }}
                         className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
                       />
                     </div>
@@ -2304,7 +2319,13 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         max={604}
                         value={setoranPageFrom}
                         onChange={(e) => setSetoranPageFrom(e.target.value)}
-                        onWheel={(e) => e.currentTarget.blur()}
+                        onWheel={(e) => {
+                          e.preventDefault();
+                          const delta = e.deltaY;
+                          const num = parseInt(String(setoranPageFrom), 10) || 1;
+                          const next = delta < 0 ? Math.min(604, num + 1) : Math.max(1, num - 1);
+                          setSetoranPageFrom(next);
+                        }}
                         className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
                       />
                     </div>
@@ -2316,7 +2337,13 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         max={604}
                         value={setoranPageTo}
                         onChange={(e) => setSetoranPageTo(e.target.value)}
-                        onWheel={(e) => e.currentTarget.blur()}
+                        onWheel={(e) => {
+                          e.preventDefault();
+                          const delta = e.deltaY;
+                          const num = parseInt(String(setoranPageTo), 10) || 1;
+                          const next = delta < 0 ? Math.min(604, num + 1) : Math.max(1, num - 1);
+                          setSetoranPageTo(next);
+                        }}
                         className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
                       />
                     </div>

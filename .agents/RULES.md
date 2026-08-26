@@ -7,6 +7,13 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Fitur Interaktif Mouse Wheel Scroll pada Field Angka Hafalan, Poin, & Dropdown Select (Versi v1.1.0.28b):
+  - 1. SCROLL WHEEL UNTUK FIELD HAFALAN & ANGKA:
+    * Pada field input hafalan juz, filter range angka, poin takzir, serta nomor ayat/halaman, menambahkan event handler `onWheel` dan global wheel dispatcher untuk menaikkan (scroll up / delta < 0) atau menurunkan (scroll down / delta > 0) nilai secara instan saat kursor hover di atas field input numerik, serta mencegah scroll jendela halaman window (`preventDefault`).
+  - 2. SCROLL WHEEL UNTUK COMBOBOX & DROPDOWN:
+    * Menerapkan fungsionalitas interaksi mouse scroll pada seluruh elemen `<select>` dropdown dan combobox (`App.tsx`) sehingga opsi di dalamnya dapat digeser atau dipilih dengan cepat menggunakan scroll wheel tanpa harus mengklik panah select terlebih dahulu.
+  - 3. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Tetap mematuhi standar desain minimalis clean-flat (bebas ikon berlebih, tanpa kontainer card bertumpuk, dan tetap responsif).
 - **[2026-08-26]**: Global Anti-Scroll Wheel on Dropdowns & Number Inputs + Global Bottom Loading Bar Overlay (Versi v1.1.0.27b):
   - 1. MATIKAN SCROLL WHEEL GLOBAL PADA DROPDOWN & INPUT NUMERIK:
     * Menerapkan event listener wheel global di level window (`App.tsx`) dengan capture mode untuk otomatis melakukan `.blur()` pada setiap elemen `<select>`, combobox kustom, dan `<input type="number">` saat kursor berada di atasnya, sehingga nilai tidak pernah berubah secara tidak sengaja akibat scrolling mouse.

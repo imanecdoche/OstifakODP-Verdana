@@ -221,25 +221,67 @@ export default function App() {
     };
   }, [isLoggedIn]);
 
-  // Global Wheel Scroll Prevention on Comboboxes, Select Dropdowns, & Number Inputs
+  // Global Wheel Scroll Interaction on Comboboxes, Select Dropdowns, & Number Inputs
   useEffect(() => {
     const handleGlobalWheel = (e: WheelEvent) => {
       const target = e.target as HTMLElement | null;
       if (!target) return;
-      if (
-        target.tagName === 'SELECT' ||
-        (target.tagName === 'INPUT' && (target as HTMLInputElement).type === 'number') ||
-        target.getAttribute('role') === 'combobox' ||
-        target.closest('select') ||
-        target.closest('input[type="number"]')
-      ) {
-        if (document.activeElement === target || target.contains(document.activeElement)) {
-          (document.activeElement as HTMLElement)?.blur?.();
+
+      // 1. SELECT ELEMENT INTERACTIVE WHEEL (Cycle options with scroll)
+      const selectEl = target.tagName === 'SELECT' ? (target as HTMLSelectElement) : target.closest('select');
+      if (selectEl && selectEl.options && selectEl.options.length > 0 && !selectEl.disabled) {
+        e.preventDefault();
+        const delta = e.deltaY;
+        if (delta === 0) return;
+        const currentIndex = selectEl.selectedIndex;
+        const newIndex = delta > 0 
+          ? Math.min(selectEl.options.length - 1, currentIndex + 1)
+          : Math.max(0, currentIndex - 1);
+        
+        if (newIndex !== currentIndex) {
+          selectEl.selectedIndex = newIndex;
+          selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+          selectEl.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        return;
+      }
+
+      // 2. NUMBER INPUT INTERACTIVE WHEEL (Increment/Decrement on hover scroll)
+      const inputEl = (target.tagName === 'INPUT' && (target as HTMLInputElement).type === 'number')
+        ? (target as HTMLInputElement)
+        : target.closest('input[type="number"]') as HTMLInputElement | null;
+
+      if (inputEl && !inputEl.disabled && !inputEl.readOnly) {
+        e.preventDefault();
+        const delta = e.deltaY;
+        if (delta === 0) return;
+
+        const step = parseFloat(inputEl.step) || 1;
+        const min = inputEl.min !== '' ? parseFloat(inputEl.min) : -Infinity;
+        const max = inputEl.max !== '' ? parseFloat(inputEl.max) : Infinity;
+        const currentVal = parseFloat(inputEl.value) || 0;
+
+        const nextVal = delta < 0
+          ? Math.min(max, currentVal + step)
+          : Math.max(min, currentVal - step);
+
+        if (nextVal !== currentVal || inputEl.value === '') {
+          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+            window.HTMLInputElement.prototype,
+            'value'
+          )?.set;
+          if (nativeInputValueSetter) {
+            nativeInputValueSetter.call(inputEl, String(nextVal));
+          } else {
+            inputEl.value = String(nextVal);
+          }
+          inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+          inputEl.dispatchEvent(new Event('input', { bubbles: true }));
         }
       }
     };
 
-    window.addEventListener('wheel', handleGlobalWheel, { passive: true, capture: true });
+    window.addEventListener('wheel', handleGlobalWheel, { passive: false, capture: true });
     return () => window.removeEventListener('wheel', handleGlobalWheel, { capture: true });
   }, []);
 
