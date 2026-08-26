@@ -7,6 +7,12 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Penyesuaian Gaya Ikon Putih Murni & Eliminasi Kontainer Lingkaran Dialog Mode Offline (Versi v1.1.0.60b):
+  - 1. IKON PUTIH MURNI & TANPA LINGKARAN PENGHALANG:
+    * Seluruh ikon pada halaman dialog konfirmasi mode offline ([`LoginPage.tsx`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/components/views/LoginPage.tsx)) diubah menjadi **warna putih murni (`text-white`)**, baik ikon utama tanpa internet/wifi di bagian atas maupun ikon-ikon pada daftar informasi rincian izin (HardDrive, ShieldCheck, Zap).
+    * Pembungkus lingkaran (*circle wrapper / background*) pada ikon utama tanpa internet/wifi di bagian atas dihapus sepenuhnya, sehingga ikon berdiri sendiri secara bersih dan lapang tanpa kontainer lingkaran penghalang.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan tata letak dialog yang bersih, lapang, unboxed (tanpa kontainer card bertumpuk kaku), menggunakan pemisah garis tipis (*divider* `divide-y divide-white/10`), serta selaras dengan estetika minimalis *clean-flat*.
 - **[2026-08-27]**: Implementasi Fitur Mode Offline Lengkap (Halaman Login, Header, & Isolasi LocalStorage 100 MB) (Versi v1.1.0.59b):
   - 1. TOMBOL & DIALOG KONFIRMASI MODE OFFLINE DI HALAMAN LOGIN:
     * Pada halaman login ([`LoginPage.tsx`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/components/views/LoginPage.tsx)), ditambahkan sebuah *icon button* di pojok kanan bawah menggunakan ikon tidak ada internet / Wi-Fi disilang (`WifiOff`).

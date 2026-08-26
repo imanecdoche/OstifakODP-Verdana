@@ -158,10 +158,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         /* Dialog Konfirmasi Mode Offline Unboxed (Menyembunyikan Form Login & Logo) */
         <div className="relative z-20 w-full max-w-lg mx-auto my-auto p-6 sm:p-8 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-250 font-body">
           
-          {/* Ikon Wi-Fi Disilang Merah Terisolasi */}
-          <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mb-5 text-rose-400">
-            <WifiOff className="w-8 h-8" />
-          </div>
+          {/* Ikon Wi-Fi Disilang Putih Murni Berdiri Sendiri Tanpa Kontainer Lingkaran */}
+          <WifiOff className="w-12 h-12 text-white mb-5 stroke-[1.75]" />
 
           <h2 className="text-xl sm:text-2xl font-bold text-white font-headline tracking-tight">
             Konfirmasi Masuk Mode Offline
@@ -170,10 +168,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             Aplikasi akan berjalan dalam isolasi penuh dari jaringan internet. Semua data dialihkan ke penyimpanan lokal peramban perangkat.
           </p>
 
-          {/* Rincian Izin & Alokasi Penyimpanan 100 MB (Unboxed dengan Garis Pemisah Tipis) */}
+          {/* Rincian Izin & Alokasi Penyimpanan 100 MB (Unboxed dengan Ikon Putih Murni & Garis Pemisah Tipis) */}
           <div className="w-full my-6 divide-y divide-white/10 border-y border-white/10 text-left text-xs font-body">
             <div className="py-3 flex items-start gap-3">
-              <HardDrive className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <HardDrive className="w-4 h-4 text-white shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold text-white">Alokasi Penyimpanan Lokal: {OFFLINE_STORAGE_QUOTA_LABEL}</p>
                 <p className="text-white/50 text-[11px] mt-0.5">
@@ -183,7 +181,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             </div>
 
             <div className="py-3 flex items-start gap-3">
-              <ShieldCheck className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              <ShieldCheck className="w-4 h-4 text-white shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold text-white">Isolasi Total Jaringan (100% Offline)</p>
                 <p className="text-white/50 text-[11px] mt-0.5">
@@ -193,7 +191,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             </div>
 
             <div className="py-3 flex items-start gap-3">
-              <Zap className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <Zap className="w-4 h-4 text-white shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold text-white">Akses & Manajemen Berkas Penuh</p>
                 <p className="text-white/50 text-[11px] mt-0.5">
@@ -215,7 +213,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 <Loader2 className="w-4 h-4 animate-spin text-black" />
               ) : (
                 <>
-                  <WifiOff className="w-4 h-4 text-rose-600" />
+                  <WifiOff className="w-4 h-4 text-black" />
                   <span>SETUJUI & MASUK MODE OFFLINE</span>
                 </>
               )}
@@ -435,7 +433,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           title="Masuk Mode Offline (Isolasi Lokal 100 MB)"
           aria-label="Mode Offline"
         >
-          <WifiOff className="w-5 h-5 text-rose-400 group-hover:text-rose-300 transition-colors" />
+          <WifiOff className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
         </button>
       )}
 
