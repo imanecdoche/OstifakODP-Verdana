@@ -7,6 +7,12 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Pembaruan Format Satuan Nilai Metrik "N Juz, N Lbr, N Hal" pada Top Lists Dashboard (Versi v1.1.0.50b):
+  - 1. PEMBARUAN FORMAT NILAI METRIK:
+    * Mengganti label keterangan lama ("N Halaman Tercatat", "Mutabaah Aktif", "N Halaman Mutqin") pada 5 kartu matriks (Top 5 Hafalan Terbanyak, Top 5 Murojaah Terbanyak Bulan Ini, Top 5 Setoran Terbanyak Bulan Ini, Top 5 Ziyadah Terbanyak Bulan Kemarin, dan Top 5 Muroja'ah Terbanyak Bulan Kemarin) dengan format satuan baku: **"N Juz, N Lbr, N Hal"**.
+    * Angka kuantitas (**N**) pada setiap satuan dicetak tebal (**bold**) menggunakan font headline berbobot kuat untuk hierarki visual yang jelas dan konsisten.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan tampilan minimalis clean-flat tanpa kontainer card bertumpuk, divider tipis, dan responsif.
 - **[2026-08-27]**: Pembaruan Sistem Perhitungan Poin Prestasi (PP) Kamar, Asrama, Kelas & Rekonstruksi Total Metrik Dashboard (Versi v1.1.0.49b):
   - 1. PEMBARUAN LOGIKA POIN PRESTASI (KAMAR, ASRAMA, & KELAS):
     * **Kategori Kamar**: Setiap kamar memiliki 3 kategori prestasi (**Indah**, **Rapi**, **Bersih**), masing-masing rentang 0-100 PP. Total PP Kamar = Indah + Rapi + Bersih.

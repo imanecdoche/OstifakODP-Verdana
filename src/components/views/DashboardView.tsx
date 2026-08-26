@@ -19,6 +19,7 @@ import {
   renderProgramStatusIcon 
 } from './WorkProgramsView';
 import { getSeverityInfo } from '../../lib/severityUtils';
+import { parseHafalanToPages } from '../../data/quranSurahs';
 import { Clock, CheckCircle2 } from 'lucide-react';
 
 interface DashboardViewProps {
@@ -148,6 +149,26 @@ const parseHafalanDate = (dateStr: string): Date | null => {
   }
   const d = new Date(dateStr);
   return isNaN(d.getTime()) ? null : d;
+};
+
+// Helper komponen untuk render format baku "N Juz, N Lbr, N Hal" dengan angka bold tebal
+const RenderJuzLbrHal: React.FC<{ pages: number; className?: string }> = ({ 
+  pages, 
+  className = 'text-[11px] text-[#64748B] font-body' 
+}) => {
+  const safePages = Math.max(0, Math.round(pages));
+  const juz = Math.floor(safePages / 20);
+  const remPages = safePages % 20;
+  const lembar = Math.floor(remPages / 2);
+  const halaman = remPages % 2;
+
+  return (
+    <p className={className}>
+      <strong className="font-bold text-[#0F172A] font-headline">{juz}</strong> Juz,{' '}
+      <strong className="font-bold text-[#0F172A] font-headline">{lembar}</strong> Lbr,{' '}
+      <strong className="font-bold text-[#0F172A] font-headline">{halaman}</strong> Hal
+    </p>
+  );
 };
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -663,9 +684,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     <p className="text-xs font-bold text-[#0F172A] font-headline">
                       {s.hafalan}
                     </p>
-                    <p className="text-[11px] text-[#64748B] font-body">
-                      Mutabaah Aktif
-                    </p>
+                    <RenderJuzLbrHal pages={parseHafalanToPages(s.hafalan)} />
                   </div>
                 </div>
               ))
@@ -712,9 +731,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     <p className="text-xs font-bold text-[#059669] font-body">
                       {item.count} Kali Setoran
                     </p>
-                    <p className="text-[11px] text-[#64748B] font-body">
-                      {item.totalPages} Halaman Tercatat
-                    </p>
+                    <RenderJuzLbrHal pages={item.totalPages} />
                   </div>
                 </div>
               ))
@@ -756,9 +773,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     <p className="text-xs font-bold text-[#059669] font-body">
                       {item.count} Sesi Murojaah
                     </p>
-                    <p className="text-[11px] text-[#64748B] font-body">
-                      {item.totalPages} Halaman Mutqin
-                    </p>
+                    <RenderJuzLbrHal pages={item.totalPages} />
                   </div>
                 </div>
               ))
@@ -805,9 +820,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     <p className="text-xs font-bold text-[#059669] font-body">
                       {item.count} Kali Setoran
                     </p>
-                    <p className="text-[11px] text-[#64748B] font-body">
-                      {item.totalPages} Halaman Tercatat
-                    </p>
+                    <RenderJuzLbrHal pages={item.totalPages} />
                   </div>
                 </div>
               ))
@@ -849,9 +862,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     <p className="text-xs font-bold text-[#059669] font-body">
                       {item.count} Sesi Murojaah
                     </p>
-                    <p className="text-[11px] text-[#64748B] font-body">
-                      {item.totalPages} Halaman Mutqin
-                    </p>
+                    <RenderJuzLbrHal pages={item.totalPages} />
                   </div>
                 </div>
               ))
