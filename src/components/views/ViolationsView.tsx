@@ -625,7 +625,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
                     {/* 5. Kolom Poin */}
                     <td className="p-3.5 w-24 min-w-[70px] max-w-[80px] font-bold text-[#EF4444] whitespace-nowrap align-middle font-mono">
                       <div className="flex items-center gap-1">
-                        <span>+{v.points}</span>
+                        <span>{v.points}</span>
                         <PKIcon className="w-3.5 h-3.5" />
                       </div>
                     </td>
@@ -927,7 +927,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
                 <p className="flex items-center gap-1">
                   <span>Bobot Poin:</span>
                   <strong className="text-rose-600 inline-flex items-center gap-1">
-                    <span>+{deletingViolation.points}</span>
+                    <span>{deletingViolation.points}</span>
                     <PKIcon className="w-3.5 h-3.5" />
                   </strong>
                 </p>

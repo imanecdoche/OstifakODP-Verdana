@@ -2274,14 +2274,15 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                         Akumulasi Poin Prestasi (PP)
                       </p>
-                      <p className="text-2xl font-bold text-[#059669] mt-0.5 font-headline">
-                        +{currentStudent.poinPrestasi || (currentStudent.achievementsHistory || []).reduce((acc, a) => acc + (a.points || 10), 0)} <span className="text-xs font-semibold text-slate-500 font-body">PP</span>
+                      <p className="text-2xl font-bold text-[#059669] mt-0.5 font-headline inline-flex items-center gap-1.5">
+                        <span>+{currentStudent.poinPrestasi || (currentStudent.achievementsHistory || []).filter((a: any) => (a.points !== undefined ? a.points : 10) > 0).reduce((acc, a) => acc + (a.points || 10), 0)}</span>
+                        <PPIcon className="w-5 h-5" />
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Penghargaan</p>
                       <p className="text-xs font-bold text-[#0F172A] mt-0.5 font-headline">
-                        {(currentStudent.achievementsHistory || (currentStudent as any).achievementHistory || []).length} Rekam Terbit
+                        {(currentStudent.achievementsHistory || (currentStudent as any).achievementHistory || []).filter((a: any) => (a.points !== undefined ? a.points : 10) > 0).length} Rekam Terbit
                       </p>
                     </div>
                   </div>
@@ -2291,7 +2292,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                       DAFTAR PENGHARGAAN & PRESTASI SANTRI
                     </h4>
                     {(() => {
-                      const achList = currentStudent.achievementsHistory || (currentStudent as any).achievementHistory || [];
+                      const achList = (currentStudent.achievementsHistory || (currentStudent as any).achievementHistory || []).filter((a: any) => (a.points !== undefined ? a.points : 10) > 0);
                       return achList.length > 0 ? (
                         <div className="space-y-2">
                           {achList.map((a: any) => (

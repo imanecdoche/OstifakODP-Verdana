@@ -7,6 +7,44 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Penyesuaian Judul & Format Nilai Leaderboard Prestasi (Versi v1.1.0.58b):
+  - 1. PENYESUAIAN JUDUL LEADERBOARD:
+    * Pada halaman **'Rekam Jejak Prestasi & Poin Penghargaan'** ([`AchievementsView.tsx`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/components/views/AchievementsView.tsx)), judul section *"Top 5 Santri Akumulasi Poin Prestasi (PP)"* diubah menjadi *"Top 5 Santri Akumulasi Poin Prestasi"*.
+  - 2. FORMAT NILAI +N PP PADA KARTU:
+    * Format nilai poin prestasi pada setiap kartu leaderboard santri ditambahkan tanda tambah `+` sehingga menjadi `+N PP` (menggunakan angka tebal berdampingan dengan ikon `<PPIcon />`).
+  - 3. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan kebersihan hierarki tipografi clean-flat dan keselarasan visual ikon SVG dinamis.
+- **[2026-08-27]**: Perbaikan Bug Teks 'undefined' pada Right Panel ODP (Versi v1.1.0.57b):
+  - 1. ELIMINASI BUG 'UNDEFINED' DAN FALLBACK ROBUST:
+    * Memperbaiki pemanggilan properti nama santri pada feed aktivitas Right Panel ([`RightPanel.tsx`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/components/layout/RightPanel.tsx)) dari `s.nama` menjadi `s.studentName || (s as any).nama || 'Santri'`, mencegah teks `undefined meraih ...` atau `undefined setor ...`.
+    * Memastikan seluruh properti dinamis (nama surah, kategori prestasi, prioritas instruksi, progres program kerja, dan nilai kamar) memiliki proteksi null-safety dan fallback default string yang aman.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan kebersihan rendering teks riil tanpa glitch nilai null/undefined di seluruh modul.
+- **[2026-08-27]**: Input Field Nama Santri Form Catat Prestasi Baru Menjadi Searchable Combobox (Versi v1.1.0.56b):
+  - 1. SEARCHABLE COMBOBOX SANTRI (NAMA, KAMAR, NIS, KELAS):
+    * Pada modal form **'Catat Rekam Jejak Prestasi Baru'** ([`AchievementsView.tsx`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/components/views/AchievementsView.tsx)), input field nama santri diubah dari `<select>` biasa menjadi **Searchable Combobox**.
+    * Pencarian mendukung multi-kriteria: **Nama Santri**, **Kamar**, **NIS**, dan **Kelas**.
+    * Hasil pencarian menampilkan nama lengkap, NIS, kelas, dan kamar santri secara jelas dengan scrollable overlay popover, serta mendukung penutupan klik di luar (*outside click*) dan shortcut tombol Escape/Enter.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Desain clean-flat, tanpa ikon dekoratif berlebih, divider tipis, dan responsif di seluler maupun desktop.
+- **[2026-08-27]**: Larangan Menampilkan Entitas dengan Nilai PP = 0 dalam Daftar Prestasi Manapun (Versi v1.1.0.55b):
+  - 1. FILTERING MUTLAK PP > 0 PADA SELURUH DAFTAR PRESTASI:
+    * Seluruh entitas (santri, kamar, asrama, penghargaan, atau entitas lainnya) yang memiliki nilai **PP (Poin Prestasi) = 0** dilarang keras untuk dimunculkan pada daftar/tabel/leaderboard/peringkat prestasi manapun di seluruh aplikasi.
+    * **Leaderboard & Direktori Prestasi (`AchievementsView`)**: Top 5 Santri Akumulasi PP dan Tabel Rekam Jejak Prestasi hanya menampilkan santri dan catatan yang memiliki `PP > 0`. Entitas atau catatan dengan 0 PP otomatis terfilter keluar.
+    * **Top 5 Santri Teladan & Top 5 Kamar Terbaik (`DashboardView`)**: Santri dengan akumulasi 0 PP atau kamar dengan total nilai 0 PP tidak akan dirender dalam daftar Top Prestasi Dashboard.
+    * **Right Panel (`RightPanel`)**: Top Kamar Terbaik dan Activity Feed Prestasi hanya menampilkan kamar dan prestasi dengan `PP > 0`.
+    * **Tab Prestasi Profil Santri (`StudentDetailModal`)**: Daftar riwayat penghargaan hanya menampilkan entitas dengan bobot `PP > 0`.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan tampilan clean-flat, divider garis tipis, bebas dari kartu kosong atau data bernilai 0 PP yang tidak relevan.
+- **[2026-08-27]**: Integrasi Data Riil Database pada Right Panel 'Info Panel ODP' (Versi v1.1.0.54b):
+  - 1. SINKRONISASI 100% DATA RIIL DATABASE:
+    * Seluruh data yang ditampilkan pada panel samping kanan (**Info Panel ODP**) bersumber langsung secara real-time dari database Firestore dan bukan data dummy/demo yang hardcoded.
+    * **AI ODP Assistant**: Ringkasan eksekutif dan status kedisiplinan dihitung secara dinamis dari data agregat santri, kasus pelanggaran aktif, capaian prestasi, serta riwayat mutaba'ah tahfizh riil di database.
+    * **Instruksi Mudir**: Terhubung langsung secara real-time dengan listener koleksi Firestore `directives` (`subscribeToDirectives`), menampilkan instruksi aktif dengan prioritas, tanggal terbit, dan target divisi.
+    * **Top Kamar Terbaik / Bersih**: Dihitung dari koleksi data master kamar riil (`rooms`) berdasarkan akumulasi nilai Indah, Rapi, Bersih dengan ikon PP (`<PPIcon />`).
+    * **Catatan Aktivitas**: Menampilkan feed riwayat aktivitas riil terbaru yang diagregasikan secara kronologis dari database (kasus pelanggaran baru, perolehan prestasi santri, setoran hafalan mutaba'ah, instruksi mudir, dan program kerja divisi).
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Desain clean-flat, divider garis tipis (`border-b border-[#E2E8F0]`), bebas dari container box bertumpuk, penggantian teks satuan PP/PK dengan ikon SVG (`<PPIcon />`, `<PKIcon />`), dan responsif.
 - **[2026-08-27]**: Penggantian Teks Satuan "PP" dan "PK" dengan Ikon SVG Asli (pp.svg & pk.svg) (Versi v1.1.0.53b):
   - 1. PENGGANTIAN SIMBOL PP & PK DENGAN FILE SVG:
     * Mengganti seluruh teks/string satuan "PP" (Poin Prestasi) di kartu ringkasan, tabel, profil santri, dan laporan dengan file ikon SVG **'pp.svg'** (komponen `<PPIcon />`).

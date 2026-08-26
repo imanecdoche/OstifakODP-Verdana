@@ -216,7 +216,7 @@ export function calculateMonthlyAwards(
     });
   });
 
-  return awards;
+  return awards.filter(award => award.points > 0);
 }
 
 /**

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { mockNotifications } from './data/mockData';
 import { UserProfile, DivisionId, ViolationRecord, WorkProgram } from './types';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
@@ -657,7 +656,7 @@ export default function App() {
           onOpenNewModal={() => setIsNewViolationModalOpen(true)}
           isRightPanelOpen={isRightPanelOpen}
           onToggleRightPanel={() => setIsRightPanelOpen(!isRightPanelOpen)}
-          unreadCount={mockNotifications.length}
+          unreadCount={violations.filter(v => v.status === 'proses' || v.status === 'pending').length}
         />
 
         {/* Content Canvas */}
@@ -752,7 +751,7 @@ export default function App() {
         </main>
       </div>
 
-      {/* Slide-over Overlay Info Panel with Framer Motion */}
+      {/* Slide-over Overlay Info Panel with Real Database Data */}
       <RightPanel
         isOpen={isRightPanelOpen}
         onClose={() => setIsRightPanelOpen(false)}
@@ -760,6 +759,9 @@ export default function App() {
           setActiveView('directives');
           setSelectedDivision(null);
         }}
+        students={students}
+        violations={mergedViolations}
+        workPrograms={workPrograms}
         rooms={rooms}
       />
 

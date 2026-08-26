@@ -1595,7 +1595,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                   <div className="px-2">
                     <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Prestasi</p>
                     <p className="text-sm font-bold text-[#059669] mt-0.5 truncate font-headline font-mono flex items-center gap-1">
-                      <span>+{getStudentPP(st)}</span>
+                      <span>{getStudentPP(st)}</span>
                       <PPIcon className="w-3.5 h-3.5" />
                     </p>
                   </div>
@@ -2247,7 +2247,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                                 <div className="flex items-center gap-2">
                                   <span className="font-bold text-[#0F172A]">{vio.title}</span>
                                   <span className="text-[10px] font-bold text-[#EF4444] bg-[#FEF2F2] px-2 py-0.5 rounded border border-[#FEE2E2] inline-flex items-center gap-1">
-                                    <span>+{vio.points}</span>
+                                    <span>{vio.points}</span>
                                     <PKIcon className="w-2.5 h-2.5" />
                                   </span>
                                 </div>

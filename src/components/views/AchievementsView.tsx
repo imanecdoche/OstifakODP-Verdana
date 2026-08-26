@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   SantriRecord, 
   StudentAchievementEntry, 
@@ -20,6 +20,7 @@ import { MoreHorizontal, Pencil, Trash2, X, AlertTriangle } from 'lucide-react';
 import { useIsMobile } from '../../lib/useIsMobile';
 import { ActionSheet } from '../ui/ActionSheet';
 import { PPIcon } from '../ui/PointIcons';
+import { ScrollArea } from '../ui/ScrollArea';
 
 const RunningText: React.FC<{
   text: string;
@@ -121,6 +122,9 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
 
   // Form State for Manual New Entry
   const [selectedStudentId, setSelectedStudentId] = useState<string>('');
+  const [studentComboQuery, setStudentComboQuery] = useState<string>('');
+  const [isStudentComboOpen, setIsStudentComboOpen] = useState<boolean>(false);
+  const studentComboRef = useRef<HTMLDivElement>(null);
   const [newTitle, setNewTitle] = useState<string>('');
   const [newCategory, setNewCategory] = useState<string>('Santri Teladan');
   const [newRank, setNewRank] = useState<string>('Juara 1');
@@ -129,6 +133,33 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
   const [newOrganizer, setNewOrganizer] = useState<string>('Pesantren Fajrul Karim');
   const [newDescription, setNewDescription] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  // Close student combobox on outside click
+  useEffect(() => {
+    if (!isStudentComboOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (studentComboRef.current && !studentComboRef.current.contains(e.target as Node)) {
+        setIsStudentComboOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [isStudentComboOpen]);
+
+  const filteredStudentsForNewAchievement = useMemo(() => {
+    const term = studentComboQuery.trim().toLowerCase();
+    if (!term) return students || [];
+    return (students || []).filter((s) => 
+      (s.studentName && s.studentName.toLowerCase().includes(term)) ||
+      (s.kamar && s.kamar.toLowerCase().includes(term)) ||
+      (s.nis && s.nis.toLowerCase().includes(term)) ||
+      (s.kelas && s.kelas.toLowerCase().includes(term))
+    );
+  }, [students, studentComboQuery]);
+
+  const selectedStudentObj = useMemo(() => {
+    return (students || []).find(s => s.id === selectedStudentId);
+  }, [students, selectedStudentId]);
 
   // Form State for Edit Achievement Modal
   const [editingAchievement, setEditingAchievement] = useState<FlattenedAchievement | null>(null);
@@ -170,22 +201,25 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
     students.forEach(s => {
       const achs = s.achievementsHistory || [];
       achs.forEach(a => {
-        list.push({
-          id: `${s.id}-${a.id}`,
-          achievementId: a.id,
-          studentId: s.id,
-          studentName: s.studentName,
-          nis: s.nis || '-',
-          kamar: s.kamar || '-',
-          kelas: s.kelas || '-',
-          title: a.title,
-          category: a.category || 'Penghargaan',
-          rank: a.rank || '-',
-          organizer: a.organizer || 'Pesantren',
-          points: a.points !== undefined ? a.points : 10,
-          date: a.date || '-',
-          description: a.description,
-        });
+        const pts = a.points !== undefined ? a.points : 10;
+        if (pts > 0) {
+          list.push({
+            id: `${s.id}-${a.id}`,
+            achievementId: a.id,
+            studentId: s.id,
+            studentName: s.studentName,
+            nis: s.nis || '-',
+            kamar: s.kamar || '-',
+            kelas: s.kelas || '-',
+            title: a.title,
+            category: a.category || 'Penghargaan',
+            rank: a.rank || '-',
+            organizer: a.organizer || 'Pesantren',
+            points: pts,
+            date: a.date || '-',
+            description: a.description,
+          });
+        }
       });
     });
 
@@ -200,21 +234,22 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
     return set.size;
   }, [allAchievements]);
 
-  // 3. Top 5 Santri by Total PP
+  // 3. Top 5 Santri by Total PP (Hanya yang memiliki PP > 0)
   const topPPSantri = useMemo(() => {
     if (!students) return [];
     const studentPPMap = students.map(s => {
-      const achs = s.achievementsHistory || [];
-      const calculatedPP = achs.reduce((acc, a) => acc + (a.points || 10), 0);
+      const achs = (s.achievementsHistory || []).filter(a => (a.points !== undefined ? a.points : 10) > 0);
+      const calculatedPP = achs.reduce((acc, a) => acc + (a.points !== undefined ? a.points : 10), 0);
+      const totalPP = s.poinPrestasi !== undefined ? s.poinPrestasi : calculatedPP;
       return {
         student: s,
-        totalPP: s.poinPrestasi !== undefined ? s.poinPrestasi : calculatedPP,
+        totalPP,
         achCount: achs.length,
       };
     });
 
     return studentPPMap
-      .filter(item => item.totalPP > 0 || item.achCount > 0)
+      .filter(item => item.totalPP > 0)
       .sort((a, b) => b.totalPP - a.totalPP || b.achCount - a.achCount)
       .slice(0, 5);
   }, [students]);
@@ -501,6 +536,9 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
       });
 
       // Reset form
+      setSelectedStudentId('');
+      setStudentComboQuery('');
+      setIsStudentComboOpen(false);
       setNewTitle('');
       setNewRank('Juara 1');
       setNewPoints(20);
@@ -521,7 +559,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#E2E8F0]">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] font-headline tracking-tight">
-            Rekam Jejak Prestasi & Poin Penghargaan (PP)
+            Rekam Jejak Prestasi & Poin Penghargaan
           </h1>
           <p className="text-xs text-[#64748B] mt-1 font-body">
             Direktori rekam jejak prestasi, penghargaan berkala otomatis (21:00 WIB), dan akumulasi Poin Prestasi (PP) santri.
@@ -541,7 +579,12 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
           <Button
             variant="primary"
             size="sm"
-            onClick={() => setIsNewModalOpen(true)}
+            onClick={() => {
+              setSelectedStudentId('');
+              setStudentComboQuery('');
+              setIsStudentComboOpen(false);
+              setIsNewModalOpen(true);
+            }}
             className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
           >
             + Catat Prestasi Baru
@@ -571,7 +614,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
           </p>
           <div className="flex items-baseline gap-1.5 mt-0.5">
             <span className="text-xl sm:text-2xl font-bold text-[#059669] tracking-tight font-headline">
-              +{totalPP}
+              {totalPP}
             </span>
             <span className="text-xs text-[#64748B] font-medium font-body">PP</span>
           </div>
@@ -604,12 +647,12 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
         </div>
       </div>
 
-      {/* 3. Leaderboard Top 5 Akumulasi Poin Prestasi (PP) */}
+      {/* 3. Leaderboard Top 5 Akumulasi Poin Prestasi */}
       <div className="space-y-3 pt-2">
         <div className="flex items-center justify-between pb-2 border-b border-[#E2E8F0]">
           <div>
             <h2 className="text-base font-bold text-[#0F172A] font-headline">
-              Top 5 Santri Akumulasi Poin Prestasi (PP)
+              Top 5 Santri Akumulasi Poin Prestasi
             </h2>
             <p className="text-[11px] text-[#64748B]">Santri peraih akumulasi poin penghargaan tertinggi</p>
           </div>
@@ -854,23 +897,106 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
             </div>
 
             <form onSubmit={handleSubmitNewAchievement} className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0">
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
+              {/* Searchable Combobox Santri (Nama, Kamar, NIS, Kelas) */}
+              <div ref={studentComboRef} className="relative">
+                <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
                   Pilih Santri Penerima Prestasi *
                 </label>
-                <select
-                  value={selectedStudentId}
-                  onChange={(e) => setSelectedStudentId(e.target.value)}
-                  required
-                  className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none cursor-pointer"
-                >
-                  <option value="">-- Pilih Santri --</option>
-                  {students.map(s => (
-                    <option key={s.id} value={s.id}>
-                      {s.studentName} ({s.nis || '-'}) - Kamar {s.kamar}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    value={
+                      isStudentComboOpen 
+                        ? studentComboQuery 
+                        : (selectedStudentObj ? `${selectedStudentObj.studentName} (${selectedStudentObj.nis || '-'}) — ${selectedStudentObj.kelas || '-'} / ${selectedStudentObj.kamar || '-'}` : '')
+                    }
+                    onChange={(e) => {
+                      setStudentComboQuery(e.target.value);
+                      setIsStudentComboOpen(true);
+                    }}
+                    onFocus={() => {
+                      setStudentComboQuery('');
+                      setIsStudentComboOpen(true);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        e.stopPropagation();
+                        setIsStudentComboOpen(false);
+                      }
+                      if (e.key === 'Enter' && isStudentComboOpen && filteredStudentsForNewAchievement.length > 0) {
+                        e.preventDefault();
+                        const s = filteredStudentsForNewAchievement[0];
+                        setSelectedStudentId(s.id);
+                        setStudentComboQuery('');
+                        setIsStudentComboOpen(false);
+                      }
+                    }}
+                    placeholder="Ketik untuk mencari nama, kamar, NIS, atau kelas..."
+                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none transition-all cursor-pointer font-medium"
+                  />
+                  {selectedStudentId && !isStudentComboOpen && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedStudentId('');
+                        setStudentComboQuery('');
+                        setIsStudentComboOpen(true);
+                      }}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-200/50 cursor-pointer"
+                      title="Ganti Santri"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Floating Dropdown Results */}
+                {isStudentComboOpen && (
+                  <div className="absolute top-full left-0 mt-1.5 w-full z-50 bg-white border border-[#CBD5E1] rounded-xl shadow-2xl overflow-hidden max-h-60 animate-in fade-in zoom-in-95 font-body">
+                    <ScrollArea
+                      className="max-h-60"
+                      viewportClassName="p-1.5 space-y-1"
+                      topOffset="top-1"
+                      bottomOffset="bottom-1"
+                    >
+                      {filteredStudentsForNewAchievement.length === 0 ? (
+                        <div className="p-4 text-xs text-[#64748B] text-center">
+                          <p className="font-semibold text-[#0F172A]">Santri tidak ditemukan</p>
+                          <p className="text-[11px] text-[#94A3B8] mt-0.5">Cari berdasarkan kata kunci nama, kamar, NIS, atau kelas.</p>
+                        </div>
+                      ) : (
+                        filteredStudentsForNewAchievement.map((s) => (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedStudentId(s.id);
+                              setStudentComboQuery('');
+                              setIsStudentComboOpen(false);
+                            }}
+                            className={`w-full px-3.5 py-2.5 rounded-lg flex flex-col text-left transition-colors cursor-pointer hover:bg-slate-50 ${
+                              selectedStudentId === s.id ? 'bg-[#059669]/10 border border-[#059669]/30' : ''
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-[#0F172A] text-xs font-headline">{s.studentName}</span>
+                              {s.nis && s.nis !== '-' && (
+                                <span className="text-[10px] font-mono text-[#64748B]">NIS: {s.nis}</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 text-[11px] text-[#64748B] mt-0.5">
+                              <span>Kelas: <strong className="text-[#0F172A]">{s.kelas || '-'}</strong></span>
+                              <span>•</span>
+                              <span>Kamar: <strong className="text-[#0F172A]">{s.kamar || '-'}</strong></span>
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </ScrollArea>
+                  </div>
+                )}
               </div>
 
               <div>

@@ -211,15 +211,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     return `${avg.toFixed(1)} Juz`;
   }, [students]);
 
-  // 2. Baris 1 - Top 5 Santri Teladan (Poin pelanggaran 0 / terendah & PP tertinggi)
+  // 2. Baris 1 - Top 5 Santri Teladan (Hanya yang memiliki PP > 0 & Poin pelanggaran 0 / terendah)
   const topSantriTeladan = useMemo(() => {
     if (!students || students.length === 0) return [];
     return [...students]
+      .filter(s => {
+        const pp = s.poinPrestasi !== undefined ? s.poinPrestasi : (s.achievementsHistory || []).reduce((acc, a) => acc + (a.points !== undefined ? a.points : 10), 0);
+        return pp > 0;
+      })
       .sort((a, b) => {
-        const pDiff = (a.poinPelanggaran || 0) - (b.poinPelanggaran || 0);
-        if (pDiff !== 0) return pDiff;
         const ppDiff = (b.poinPrestasi || 0) - (a.poinPrestasi || 0);
         if (ppDiff !== 0) return ppDiff;
+        const pDiff = (a.poinPelanggaran || 0) - (b.poinPelanggaran || 0);
+        if (pDiff !== 0) return pDiff;
         const hafalanDiff = parseHafalanNumber(b.hafalan) - parseHafalanNumber(a.hafalan);
         if (hafalanDiff !== 0) return hafalanDiff;
         return (b.achievementsHistory?.length || 0) - (a.achievementsHistory?.length || 0);
@@ -227,7 +231,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       .slice(0, 5);
   }, [students]);
 
-  // 3. Baris 1 - Top 5 Kamar Terbaik (Total PP dari 3 Kategori: Indah + Rapi + Bersih)
+  // 3. Baris 1 - Top 5 Kamar Terbaik (Total PP > 0 dari 3 Kategori: Indah + Rapi + Bersih)
   const topKamarTerbaik = useMemo(() => {
     const roomList = (rooms && rooms.length > 0) ? rooms : ALL_OFFICIAL_ROOMS;
     const list = roomList.map(r => {
@@ -258,6 +262,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     });
 
     return list
+      .filter(item => item.totalPP > 0)
       .sort((a, b) => b.totalPP - a.totalPP)
       .slice(0, 5);
   }, [rooms, students]);
@@ -525,7 +530,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
           <div className="divide-y divide-[#E2E8F0]">
             {topSantriTeladan.length === 0 ? (
-              <p className="text-xs text-[#64748B] py-4">Belum ada data santri terdaftar.</p>
+              <p className="text-xs text-[#64748B] py-4">Belum ada santri dengan akumulasi Poin Prestasi (PP).</p>
             ) : (
               topSantriTeladan.map((s, idx) => (
                 <div key={s.id} className="py-3.5 flex items-center justify-between gap-4">
@@ -544,7 +549,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-xs font-bold text-[#059669] font-body flex items-center justify-end gap-1">
-                      <span>+{s.poinPrestasi || 0}</span>
+                      <span>{s.poinPrestasi || 0}</span>
                       <PPIcon className="w-3.5 h-3.5" />
                     </p>
                     <p className="text-[11px] text-[#64748B] font-body flex items-center justify-end gap-1">
@@ -574,7 +579,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
           <div className="divide-y divide-[#E2E8F0]">
             {topKamarTerbaik.length === 0 ? (
-              <p className="text-xs text-[#64748B] py-4">Belum ada data kamar terdaftar.</p>
+              <p className="text-xs text-[#64748B] py-4">Belum ada kamar dengan akumulasi Poin Prestasi (PP).</p>
             ) : (
               topKamarTerbaik.map((r, idx) => (
                 <div key={r.id || r.roomName} className="py-3.5 flex items-center justify-between gap-4">
@@ -948,7 +953,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       {/* 4. Poin */}
                       <td className="p-3.5 w-20 min-w-[60px] max-w-[70px] font-bold text-[#EF4444] whitespace-nowrap align-middle font-mono">
                         <div className="flex items-center gap-1">
-                          <span>+{v.points}</span>
+                          <span>{v.points}</span>
                           <PKIcon className="w-3.5 h-3.5" />
                         </div>
                       </td>
