@@ -14,7 +14,7 @@ import {
 } from '../../lib/achievementAutomationService';
 import { PillTabs } from '../ui/PillTabs';
 import { Button } from '../ui/Button';
-import { gooeyToast } from 'goey-toast';
+import { gooeyToast } from '../../lib/toast';
 import { recordSessionAction } from '../../lib/sessionLogService';
 import { MoreHorizontal, Pencil, Trash2, X, AlertTriangle } from 'lucide-react';
 import { useIsMobile } from '../../lib/useIsMobile';

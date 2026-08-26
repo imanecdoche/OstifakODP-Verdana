@@ -1,6 +1,6 @@
 import { SantriRecord, StudentAchievementEntry, updateSantriRecord } from './firestoreService';
 import { recordSessionAction } from './sessionLogService';
-import { gooeyToast } from 'goey-toast';
+import { gooeyToast } from './toast';
 
 export interface PPAwardResult {
   studentId: string;

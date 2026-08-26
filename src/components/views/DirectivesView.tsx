@@ -3,7 +3,7 @@ import { ScrollText, Plus, Send, X } from 'lucide-react';
 import { MudirDirective } from '../../types';
 import { Button } from '../ui/Button';
 import { subscribeToDirectives, addDirectiveRecord } from '../../lib/firestoreService';
-import { gooeyToast } from 'goey-toast';
+import { gooeyToast } from '../../lib/toast';
 
 const RunningText: React.FC<{
   text: string;

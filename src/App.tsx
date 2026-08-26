@@ -41,7 +41,7 @@ import {
   getDeletedViolationIds,
   logoutUser
 } from './lib/firestoreService';
-import { GooeyToaster, gooeyToast } from 'goey-toast';
+import { GooeyToaster, gooeyToast } from './lib/toast';
 import 'goey-toast/styles.css';
 import { 
   recordLoginSession, 

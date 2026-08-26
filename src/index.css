@@ -162,10 +162,20 @@ html.lenis, html.lenis body {
   }
 }
 
-/* Gooey Toast Styling & Customization */
+/* Gooey Toast Explicit Visible Border & Styling */
 .gooey-blobSvg path {
   stroke: #E0E0E0 !important;
   stroke-width: 1.5px !important;
+  paint-order: stroke fill !important;
+}
+
+.gooey-blobSvg {
+  overflow: visible !important;
+  filter: drop-shadow(0 4px 12px rgba(15, 23, 42, 0.08)) drop-shadow(0 1px 4px rgba(15, 23, 42, 0.04)) !important;
+}
+
+.gooey-closeButton {
+  border: 1.5px solid #E0E0E0 !important;
 }
 
 .gooey-title {

@@ -54,7 +54,7 @@ import {
   parseHafalanToPages,
   calculateStudentZiyadahPages
 } from '../../data/quranSurahs';
-import { gooeyToast } from 'goey-toast';
+import { gooeyToast } from '../../lib/toast';
 import { ScrollArea } from '../ui/ScrollArea';
 import { Button } from '../ui/Button';
 import { useLenisModalLock } from '../../lib/lenis';

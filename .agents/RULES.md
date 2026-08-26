@@ -7,6 +7,12 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Pemberian Border Terlihat (#E0E0E0, 1.5px) pada Seluruh Komponen GooeyToast (Versi v1.1.0.64b):
+  - 1. VISIBILITAS BORDER GOOEYTOAST:
+    * Dibuat modul pembungkus terpusat [`src/lib/toast.ts`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/lib/toast.ts) yang secara otomatis menyuntikkan properti `borderColor: '#E0E0E0'`, `borderWidth: 1.5`, `bounce: 0.05`, dan `showTimestamp: false` ke seluruh panggilan `gooeyToast` (success, error, warning, info, promise, default).
+    * Ditambahkan aturan CSS eksplisit pada `.gooey-blobSvg path` (`stroke: #E0E0E0 !important; stroke-width: 1.5px !important; paint-order: stroke fill !important;`) dan `.gooey-closeButton` di [`index.css`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/index.css) sehingga garis pembatas selalu tampak tegas dan kontras di latar belakang apa pun.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan kebersihan estetika *clean-flat* dengan batas garis tipis yang presisi.
 - **[2026-08-27]**: Perbaikan Bug Posisi & Transformasi GooeyToast saat Muncul (Versi v1.1.0.63b):
   - 1. PERBAIKAN BUG POSISI & TRANSFORM:
     * Menghapus seluruh override CSS `transform: scale(...)` dan `transform-origin` pada `.gooey-wrapper` dan `[data-sonner-toast]` di [`index.css`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/index.css) yang sebelumnya merusak perhitungan rotasi cermin horizontal `scaleX(-1)` internal goey-toast untuk alignment kanan.

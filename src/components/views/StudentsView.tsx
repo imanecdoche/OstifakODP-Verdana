@@ -58,7 +58,7 @@ import {
 } from '../../lib/firestoreService';
 import { useLenisModalLock } from '../../lib/lenis';
 import { useIsMobile } from '../../lib/useIsMobile';
-import { gooeyToast } from 'goey-toast';
+import { gooeyToast } from '../../lib/toast';
 
 interface StudentsViewProps {
   dormitories?: Dormitory[];

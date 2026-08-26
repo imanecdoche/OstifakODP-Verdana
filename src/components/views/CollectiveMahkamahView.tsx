@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { SantriRecord, recordCollectiveMahkamahSession } from '../../lib/firestoreService';
 import { getSeverityInfo, sliderFillPercent } from '../../lib/severityUtils';
 import { RollingNumber } from '../modals/NewViolationModal';
-import { gooeyToast } from 'goey-toast';
+import { gooeyToast } from '../../lib/toast';
 import { PKIcon } from '../ui/PointIcons';
 
 interface CollectiveMahkamahViewProps {

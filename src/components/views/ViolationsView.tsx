@@ -25,7 +25,7 @@ import {
   violationIdentity,
   SantriRecord
 } from '../../lib/firestoreService';
-import { gooeyToast } from 'goey-toast';
+import { gooeyToast } from '../../lib/toast';
 import { useLenisModalLock } from '../../lib/lenis';
 import { RollingNumber } from '../modals/NewViolationModal';
 import { getSeverityInfo, sliderFillPercent } from '../../lib/severityUtils';
