@@ -7,6 +7,15 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Fitur Edit & Hapus Rekam Prestasi serta Pelanggaran dengan Menu Kontekstual & Sinkronisasi Poin (Versi v1.1.0.35b):
+  - 1. KOLOM AKSI & MENU KONTEKSTUAL (TITIK TIGA & KLIK KANAN):
+    * Menambahkan kolom resmi **AKSI** pada tabel rekam prestasi (`AchievementsView.tsx`) dan tabel rekam pelanggaran (`ViolationsView.tsx`).
+    * Menyediakan tombol interaktif titik tiga (`MoreHorizontal`) di setiap baris serta listener klik kanan (`onContextMenu`) yang memicu popover menu opsi kontekstual (Edit dan Hapus) secara presisi dengan boundary guard layar.
+  - 2. MODAL FORM EDIT & LOGIKA HAPUS DATA SINKRON:
+    * Modal edit data prestasi terhubung langsung dengan pre-fill data awal yang lengkap (judul, kategori, peringkat, bobot PP, tanggal, penyelenggara, keterangan) dan otomatis mengupdate akumulasi poin PP santri di database.
+    * Konfirmasi hapus data prestasi dan pelanggaran terhubung langsung secara sinkron dengan database dan otomatis mengalkulasi ulang total poin (**PP** dan **PK**) santri.
+  - 3. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan estetika clean-flat murni berbasis divider tipis, anti-text-wrapping (marquee tickers), dan responsif di perangkat mobile.
 - **[2026-08-26]**: Penyesuaian Logika Otomasi PP: Pengecualian Santri 30 Juz dari Kategori Hafalan Terbanyak (Versi v1.1.0.34b):
   - 1. PENGECUALIAN UNTUK SANTRI 30 JUZ:
     * Memperbarui fungsi evaluasi predikat bulanan (`calculateMonthlyAwards` pada `achievementAutomationService.ts`) agar santri yang sudah tuntas 30 Juz (Para Huffazh) dikecualikan dari perolehan otomatis poin PP pada kategori "Hafalan Terbanyak" (`juz > 0 && juz < 30`).
