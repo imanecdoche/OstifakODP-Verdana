@@ -160,12 +160,13 @@ export function getOfflineStudents(): SantriRecord[] {
   } catch (e) {
     console.error('Error reading offline students:', e);
   }
-  return mockStudents as unknown as SantriRecord[];
+  return [];
 }
 
 export function saveOfflineStudents(students: SantriRecord[]): void {
   try {
     localStorage.setItem(OFFLINE_KEYS.SANTRI, JSON.stringify(students));
+    window.dispatchEvent(new CustomEvent('ostifak-santri-changed', { detail: { isOffline: true } }));
     window.dispatchEvent(new CustomEvent('ostifak_santri_changed', { detail: { isOffline: true } }));
   } catch (e) {
     console.error('Error saving offline students:', e);
@@ -185,6 +186,7 @@ export function getOfflineViolations(): ViolationRecord[] {
 export function saveOfflineViolations(violations: ViolationRecord[]): void {
   try {
     localStorage.setItem(OFFLINE_KEYS.VIOLATIONS, JSON.stringify(violations));
+    window.dispatchEvent(new CustomEvent('ostifak-violations-changed', { detail: { isOffline: true } }));
     window.dispatchEvent(new CustomEvent('ostifak_violations_changed', { detail: { isOffline: true } }));
   } catch (e) {
     console.error('Error saving offline violations:', e);
@@ -204,6 +206,7 @@ export function getOfflinePrograms(): WorkProgram[] {
 export function saveOfflinePrograms(programs: WorkProgram[]): void {
   try {
     localStorage.setItem(OFFLINE_KEYS.PROGRAMS, JSON.stringify(programs));
+    window.dispatchEvent(new CustomEvent('ostifak-programs-changed', { detail: { isOffline: true } }));
     window.dispatchEvent(new CustomEvent('ostifak_programs_changed', { detail: { isOffline: true } }));
   } catch (e) {
     console.error('Error saving offline programs:', e);
@@ -217,12 +220,13 @@ export function getOfflineDirectives(): MudirDirective[] {
   } catch (e) {
     console.error('Error reading offline directives:', e);
   }
-  return mockDirectives as unknown as MudirDirective[];
+  return mockMudirDirectives as unknown as MudirDirective[];
 }
 
 export function saveOfflineDirectives(directives: MudirDirective[]): void {
   try {
     localStorage.setItem(OFFLINE_KEYS.DIRECTIVES, JSON.stringify(directives));
+    window.dispatchEvent(new CustomEvent('ostifak-directives-changed', { detail: { isOffline: true } }));
     window.dispatchEvent(new CustomEvent('ostifak_directives_changed', { detail: { isOffline: true } }));
   } catch (e) {
     console.error('Error saving offline directives:', e);
@@ -253,6 +257,7 @@ export function saveOfflineDormitoriesAndRooms(dorms: Dormitory[], rooms: Dormit
   try {
     localStorage.setItem(OFFLINE_KEYS.DORMITORIES, JSON.stringify(dorms));
     localStorage.setItem(OFFLINE_KEYS.ROOMS, JSON.stringify(rooms));
+    window.dispatchEvent(new CustomEvent('ostifak-dorms-changed', { detail: { isOffline: true } }));
     window.dispatchEvent(new CustomEvent('ostifak_dorms_changed', { detail: { isOffline: true } }));
   } catch (e) {
     console.error('Error saving offline dorms/rooms:', e);
@@ -272,6 +277,7 @@ export function getOfflineClasses(): SchoolClass[] {
 export function saveOfflineClasses(classes: SchoolClass[]): void {
   try {
     localStorage.setItem(OFFLINE_KEYS.CLASSES, JSON.stringify(classes));
+    window.dispatchEvent(new CustomEvent('ostifak-classes-changed', { detail: { isOffline: true } }));
     window.dispatchEvent(new CustomEvent('ostifak_classes_changed', { detail: { isOffline: true } }));
   } catch (e) {
     console.error('Error saving offline classes:', e);

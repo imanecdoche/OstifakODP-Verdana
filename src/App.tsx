@@ -168,14 +168,35 @@ export default function App() {
   const [classes, setClasses] = useState<SchoolClass[]>(OFFICIAL_CLASSES);
 
   // Data Fetching & Sync Status (Global Bottom Loading Bar)
-  const [isDataFetching, setIsDataFetching] = useState<boolean>(true);
+  const [isDataFetching, setIsDataFetching] = useState<boolean>(() => !isOfflineModeActive());
   const [dataFetchMessage, setDataFetchMessage] = useState<string>('Memuat & menyinkronkan data database...');
 
-  // Subscribe to Live Collections
+  // Subscribe to Live Collections (Strictly isolated in Offline Mode)
   useEffect(() => {
     if (!isLoggedIn) {
       setIsDataFetching(false);
       return;
+    }
+
+    if (isOfflineMode) {
+      setIsDataFetching(false);
+      // In offline mode: immediate synchronous initialization without network loading bar
+      const unsubViolations = subscribeToPelanggaran((list) => setViolations(list));
+      const unsubProposals = subscribeToProposals((list) => setWorkPrograms(list));
+      const unsubSantri = subscribeToSantri((list) => setStudents(list));
+      const unsubClasses = subscribeToClasses((classList) => setClasses(classList));
+      const unsubDorms = subscribeToDormitories((dormList, roomList) => {
+        setDormitories(dormList);
+        setRooms(roomList);
+      });
+
+      return () => {
+        unsubViolations();
+        unsubProposals();
+        unsubSantri();
+        unsubDorms();
+        unsubClasses();
+      };
     }
 
     setIsDataFetching(true);
@@ -221,6 +242,7 @@ export default function App() {
     });
 
     const handleCustomDataLoading = (e: Event) => {
+      if (isOfflineMode) return;
       const detail = (e as CustomEvent).detail;
       if (detail) {
         setIsDataFetching(detail.isLoading ?? true);
@@ -238,7 +260,7 @@ export default function App() {
       unsubClasses();
       window.removeEventListener('ostifak-data-loading', handleCustomDataLoading);
     };
-  }, [isLoggedIn]);
+  }, [isLoggedIn, isOfflineMode]);
 
   // Global Wheel Scroll Interaction on Comboboxes, Select Dropdowns, & Number Inputs
   useEffect(() => {
@@ -815,9 +837,9 @@ export default function App() {
       {/* Global Gooey Toast Notifications */}
       <GooeyToaster position="top-center" duration={3500} closeButton />
 
-      {/* Global Data Fetching Loading Bar (Thin Overlay, Bright Green, Fast Spin) */}
+      {/* Global Data Fetching Loading Bar (Thin Overlay, Bright Green, Fast Spin - Disabled in Offline Mode) */}
       <AnimatePresence>
-        {isDataFetching && (
+        {!isOfflineMode && isDataFetching && (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}

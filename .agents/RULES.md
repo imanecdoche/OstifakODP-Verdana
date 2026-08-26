@@ -7,6 +7,16 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Pemutusan Total Koneksi/Sinkronisasi Cloud & Penghapusan Bar Hijau Sinkronisasi pada Mode Offline (Versi v1.1.0.61b):
+  - 1. PEMUTUSAN TOTAL KONEKSI & SINKRONISASI DATABASE CLOUD:
+    * Seluruh proses otomatis yang mendeteksi koneksi atau mencoba melakukan sinkronisasi/fetching ke database cloud dinonaktifkan total saat bendera status mode offline aktif (`localStorage.getItem('ostifak_offline_mode') === 'true'`).
+    * Bar indikator hijau sinkronisasi database di bagian bawah layar dihapus dan disembunyikan secara permanen selama mode offline berjalan.
+    * Seluruh listener real-time Firestore (`asrama`, `kelas`, `pelanggaran`, `proposal`, `santri`, `directives`, `sessions`) dicegah menginisialisasi query snapshot cloud saat mode offline aktif.
+  - 2. PENGALIHAN PENUH KE LOCALSTORAGE:
+    * Seluruh fungsi baca data (fetch), buat (create), ubah (update), dan hapus (delete) di seluruh modul dialihkan 100% membaca dan menulis secara mandiri ke dalam `localStorage` via [`offlineManager.ts`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/lib/offlineManager.ts).
+    * Ikon no-internet berwarna merah di pojok kanan atas header aktif sebagai indikator visual bahwa sistem berjalan 100% lokal dan terisolasi.
+  - 3. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan kebersihan antarmuka, bebas dari popup/bar sinkronisasi yang mengganggu estetika minimalis *clean-flat*.
 - **[2026-08-27]**: Penyesuaian Gaya Ikon Putih Murni & Eliminasi Kontainer Lingkaran Dialog Mode Offline (Versi v1.1.0.60b):
   - 1. IKON PUTIH MURNI & TANPA LINGKARAN PENGHALANG:
     * Seluruh ikon pada halaman dialog konfirmasi mode offline ([`LoginPage.tsx`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/components/views/LoginPage.tsx)) diubah menjadi **warna putih murni (`text-white`)**, baik ikon utama tanpa internet/wifi di bagian atas maupun ikon-ikon pada daftar informasi rincian izin (HardDrive, ShieldCheck, Zap).

@@ -1464,6 +1464,26 @@ export const OFFICIAL_DORMITORIES: Dormitory[] = [
 export const ALL_OFFICIAL_ROOMS: DormitoryRoom[] = OFFICIAL_DORMITORIES.flatMap(d => d.rooms);
 
 export function subscribeToDormitories(callback: (dormitories: Dormitory[], allRooms: DormitoryRoom[]) => void) {
+  if (isOfflineModeActive()) {
+    const emitOffline = () => {
+      const dorms = getOfflineDormitories();
+      const rooms = getOfflineRooms();
+      callback(dorms.length > 0 ? dorms : OFFICIAL_DORMITORIES, rooms.length > 0 ? rooms : ALL_OFFICIAL_ROOMS);
+    };
+    emitOffline();
+    const handleOfflineChange = () => emitOffline();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('ostifak_dorms_changed', handleOfflineChange);
+      window.addEventListener('storage', handleOfflineChange);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('ostifak_dorms_changed', handleOfflineChange);
+        window.removeEventListener('storage', handleOfflineChange);
+      }
+    };
+  }
+
   const q = query(collection(db, 'asrama'));
   const unsubSnapshot = onSnapshot(q, (snapshot) => {
     if (snapshot.empty) {
@@ -1553,6 +1573,24 @@ export const OFFICIAL_CLASSES: SchoolClass[] = [
 ];
 
 export function subscribeToClasses(callback: (classes: SchoolClass[]) => void) {
+  if (isOfflineModeActive()) {
+    const emitOffline = () => {
+      const classes = getOfflineClasses();
+      callback(classes.length > 0 ? classes : OFFICIAL_CLASSES);
+    };
+    emitOffline();
+    const handleOfflineChange = () => emitOffline();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('ostifak_classes_changed', handleOfflineChange);
+      window.addEventListener('storage', handleOfflineChange);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('ostifak_classes_changed', handleOfflineChange);
+        window.removeEventListener('storage', handleOfflineChange);
+      }
+    };
+  }
   const q = query(collection(db, 'kelas'));
   const unsubSnapshot = onSnapshot(q, (snapshot) => {
     if (snapshot.empty) {

@@ -305,17 +305,17 @@ export const fetchRealGeolocationIfAllowed = (sessionId: string): void => {
           }
           return rec;
         });
-        saveSessionRecords(updated);
-
-        // Sync to cloud Firestore
-        try {
-          const docRef = doc(db, 'sessions', sessionId);
-          updateDoc(docRef, {
-            coordinates: coordStr,
-            locationName: locStr,
-            updatedAt: serverTimestamp(),
-          }).catch(() => {});
-        } catch {}
+        // Sync to cloud Firestore (skipped in offline mode)
+        if (!isOfflineModeActive()) {
+          try {
+            const docRef = doc(db, 'sessions', sessionId);
+            updateDoc(docRef, {
+              coordinates: coordStr,
+              locationName: locStr,
+              updatedAt: serverTimestamp(),
+            }).catch(() => {});
+          } catch {}
+        }
 
         broadcastSync({ module: 'sessions', action: 'UPDATE', id: sessionId });
       },
@@ -507,19 +507,21 @@ export const recordLogoutSession = (): void => {
     localStorage.removeItem(STORAGE_KEY_ACTIVE_ID);
 
     if (updatedTarget) {
-      // Sync logout status to Firestore cloud
-      try {
-        const docRef = doc(db, 'sessions', activeId);
-        updateDoc(docRef, {
-          isActive: false,
-          logoutTime: (updatedTarget as SessionRecord).logoutTime,
-          duration: (updatedTarget as SessionRecord).duration,
-          actions: (updatedTarget as SessionRecord).actions,
-          updatedAt: serverTimestamp(),
-        }).catch((err) => {
-          console.warn('Remote session logout updateDoc notice:', err);
-        });
-      } catch {}
+      // Sync logout status to Firestore cloud (skipped in offline mode)
+      if (!isOfflineModeActive()) {
+        try {
+          const docRef = doc(db, 'sessions', activeId);
+          updateDoc(docRef, {
+            isActive: false,
+            logoutTime: (updatedTarget as SessionRecord).logoutTime,
+            duration: (updatedTarget as SessionRecord).duration,
+            actions: (updatedTarget as SessionRecord).actions,
+            updatedAt: serverTimestamp(),
+          }).catch((err) => {
+            console.warn('Remote session logout updateDoc notice:', err);
+          });
+        } catch {}
+      }
 
       broadcastSync({ module: 'sessions', action: 'UPDATE', id: activeId });
     }
