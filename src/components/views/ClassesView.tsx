@@ -381,7 +381,7 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
                       <div
                         key={res.id}
                         onClick={() => setSelectedDetailStudent(res)}
-                        className="flex flex-col p-3 bg-white rounded-xl border border-slate-200/80 hover:bg-slate-50/80 shadow-2xs transition-all relative overflow-hidden group cursor-pointer"
+                        className="bg-white rounded-xl border border-slate-200/80 hover:bg-slate-50/80 shadow-2xs transition-all relative overflow-hidden group cursor-pointer flex flex-col justify-between"
                       >
                         {/* Overlay Shutter Shortcut */}
                         <div 
@@ -389,7 +389,8 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
                             e.stopPropagation();
                             setSelectedDetailStudent(res);
                           }}
-                          className="absolute -inset-1 rounded-[inherit] bg-slate-950/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto flex items-center justify-center z-20 cursor-pointer"
+                          className="absolute inset-0 z-20 bg-slate-950/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto flex items-center justify-center cursor-pointer"
+                          style={{ top: 0, bottom: 0, left: 0, right: 0 }}
                         >
                           <button
                             type="button"
@@ -404,19 +405,21 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
                           </button>
                         </div>
 
-                        <div className="flex items-center justify-between">
-                          <div className="min-w-0">
-                            <span className="font-bold text-[#0F172A] text-xs truncate">{res.studentName}</span>
+                        <div className="p-3 flex flex-col justify-between h-full">
+                          <div className="flex items-center justify-between">
+                            <div className="min-w-0">
+                              <span className="font-bold text-[#0F172A] text-xs truncate">{res.studentName}</span>
+                            </div>
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 bg-[#F1F5F9] text-[#475569] rounded shrink-0">
+                              {res.kamar || 'Kamar -'}
+                            </span>
                           </div>
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 bg-[#F1F5F9] text-[#475569] rounded shrink-0">
-                            {res.kamar || 'Kamar -'}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#F1F5F9] text-[11px] text-[#64748B]">
-                          <span>{res.hafalan || '0 Juz'}</span>
-                          <span className={res.isTahsinPassed ? 'text-[#059669] font-medium' : 'text-[#D97706] font-medium'}>
-                            {res.isTahsinPassed ? 'Lulus Tahsin' : 'Bimbingan'}
-                          </span>
+                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#F1F5F9] text-[11px] text-[#64748B]">
+                            <span>{res.hafalan || '0 Juz'}</span>
+                            <span className={res.isTahsinPassed ? 'text-[#059669] font-medium' : 'text-[#D97706] font-medium'}>
+                              {res.isTahsinPassed ? 'Lulus Tahsin' : 'Bimbingan'}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     ))}

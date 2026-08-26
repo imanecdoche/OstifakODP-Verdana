@@ -1503,16 +1503,23 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredStudents.map((st) => (
-            <Card key={st.id} variant="default" className={`p-6 space-y-4 transition-all relative overflow-hidden group flex flex-col justify-between h-full ${isEditMode ? 'ring-2 ring-[#059669]/30 border-[#059669]' : 'hoverable'}`}>
-              
-              {/* Overlay Shutter Shortcut (Visible on hover when not in edit mode, fully covering the card with zero gaps) */}
+            <div 
+              key={st.id} 
+              className={`bg-white border border-[#E2E8F0] shadow-[0_2px_6px_rgba(15,23,42,0.05)] rounded-md transition-all relative overflow-hidden group flex flex-col justify-between ${
+                isEditMode 
+                  ? 'ring-2 ring-[#059669]/30 border-[#059669]' 
+                  : 'hover:border-[#0F172A] hover:shadow-[0_4px_16px_rgba(15,23,42,0.07)]'
+              }`}
+            >
+              {/* Full Bounding-Box Overlay (Directly positioned to card outer container edges: top: 0, bottom: 0, left: 0, right: 0) */}
               {!isEditMode && (
                 <div 
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedDetailStudent(st);
                   }}
-                  className="absolute -inset-1 rounded-[inherit] bg-slate-950/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto flex items-center justify-center z-20 cursor-pointer"
+                  className="absolute inset-0 z-20 bg-slate-950/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto flex items-center justify-center cursor-pointer"
+                  style={{ top: 0, bottom: 0, left: 0, right: 0 }}
                 >
                   <button
                     type="button"
@@ -1528,98 +1535,101 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 </div>
               )}
 
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-lg font-bold text-[#0F172A] font-headline tracking-tight">
-                    {st.studentName}
-                  </h3>
-                  <p className="text-xs text-[#64748B] mt-0.5">
-                    <span className="font-semibold text-[#059669]">{st.kamar}</span> • {st.kelas}
-                  </p>
+              {/* Inner Card Content Padding Container */}
+              <div className="p-6 space-y-4 flex flex-col justify-between h-full">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-lg font-bold text-[#0F172A] font-headline tracking-tight">
+                      {st.studentName}
+                    </h3>
+                    <p className="text-xs text-[#64748B] mt-0.5">
+                      <span className="font-semibold text-[#059669]">{st.kamar}</span> • {st.kelas}
+                    </p>
+                  </div>
+
+                  {/* Action Buttons: Open Detail & Edit/Delete */}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedDetailStudent(st);
+                        setDetailActiveTab('bio');
+                      }}
+                      aria-label="Lihat Detail Santri"
+                      className="w-8 h-8 rounded-full bg-[#F8FAFC] border border-[#E2E8F0] hover:bg-[#142A18] hover:text-white text-[#475569] flex items-center justify-center transition-all cursor-pointer shadow-2xs hover:shadow-sm"
+                      title="Buka Detail Lengkap Santri"
+                    >
+                      <ArrowUpRight className="w-4 h-4" />
+                    </button>
+
+                    {/* Edit & Delete Action Buttons (Visible when isEditMode is true) */}
+                    {isEditMode && (
+                      <div className="flex items-center gap-1.5 animate-in fade-in zoom-in-95">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenEdit(st);
+                          }}
+                          aria-label="Edit Data Santri"
+                          className="w-8 h-8 rounded bg-[#F8FAFC] border border-[#E2E8F0] hover:bg-[#0F172A] hover:text-white text-[#0F172A] flex items-center justify-center transition-colors cursor-pointer"
+                          title="Edit Santri"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setStudentToDelete(st);
+                          }}
+                          aria-label="Hapus Santri"
+                          className="w-8 h-8 rounded bg-[#FEF2F2] border border-[#FEE2E2] hover:bg-[#EF4444] hover:text-white text-[#EF4444] flex items-center justify-center transition-colors cursor-pointer"
+                          title="Hapus Santri"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* Action Buttons: Open Detail & Edit/Delete */}
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedDetailStudent(st);
-                      setDetailActiveTab('bio');
-                    }}
-                    aria-label="Lihat Detail Santri"
-                    className="w-8 h-8 rounded-full bg-[#F8FAFC] border border-[#E2E8F0] hover:bg-[#142A18] hover:text-white text-[#475569] flex items-center justify-center transition-all cursor-pointer shadow-2xs hover:shadow-sm"
-                    title="Buka Detail Lengkap Santri"
-                  >
-                    <ArrowUpRight className="w-4 h-4" />
-                  </button>
+                {/* Symmetrical 3-Column Metrics (Hafalan | Prestasi | Pelanggaran) with Thin Dividers */}
+                <div className="grid grid-cols-3 divide-x divide-[#E2E8F0] pt-3 border-t border-[#E2E8F0] text-xs">
+                  <div className="pr-2">
+                    <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Hafalan</p>
+                    <p className="text-sm font-bold text-[#0F172A] mt-0.5 truncate font-headline">{st.hafalan}</p>
+                  </div>
 
-                  {/* Edit & Delete Action Buttons (Visible when isEditMode is true) */}
-                  {isEditMode && (
-                    <div className="flex items-center gap-1.5 animate-in fade-in zoom-in-95">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenEdit(st);
-                        }}
-                        aria-label="Edit Data Santri"
-                        className="w-8 h-8 rounded bg-[#F8FAFC] border border-[#E2E8F0] hover:bg-[#0F172A] hover:text-white text-[#0F172A] flex items-center justify-center transition-colors cursor-pointer"
-                        title="Edit Santri"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setStudentToDelete(st);
-                        }}
-                        aria-label="Hapus Santri"
-                        className="w-8 h-8 rounded bg-[#FEF2F2] border border-[#FEE2E2] hover:bg-[#EF4444] hover:text-white text-[#EF4444] flex items-center justify-center transition-colors cursor-pointer"
-                        title="Hapus Santri"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                  <div className="px-2">
+                    <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Prestasi</p>
+                    <p className="text-sm font-bold text-[#059669] mt-0.5 truncate font-headline font-mono">
+                      +{getStudentPP(st)} PP
+                    </p>
+                  </div>
+
+                  <div className="pl-2">
+                    <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Pelanggaran</p>
+                    <p className={`text-sm font-bold mt-0.5 truncate font-headline font-mono ${st.poinPelanggaran > 0 ? 'text-[#EF4444]' : 'text-[#16A34A]'}`}>
+                      {st.poinPelanggaran || 0} PK
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-[#64748B] pt-1 font-body">
+                  <div className="flex items-center gap-2">
+                    <UserCheck className="w-4 h-4 text-[#059669] shrink-0" />
+                    <span>Presensi: <strong className="text-[#0F172A]">{st.statusIbadah}</strong></span>
+                  </div>
+                  {st.isTahsinPassed !== undefined && (
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${st.isTahsinPassed ? 'text-[#059669] bg-[#ECFDF5]' : 'text-[#D97706] bg-[#FFFBEB]'}`}>
+                      {st.isTahsinPassed ? 'Lulus Tahsin' : 'Bimbingan Tahsin'}
+                    </span>
                   )}
                 </div>
               </div>
-
-              {/* Symmetrical 3-Column Metrics (Hafalan | Prestasi | Pelanggaran) with Thin Dividers */}
-              <div className="grid grid-cols-3 divide-x divide-[#E2E8F0] pt-3 border-t border-[#E2E8F0] text-xs">
-                <div className="pr-2">
-                  <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Hafalan</p>
-                  <p className="text-sm font-bold text-[#0F172A] mt-0.5 truncate font-headline">{st.hafalan}</p>
-                </div>
-
-                <div className="px-2">
-                  <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Prestasi</p>
-                  <p className="text-sm font-bold text-[#059669] mt-0.5 truncate font-headline font-mono">
-                    +{getStudentPP(st)} PP
-                  </p>
-                </div>
-
-                <div className="pl-2">
-                  <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Pelanggaran</p>
-                  <p className={`text-sm font-bold mt-0.5 truncate font-headline font-mono ${st.poinPelanggaran > 0 ? 'text-[#EF4444]' : 'text-[#16A34A]'}`}>
-                    {st.poinPelanggaran || 0} PK
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-xs text-[#64748B] pt-1 font-body">
-                <div className="flex items-center gap-2">
-                  <UserCheck className="w-4 h-4 text-[#059669] shrink-0" />
-                  <span>Presensi: <strong className="text-[#0F172A]">{st.statusIbadah}</strong></span>
-                </div>
-                {st.isTahsinPassed !== undefined && (
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${st.isTahsinPassed ? 'text-[#059669] bg-[#ECFDF5]' : 'text-[#D97706] bg-[#FFFBEB]'}`}>
-                    {st.isTahsinPassed ? 'Lulus Tahsin' : 'Bimbingan Tahsin'}
-                  </span>
-                )}
-              </div>
-            </Card>
+            </div>
           ))}
         </div>
       )}

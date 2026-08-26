@@ -7,6 +7,12 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Penyesuaian Posisi Absolut Overlay Kartu Santri Full Bounding Box Bebas Hambatan Padding (Versi v1.1.0.38b):
+  - 1. PENYESUAIAN POSISI ABSOLUT OVERLAY (FULL BOUNDING BOX):
+    * Merekonstruksi hierarki DOM kartu santri di `StudentsView.tsx`, `DormitoryView.tsx`, dan `ClassesView.tsx` dengan memisahkan kontainer terluar `relative overflow-hidden p-0` dari pembungkus konten dalam yang memiliki padding (`p-6` / `p-3`).
+    * Menetapkan posisi overlay hover secara absolut langsung terhadap kontainer terluar dengan `inset: 0` (`top: 0, bottom: 0, left: 0, right: 0`), sehingga backdrop menutup 100% permukaan kartu santri secara rapat hingga ke border dan sudut terbawah tanpa terpotong padding kontainer.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Efek hover shutter transisi tetap mulus, presisi, bebas artefak visual, dan selaras dengan estetika minimalis clean-flat.
 - **[2026-08-26]**: Penutupan Penuh Backdrop Card Hover Santri Tanpa Celah Bawah (Versi v1.1.0.37b):
   - 1. PENUTUPAN BACKDROP CARD SEPENUHNYA:
     * Mengatasi celah kosong di bawah kartu santri saat hover dengan menerapkan `-inset-1 rounded-[inherit]` dan penyesuaian flex layout `flex flex-col justify-between h-full` pada kartu santri (`StudentsView.tsx`, `DormitoryView.tsx`, `ClassesView.tsx`).
