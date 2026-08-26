@@ -28,6 +28,7 @@ import {
 import { gooeyToast } from 'goey-toast';
 import { useLenisModalLock } from '../../lib/lenis';
 import { RollingNumber } from '../modals/NewViolationModal';
+import { CollectiveMahkamahModal } from '../modals/CollectiveMahkamahModal';
 
 interface ViolationsViewProps {
   violations: ViolationRecord[];
@@ -42,6 +43,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
   students = [],
   onOpenNewViolationModal,
 }) => {
+  const [isCollectiveModalOpen, setIsCollectiveModalOpen] = useState(false);
   const [filter, setFilter] = useState<ViolationFilter>(() => {
     try {
       return (localStorage.getItem('ostifak_violation_filter') as ViolationFilter) || 'all';
@@ -146,6 +148,44 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
       window.removeEventListener('resize', handleClose);
     };
   }, [activeMenu]);
+
+  // Global Escape Key Listener for ViolationsView
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (activeMenu) {
+          setActiveMenu(null);
+          return;
+        }
+        if (editingViolation) {
+          setEditingViolation(null);
+          return;
+        }
+        if (deletingViolation) {
+          setDeletingViolation(null);
+          return;
+        }
+        if (isCollectiveModalOpen) {
+          setIsCollectiveModalOpen(false);
+          return;
+        }
+      }
+    };
+
+    const handleCustomEscape = () => {
+      setActiveMenu(null);
+      setEditingViolation(null);
+      setDeletingViolation(null);
+      setIsCollectiveModalOpen(false);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('ostifak-escape-pressed', handleCustomEscape);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('ostifak-escape-pressed', handleCustomEscape);
+    };
+  }, [activeMenu, editingViolation, deletingViolation, isCollectiveModalOpen]);
 
   // Filter out permanently & optimistically deleted items
   const visibleViolations = violations.filter(
@@ -336,14 +376,26 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
           </p>
         </div>
 
-        <Button
-          variant="destructive"
-          size="md"
-          onClick={onOpenNewViolationModal}
-          icon={<Plus className="w-4 h-4 text-white" />}
-        >
-          Input Kasus Pelanggaran
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => setIsCollectiveModalOpen(true)}
+            icon={<Scale className="w-4 h-4 text-slate-800" />}
+            className="bg-white border border-slate-300 text-slate-900 hover:bg-slate-50 shadow-2xs"
+          >
+            Sidang Mahkamah Kolektif
+          </Button>
+
+          <Button
+            variant="destructive"
+            size="md"
+            onClick={onOpenNewViolationModal}
+            icon={<Plus className="w-4 h-4 text-white" />}
+          >
+            Input Kasus Pelanggaran
+          </Button>
+        </div>
       </div>
 
       {/* Filter Tabs & Search */}
@@ -720,6 +772,13 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* Sidang Mahkamah Kolektif Modal */}
+      <CollectiveMahkamahModal
+        isOpen={isCollectiveModalOpen}
+        onClose={() => setIsCollectiveModalOpen(false)}
+        students={students}
+      />
 
     </div>
   );

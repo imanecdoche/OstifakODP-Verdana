@@ -139,6 +139,36 @@ export const Header: React.FC<HeaderProps> = ({
     };
   }, [isSettingsMenuOpen]);
 
+  // Global Shortcut listener for Ctrl+S / Cmd+S and custom focus-search event
+  useEffect(() => {
+    const handleFocusSearch = () => {
+      if (searchCollapseTimerRef.current) clearTimeout(searchCollapseTimerRef.current);
+      setIsSearchBoxExpanded(true);
+      setIsSearchOpen(true);
+      setTimeout(() => {
+        if (searchRef.current) {
+          searchRef.current.focus();
+          searchRef.current.select();
+        }
+      }, 50);
+    };
+
+    const handleEscapePressed = () => {
+      setIsProfileOpen(false);
+      setIsSettingsMenuOpen(false);
+      setIsSettingsModalOpen(false);
+      setIsSessionRecordsModalOpen(false);
+      closeSearch();
+    };
+
+    window.addEventListener('ostifak-focus-search', handleFocusSearch);
+    window.addEventListener('ostifak-escape-pressed', handleEscapePressed);
+    return () => {
+      window.removeEventListener('ostifak-focus-search', handleFocusSearch);
+      window.removeEventListener('ostifak-escape-pressed', handleEscapePressed);
+    };
+  }, []);
+
   const getBreadcrumbTitle = () => {
     if (selectedDivision) {
       const div = mockDivisions.find((d) => d.id === selectedDivision);
@@ -216,6 +246,7 @@ export const Header: React.FC<HeaderProps> = ({
                 {isSearchOpen && (
                   <motion.input
                     ref={searchRef}
+                    data-search-input="true"
                     type="text"
                     value={searchQuery}
                     onChange={(e) => onSearchChange(e.target.value)}

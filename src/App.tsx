@@ -180,6 +180,56 @@ export default function App() {
     };
   }, [isLoggedIn]);
 
+  // Global Keyboard Shortcuts (Ctrl+S / Cmd+S & Escape)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+
+      // 1. SHORTCUT Ctrl + S (Override browser save & focus search bar)
+      if (isCtrlOrCmd && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Broadcast focus event to header search bar
+        window.dispatchEvent(new CustomEvent('ostifak-focus-search'));
+
+        // Immediate DOM fallback
+        setTimeout(() => {
+          const searchInput = document.querySelector<HTMLInputElement>(
+            'input[data-search-input="true"], input[placeholder*="Cari"], input[placeholder*="Filter"]'
+          );
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+          }
+        }, 30);
+        return;
+      }
+
+      // 2. SHORTCUT Esc (Tutup Modul / Modal / Pop-up Aktif)
+      if (e.key === 'Escape') {
+        // Dispatches event so sub-views/modals close their local modals/drawers
+        window.dispatchEvent(new CustomEvent('ostifak-escape-pressed'));
+
+        if (isNewViolationModalOpen) {
+          setIsNewViolationModalOpen(false);
+        }
+        if (isNewProgramModalOpen) {
+          setIsNewProgramModalOpen(false);
+        }
+        if (isRightPanelOpen) {
+          setIsRightPanelOpen(false);
+        }
+        if (isMobileSidebarOpen) {
+          setIsMobileSidebarOpen(false);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown, true);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown, true);
+  }, [isNewViolationModalOpen, isNewProgramModalOpen, isRightPanelOpen, isMobileSidebarOpen]);
+
   // Unified violation recap: remote `pelanggaran` collection + local-first santri history.
   // Orphan rows (santri tidak terdaftar) disaring agar rekap selalu sinkron dengan database santri.
   const mergedViolations = React.useMemo(() => {

@@ -99,6 +99,29 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
 
   useLenisModalLock(isOpen);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        if (isStudentOpen) {
+          setIsStudentOpen(false);
+          return;
+        }
+        onClose();
+      }
+    };
+    const handleCustomEscape = () => {
+      onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('ostifak-escape-pressed', handleCustomEscape);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('ostifak-escape-pressed', handleCustomEscape);
+    };
+  }, [isOpen, onClose, isStudentOpen]);
+
   // Dynamic Severity & Category Mapping (1-12 Ringan, 13-25 Sedang, 26-38 Berat, 39-50 Sangat Berat)
   const getSeverityInfo = (pts: number) => {
     if (pts <= 12) {

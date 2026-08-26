@@ -7,6 +7,65 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Ringkasan Metrik Halaman Per-asramaan (1 Row & Unboxed):
+  - 1 ROW METRIK RINGKASAN: Metrik ringkasan (Asrama Terdaftar, Total Kamar, Total Kapasitas) pada halaman Sistem & Manajemen Per-asramaan ditata sejajar dalam 1 baris (`grid grid-cols-3`).
+  - UNBOXED DENGAN DIVIDER: Menghilangkan kartu/kontainer pembungkus card, hanya dipisahkan dengan garis pembatas/divider vertikal (`divide-x`) dan horizontal (`border-y`).
+- **[2026-08-26]**: ATURAN GLOBAL MUTLAK — MINIMALISASI EKSTREM ELEMEN DEKORATIF & STANDAR MODAL POPUP:
+  - 1. HEADER MODAL BERSIH TANPA IKON:
+    * Setiap kali membuat modal/popup dialog baru, bagian header judul modal wajib bersih tanpa ikon pendamping sama sekali (hanya judul teks dan tombol close `X`).
+  - 2. KATEGORI TANPA NUMBERING & LABEL TEGAS:
+    * Label kategori/bagian pada form dilarang menggunakan penomoran ("1.", "2.", "3.").
+    * Gunakan label teks yang lebih besar, tebal, jelas (`text-sm font-bold text-[#0F172A]`), dan dipisahkan dengan garis pembatas tipis yang tegas (`border-t border-slate-200`).
+  - 3. DAFTAR SCROLLABLE DENGAN EDGE SHADOW & NO-SCROLLBAR:
+    * Area daftar pilihan (seperti picker santri/kamar/kelas) wajib memiliki batasan tinggi (`max-h-*`), dapat di-scroll secara halus tanpa scrollbar visual (`no-scrollbar`), dan dilengkapi efek bayangan tepi atas & bawah (*edge shadow / fade effect*).
+  - 4. MODAL NEAR-FULLSCREEN:
+    * Dialog modal kompleks wajib memiliki tinggi maksimal / nyaris fullscreen (`h-[92vh] max-h-[94vh] max-w-5xl`) agar konten di dalamnya lega dan tidak memicu double scrolling pada halaman.
+  - 5. ATURAN PERMANEN ANTI-DEKORATIF & CLEAN-FLAT:
+    * Minimalisir ekstrem penggunaan ikon di seluruh antarmuka aplikasi.
+    * Hapus total penggunaan kontainer card/box pembungkus bertumpuk. Gunakan desain clean-flat / underline-based.
+    * Larangan keras menggunakan tag, kapsul, atau badge warna-warni berlebih. Gunakan tipografi bersih, teks polos (*plain text*), atau garis pemisah tipis.
+- **[2026-08-26]**: ATURAN GLOBAL MUTLAK — DEFAULT PRIORITAS: IKON BUTTON ONLY (TANPA LABEL TEKS):
+  - 1. DEFAULT ICON BUTTON ONLY:
+    * Setiap kali membuat komponen tombol (button) baru di seluruh bagian aplikasi (header, toolbar, action bar, sub-modul, row table, kartu, filter bar, dll.), standar utamanya **wajib menggunakan Icon Button Only** (hanya ikon tunggal yang bersih tanpa teks label pendamping).
+  - 2. PENGECUALIAN AKSI PRIMER KRUSIAL:
+    * Kecuali untuk tombol aksi primer yang sangat krusial dan membutuhkan kejelasan teks mutlak (seperti tombol "MASUK", "Simpan Perubahan", "Simpan Sesi", atau "Terbitkan Arahan"), seluruh tombol lainnya wajib berwujud ikon minimalis murni dengan `title`/tooltip atau hover state yang elegan.
+  - 3. CLEAN-FLAT & ANTI-CONTAINER OVERLOAD:
+    * Dilarang keras membuat tombol dengan label teks panjang yang dibungkus kontainer kotak tebal atau kapsul mencolok. Pertahankan gaya clean-flat tanpa border kontainer yang berlebihan.
+- **[2026-08-26]**: Fitur Keyboard Shortcut Global:
+  - SHORTCUT `Ctrl + S` / `Cmd + S` (Override Browser Save & Fokus Search Bar):
+    * Tangkap event `Ctrl + S` / `Cmd + S` di level window/document, jalankan `e.preventDefault()` agar browser tidak membuka dialog "Save Page As".
+    * Arahkan fokus kursor secara otomatis (`focus()`) ke search bar utama aplikasi di header/view aktif agar pengguna bisa langsung mencari data secara instan.
+  - SHORTCUT `Esc` (Tutup Modul / Modal Aktif):
+    * Tangkap event `Escape` (`Esc`).
+    * Jika ada modal aktif, pop-up form, sub-modul (seperti form instruksi, detail santri, sidang mahkamah, dialog konfirmasi, rekam sesi, dll.), tutup modal seketika dan kembalikan tampilan ke layar utama.
+- **[2026-08-26]**: Modal Popup untuk Form Penerbitan Instruksi Mudir:
+  - OVERLAY DIALOG MODAL:
+    * Form penerbitan instruksi Mudir harus berupa popup modal mengapung (`fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm`), bukan form inline yang disisipkan di dalam dokumen halaman utama.
+  - TRIGGER BUKA / TUTUP:
+    * Modal hanya muncul saat tombol "Terbitkan Arahan Mudir" diklik (`isModalOpen === true`).
+    * Tombol silang `X` di pojok kanan atas modal dan tombol "Batal" menutup modal sepenuhnya.
+  - GAYA VISUAL KONSISTEN:
+    * Form di dalam modal mempertahankan gaya input bersih, shadow halus, dan tata letak elegan.
+- **[2026-08-26]**: Fitur Sidang Mahkamah Kolektif & Integrasi Rekam Jejak Mahkamah Profil Santri:
+  - WORKFLOW MAHKAMAH KOLEKTIF:
+    * Form input sidang kolektif mendukung multi-select banyak santri (5-10+ santri via searchable tags picker), multi-select divisi terkait (2-3 divisi), input jenis pelanggaran, hukuman, dan tanggal mahkamah (format tanggal saja tanpa jam).
+  - SINKRONISASI BATCH / ZERO-LOSS GUARANTEE:
+    * Saat sesi mahkamah disimpan, sistem melakukan update batch ke setiap santri terpilih (`mahkamahHistory` dan rekam pelanggaran), tersinkronisasi ke Firestore dan `BroadcastChannel` real-time lintas perangkat.
+  - REKAM MAHKAMAH PADA PROFIL SANTRI:
+    * Sub-tab "Rekam Mahkamah" pada modal detail santri menampilkan baris tipografi bersih (Divisi, Pelanggaran, Hukuman, Tanggal).
+    * Indikator frekuensi rekapitulasi per divisi + filter waktu interaktif (1 Bulan Terakhir, 3 Bulan, Semua Waktu).
+  - STANDAR UI/UX CLEAN-SAAS:
+    * Whitespace luas, tanpa kontainer card berlebih/badge mencolok, anti-wrapping & anti-overlapping.
+- **[2026-08-26]**: Rekonstruksi Halaman & Kartu "Instruksi Mudir":
+  - TATA LETAK GRID 2 KOLOM:
+    * Gunakan grid dua kolom (`grid grid-cols-1 md:grid-cols-2 gap-6`) sehingga dalam satu baris terdapat 2 kartu instruksi sejajar.
+  - DESAIN KARTU MINIMALIS & UNBOXED (SERAGAM ASRAMA/KELAS/SANTRI):
+    * Tampil bersih langsung di atas latar belakang tanpa kontainer/kotak border kaku yang berlebihan.
+  - STRUKTUR KONTEN KARTU:
+    * **Baris Atas (Judul & Tanggal):** Judul di posisi teratas. Jika panjang/berpotensi terpotong, gunakan animasi teks bergerak (*running text / marquee looping*). Tanggal diletakkan sejajar di sebelah kanan judul.
+    * **Deskripsi Instruksi:** Ditampilkan bersih di bawah judul tanpa dibungkus kotak box.
+    * **Prioritas & Divisi:** Teks prioritas **tebal (bold) tanpa dot/ikon titik**, diikuti informasi divisi dipisah dengan tanda titik tunggal (`·`).
+    * **Penerbit & Status:** Nama penerbit di kiri bawah, dan status instruksi di kanan bawah berupa **plain text biasa** tanpa background badge/kontainer.
 - **[2026-08-26]**: Kosongkan Data Biografi Halusinasi pada Santri Baru & Push Commit:
   - TANPA DATA DUMMY / HALUSINASI:
     * Saat form tambah santri baru diinisialisasi atau disubmit, field data biografi opsional (nomor telepon wali, alamat lengkap, nama wali, domisili, tanggal lahir, dll.) TIDAK boleh diisi data dummy, rekaan, atau halusinasi default.

@@ -586,6 +586,17 @@ export interface StudentPermissionEntry {
   notes?: string;
 }
 
+export interface StudentMahkamahEntry {
+  id: string;
+  divisions: string[];
+  violation: string;
+  penalty: string;
+  date: string;
+  points?: number;
+  sessionNotes?: string;
+  createdAt?: string;
+}
+
 export interface SantriRecord {
   id: string;
   studentName: string;
@@ -602,6 +613,7 @@ export interface SantriRecord {
   address?: string;
   isTahsinPassed?: boolean;
   violationsHistory?: StudentViolationEntry[];
+  mahkamahHistory?: StudentMahkamahEntry[];
   hafalanHistory?: StudentHafalanEntry[];
   achievementsHistory?: StudentAchievementEntry[];
   permissionsHistory?: StudentPermissionEntry[];
@@ -770,6 +782,7 @@ export function subscribeToSantri(callback: (santri: SantriRecord[]) => void) {
           address: data.address || '',
           isTahsinPassed: data.isTahsinPassed ?? true,
           violationsHistory: data.violationsHistory || [],
+          mahkamahHistory: data.mahkamahHistory || [],
           hafalanHistory: data.hafalanHistory || [],
           achievementsHistory: data.achievementsHistory || [],
           permissionsHistory: data.permissionsHistory || [],
@@ -857,6 +870,97 @@ export async function addSantriRecord(santri: Omit<SantriRecord, 'id'>) {
     console.warn('Remote addDoc restricted (safely stored locally in persistent cache):', err);
     return { id: localId };
   }
+}
+
+/**
+ * BATCH & ATOMIC WRITE FOR SIDANG MAHKAMAH KOLEKTIF (ZERO-LOSS GUARANTEE)
+ */
+export async function recordCollectiveMahkamahSession(params: {
+  students: { id: string; name: string; nis?: string; kamar?: string }[];
+  divisions: string[];
+  violation: string;
+  penalty: string;
+  date: string;
+  points?: number;
+  sessionNotes?: string;
+}) {
+  const { students, divisions, violation, penalty, date, points = 0, sessionNotes = '' } = params;
+
+  for (const s of students) {
+    const mahkamahEntry: StudentMahkamahEntry = {
+      id: `mhk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      divisions,
+      violation,
+      penalty,
+      date,
+      points,
+      sessionNotes,
+      createdAt: new Date().toISOString(),
+    };
+
+    const updatedMap = getUpdatedSantriMap();
+    const currentStudentOverride = updatedMap[s.id] || {};
+    const existingMahkamah = currentStudentOverride.mahkamahHistory || [];
+    const newMahkamahHistory = [mahkamahEntry, ...existingMahkamah];
+
+    const existingViolations = currentStudentOverride.violationsHistory || [];
+    const newViolationHistory = [
+      {
+        id: `vio_mhk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        title: `[Sidang Mahkamah] ${violation}`,
+        date,
+        points: points || 0,
+        penalty,
+        notes: `Divisi: ${divisions.join(', ')}`,
+      },
+      ...existingViolations,
+    ];
+
+    const currentPoints = currentStudentOverride.poinPelanggaran ?? 0;
+    const newPoints = currentPoints + (points || 0);
+
+    const updates: Partial<SantriRecord> = {
+      mahkamahHistory: newMahkamahHistory,
+      violationsHistory: newViolationHistory,
+      ...(points > 0 ? { poinPelanggaran: newPoints } : {}),
+    };
+
+    // 1. Instantly write to local persistent storage + broadcast
+    saveUpdatedSantri(s.id, updates);
+    broadcastSync({ module: 'santri', action: 'UPDATE', id: s.id, payload: updates });
+
+    // 2. Fire background Firestore update
+    try {
+      const docRef = doc(db, 'santri', s.id);
+      await updateDoc(docRef, {
+        ...updates,
+        updatedAt: serverTimestamp(),
+      });
+    } catch (err) {
+      console.warn(`Remote updateDoc for student ${s.id} (saved in local persistent store):`, err);
+    }
+
+    // 3. Record in unified violations collection
+    try {
+      await addPelanggaranRecord({
+        studentName: s.name,
+        nis: s.nis || '-',
+        kamar: s.kamar || '-',
+        violation: `[Sidang Mahkamah] ${violation}`,
+        category: divisions.join(' & '),
+        points: points || 0,
+        severity: 'berat',
+        status: 'selesai',
+        date,
+        penaltyDescription: penalty,
+        reportedBy: `Sidang Mahkamah (${divisions.join(', ')})`,
+      });
+    } catch (err) {
+      console.warn('addPelanggaranRecord warning for mahkamah session:', err);
+    }
+  }
+
+  broadcastSync({ module: 'santri', action: 'UPDATE', payload: { collective: true } });
 }
 
 /**

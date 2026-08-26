@@ -51,7 +51,7 @@ export interface StudentDetailModalProps {
   student: SantriRecord | null;
   onClose: () => void;
   onStudentUpdated?: (updatedStudent: SantriRecord) => void;
-  initialTab?: 'bio' | 'hafalan' | 'pelanggaran' | 'prestasi' | 'izin';
+  initialTab?: 'bio' | 'hafalan' | 'pelanggaran' | 'mahkamah' | 'prestasi' | 'izin';
   dormitories?: Dormitory[];
   rooms?: DormitoryRoom[];
   classes?: SchoolClass[];
@@ -67,15 +67,17 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   classes: propClasses,
 }) => {
   const [currentStudent, setCurrentStudent] = useState<SantriRecord | null>(student);
-  const [detailActiveTab, setDetailActiveTab] = useState<'bio' | 'hafalan' | 'pelanggaran' | 'prestasi' | 'izin'>(() => {
+  const [detailActiveTab, setDetailActiveTab] = useState<'bio' | 'hafalan' | 'pelanggaran' | 'mahkamah' | 'prestasi' | 'izin'>(() => {
     try {
       const saved = localStorage.getItem('ostifak_student_modal_tab');
-      if (saved && ['bio', 'hafalan', 'pelanggaran', 'prestasi', 'izin'].includes(saved)) {
+      if (saved && ['bio', 'hafalan', 'pelanggaran', 'mahkamah', 'prestasi', 'izin'].includes(saved)) {
         return saved as any;
       }
     } catch {}
     return initialTab;
   });
+
+  const [mahkamahTimeFilter, setMahkamahTimeFilter] = useState<'1m' | '3m' | 'all'>('all');
 
   useEffect(() => {
     try {
@@ -121,12 +123,82 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     setCurrentStudent(student);
   }, [student]);
 
+  const filteredMahkamahHistory = useMemo(() => {
+    if (!currentStudent?.mahkamahHistory) return [];
+    const list = currentStudent.mahkamahHistory;
+    if (mahkamahTimeFilter === 'all') return list;
+
+    const now = new Date().getTime();
+    const daysLimit = mahkamahTimeFilter === '1m' ? 30 : 90;
+    const cutoff = now - daysLimit * 24 * 60 * 60 * 1000;
+
+    return list.filter((item) => {
+      const itemTime = new Date(item.date).getTime();
+      return !isNaN(itemTime) ? itemTime >= cutoff : true;
+    });
+  }, [currentStudent?.mahkamahHistory, mahkamahTimeFilter]);
+
+  const mahkamahDivisionFrequency = useMemo(() => {
+    const map: Record<string, number> = {};
+    if (!currentStudent?.mahkamahHistory) return map;
+    for (const item of currentStudent.mahkamahHistory) {
+      if (item.divisions && Array.isArray(item.divisions)) {
+        for (const div of item.divisions) {
+          map[div] = (map[div] || 0) + 1;
+        }
+      }
+    }
+    return map;
+  }, [currentStudent?.mahkamahHistory]);
+
   // Nested sub-modals state
   const [isIzinModalOpen, setIsIzinModalOpen] = useState(false);
   const [isMoveKamarModalOpen, setIsMoveKamarModalOpen] = useState(false);
   const [isMoveKelasModalOpen, setIsMoveKelasModalOpen] = useState(false);
   const [isSetoranModalOpen, setIsSetoranModalOpen] = useState(false);
   const [isHafalanChartModalOpen, setIsHafalanChartModalOpen] = useState(false);
+
+  // Close on Escape shortcut
+  useEffect(() => {
+    if (!student) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        if (isIzinModalOpen) {
+          setIsIzinModalOpen(false);
+          return;
+        }
+        if (isMoveKamarModalOpen) {
+          setIsMoveKamarModalOpen(false);
+          return;
+        }
+        if (isMoveKelasModalOpen) {
+          setIsMoveKelasModalOpen(false);
+          return;
+        }
+        if (isSetoranModalOpen) {
+          setIsSetoranModalOpen(false);
+          return;
+        }
+        if (isHafalanChartModalOpen) {
+          setIsHafalanChartModalOpen(false);
+          return;
+        }
+        onClose();
+      }
+    };
+
+    const handleCustomEscape = () => {
+      onClose();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('ostifak-escape-pressed', handleCustomEscape);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('ostifak-escape-pressed', handleCustomEscape);
+    };
+  }, [student, onClose, isIzinModalOpen, isMoveKamarModalOpen, isMoveKelasModalOpen, isSetoranModalOpen, isHafalanChartModalOpen]);
 
   // Hafalan Chart state
   const [chartTimeframe, setChartTimeframe] = useState<'pekan' | 'bulan' | 'tahun'>('pekan');
@@ -1022,6 +1094,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                   { id: 'bio', label: 'Bio' },
                   { id: 'hafalan', label: 'Hafalan' },
                   { id: 'pelanggaran', label: 'Pelanggaran' },
+                  { id: 'mahkamah', label: 'Rekam Mahkamah' },
                   { id: 'prestasi', label: 'Prestasi' },
                   { id: 'izin', label: 'Riwayat Izin' },
                 ].map((t) => {
@@ -1044,6 +1117,11 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                       {t.id === 'pelanggaran' && currentStudent.poinPelanggaran > 0 && (
                         <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-red-500 text-white font-bold">
                           {currentStudent.poinPelanggaran} Pts
+                        </span>
+                      )}
+                      {t.id === 'mahkamah' && currentStudent.mahkamahHistory && currentStudent.mahkamahHistory.length > 0 && (
+                        <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-900 text-white font-bold">
+                          {currentStudent.mahkamahHistory.length}
                         </span>
                       )}
                     </button>
@@ -1579,6 +1657,113 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto" />
                         <p className="font-semibold text-slate-800">Catatan Pelanggaran Bersih</p>
                         <p className="text-[11px] text-slate-400">Santri ini belum memiliki catatan pelanggaran tata tertib.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: REKAM MAHKAMAH */}
+              {detailActiveTab === 'mahkamah' && (
+                <div className="space-y-6 animate-in fade-in duration-150">
+                  {/* Top Bar: Frekuensi Rekapitulasi & Filter Rentang Waktu */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
+                    <div className="space-y-1 min-w-0">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-headline">
+                        Rekapitulasi Sidang Mahkamah
+                      </p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#0F172A] font-medium font-body">
+                        {Object.keys(mahkamahDivisionFrequency).length > 0 ? (
+                          Object.entries(mahkamahDivisionFrequency).map(([divName, count], idx, arr) => (
+                            <span key={divName} className="flex items-center gap-1.5">
+                              <span>Mahkamah {divName}: <strong>{count} kali</strong></span>
+                              {idx < arr.length - 1 && <span className="text-slate-300">·</span>}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-slate-500">Belum ada riwayat sidang mahkamah</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Filter Rentang Waktu (1 Bulan, 3 Bulan, Semua Waktu) */}
+                    <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg shrink-0 self-start sm:self-auto">
+                      {[
+                        { id: '1m', label: '1 Bulan Terakhir' },
+                        { id: '3m', label: '3 Bulan' },
+                        { id: 'all', label: 'Semua Waktu' },
+                      ].map((f) => {
+                        const isSelected = mahkamahTimeFilter === f.id;
+                        return (
+                          <button
+                            key={f.id}
+                            type="button"
+                            onClick={() => setMahkamahTimeFilter(f.id as any)}
+                            className={`px-3 py-1 text-xs rounded-md font-medium transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-white text-slate-900 font-semibold shadow-2xs'
+                                : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                          >
+                            {f.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* List Riwayat Mahkamah (Clean Typography Rows) */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">
+                        DAFTAR CATATAN SIDANG ({filteredMahkamahHistory.length})
+                      </h4>
+                    </div>
+
+                    {filteredMahkamahHistory.length > 0 ? (
+                      <div className="divide-y divide-slate-100">
+                        {filteredMahkamahHistory.map((mhk) => (
+                          <div
+                            key={mhk.id}
+                            className="py-4 first:pt-0 last:pb-0 space-y-2 hover:bg-slate-50/50 rounded-lg transition-colors"
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1.5">
+                              <p className="font-bold text-xs text-slate-900 font-headline tracking-tight">
+                                {mhk.divisions && mhk.divisions.length > 0 ? mhk.divisions.join(' · ') : 'Sidang Mahkamah'}
+                              </p>
+                              <span className="text-xs text-slate-400 font-body shrink-0 font-medium">
+                                {formatDateDDMMMMYY(mhk.date)}
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                              <div>
+                                <span className="text-slate-400 font-medium block text-[11px]">Jenis Pelanggaran</span>
+                                <span className="text-slate-800 font-medium leading-relaxed">{mhk.violation}</span>
+                              </div>
+                              <div>
+                                <span className="text-slate-400 font-medium block text-[11px]">Vonis Takzir / Hukuman</span>
+                                <span className="text-slate-800 font-semibold leading-relaxed">{mhk.penalty}</span>
+                              </div>
+                            </div>
+
+                            {mhk.sessionNotes && (
+                              <p className="text-[11px] text-slate-500 italic pt-1">
+                                Catatan: {mhk.sessionNotes}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-8 text-center bg-slate-50/60 rounded-xl border border-dashed border-slate-200 text-slate-500 space-y-1.5">
+                        <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto" />
+                        <p className="font-semibold text-slate-800 text-xs font-headline">Tidak Ada Rekam Mahkamah</p>
+                        <p className="text-[11px] text-slate-400 font-body">
+                          {mahkamahTimeFilter !== 'all' 
+                            ? 'Tidak ada sidang mahkamah pada rentang waktu yang dipilih.' 
+                            : 'Santri ini belum pernah tercatat dalam sidang mahkamah kolektif.'}
+                        </p>
                       </div>
                     )}
                   </div>

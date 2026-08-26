@@ -227,6 +227,49 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
     return () => document.removeEventListener('mousedown', handler);
   }, [isSurahDropdownOpen]);
 
+  // Global Escape Key Listener for StudentsView popups
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isSurahDropdownOpen) {
+          setIsSurahDropdownOpen(false);
+          return;
+        }
+        if (isAdding) {
+          setIsAdding(false);
+          return;
+        }
+        if (editingStudent) {
+          setEditingStudent(null);
+          return;
+        }
+        if (studentToDelete) {
+          setStudentToDelete(null);
+          return;
+        }
+        if (selectedDetailStudent) {
+          setSelectedDetailStudent(null);
+          return;
+        }
+      }
+    };
+
+    const handleCustomEscape = () => {
+      setIsSurahDropdownOpen(false);
+      setIsAdding(false);
+      setEditingStudent(null);
+      setStudentToDelete(null);
+      setSelectedDetailStudent(null);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('ostifak-escape-pressed', handleCustomEscape);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('ostifak-escape-pressed', handleCustomEscape);
+    };
+  }, [isSurahDropdownOpen, isAdding, editingStudent, studentToDelete, selectedDetailStudent]);
+
   const filteredSurahs = useMemo(() => {
     const q = surahQuery.trim().toLowerCase();
     if (!q) return QURAN_SURAHS;

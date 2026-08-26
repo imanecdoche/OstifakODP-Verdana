@@ -1,15 +1,68 @@
-import React, { useState, useEffect } from 'react';
-import { ScrollText, ShieldCheck, Clock, CheckCircle, Plus, Send } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ScrollText, Plus, Send, X } from 'lucide-react';
 import { MudirDirective } from '../../types';
-import { Card } from '../ui/Card';
-import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { subscribeToDirectives, addDirectiveRecord } from '../../lib/firestoreService';
 import { gooeyToast } from 'goey-toast';
 
+const RunningText: React.FC<{
+  text: string;
+  className?: string;
+}> = ({ text, className = '' }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLSpanElement>(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const [overflowDistance, setOverflowDistance] = useState(0);
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (containerRef.current && contentRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        const contentWidth = contentRef.current.scrollWidth;
+        if (contentWidth > containerWidth + 2) {
+          setIsOverflowing(true);
+          setOverflowDistance(contentWidth - containerWidth + 16);
+        } else {
+          setIsOverflowing(false);
+          setOverflowDistance(0);
+        }
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [text]);
+
+  const duration = Math.max(4, Math.min(12, overflowDistance / 15));
+
+  return (
+    <div
+      ref={containerRef}
+      className={`relative overflow-hidden whitespace-nowrap min-w-0 flex-1 ${className}`}
+      title={text}
+    >
+      <span
+        ref={contentRef}
+        style={
+          isOverflowing
+            ? ({
+                '--scroll-offset': `-${overflowDistance}px`,
+                animation: `running-ticker ${duration}s ease-in-out infinite alternate`,
+              } as React.CSSProperties)
+            : undefined
+        }
+        className={`inline-block whitespace-nowrap ${isOverflowing ? 'will-change-transform' : ''}`}
+      >
+        {text}
+      </span>
+    </div>
+  );
+};
+
 export const DirectivesView: React.FC = () => {
   const [directives, setDirectives] = useState<MudirDirective[]>([]);
-  const [isCreating, setIsCreating] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [targetDivision, setTargetDivision] = useState('Semua Divisi');
   const [priority, setPriority] = useState<'tinggi' | 'sedang' | 'normal'>('tinggi');
@@ -22,6 +75,25 @@ export const DirectivesView: React.FC = () => {
     });
     return () => unsub();
   }, []);
+
+  useEffect(() => {
+    if (!isModalOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setIsModalOpen(false);
+      }
+    };
+    const handleCustomEscape = () => {
+      setIsModalOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('ostifak-escape-pressed', handleCustomEscape);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('ostifak-escape-pressed', handleCustomEscape);
+    };
+  }, [isModalOpen]);
 
   const handleCreateDirective = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +111,7 @@ export const DirectivesView: React.FC = () => {
       });
       setTitle('');
       setContent('');
-      setIsCreating(false);
+      setIsModalOpen(false);
       gooeyToast.info('Instruksi Mudir Diterbitkan', {
         description: `${title} (Target: ${targetDivision})`,
       });
@@ -54,7 +126,7 @@ export const DirectivesView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-body">
       {/* Header (Unboxed) */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
         <div>
@@ -70,126 +142,201 @@ export const DirectivesView: React.FC = () => {
         <Button
           variant="sage"
           size="md"
-          onClick={() => setIsCreating(!isCreating)}
+          onClick={() => setIsModalOpen(true)}
           icon={<Plus className="w-4 h-4 text-white" />}
         >
-          {isCreating ? 'Tutup Form' : 'Terbitkan Arahan Mudir'}
+          Terbitkan Arahan Mudir
         </Button>
       </div>
 
-      {/* Form */}
-      {isCreating && (
-        <Card variant="default" className="p-6 border border-[#0F172A] bg-white">
-          <h3 className="text-sm font-bold text-[#0F172A] mb-4 flex items-center gap-2 font-headline">
-            <Send className="w-4 h-4 text-[#0F172A]" /> Form Penerbitan Instruksi Resmi
-          </h3>
-          <form onSubmit={handleCreateDirective} className="space-y-4 text-xs">
-            <div>
-              <label className="block font-semibold mb-1 text-[#0F172A] font-headline">Judul / Perihal Instruksi *</label>
-              <input
-                type="text"
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Contoh: Pengetatan Disiplin Shalat Shubuh & Halaqah"
-                className="w-full h-10 px-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
-              />
+      {/* Popup Modal (Jendela Mengapung / Dialog Overlay) */}
+      {isModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          data-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200 font-body"
+        >
+          <div className="relative w-full max-w-xl bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[92vh]">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-slate-900 text-white flex items-center justify-center shrink-0">
+                  <Send className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-[#0F172A] font-headline tracking-tight">
+                    Penerbitan Instruksi Resmi
+                  </h2>
+                  <p className="text-xs text-[#64748B] mt-0.5">
+                    Arahan Mudir: K.H. Mulhat Ali Nuh, Lc., M.A.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                title="Tutup Modal"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            {/* Modal Form Content */}
+            <form onSubmit={handleCreateDirective} className="p-6 sm:p-7 space-y-5 overflow-y-auto text-xs">
               <div>
-                <label className="block font-semibold mb-1 text-[#0F172A] font-headline">Target Divisi</label>
+                <label className="block font-semibold mb-1.5 text-[#0F172A] font-headline">
+                  Judul / Perihal Instruksi *
+                </label>
                 <input
                   type="text"
-                  value={targetDivision}
-                  onChange={(e) => setTargetDivision(e.target.value)}
-                  placeholder="Contoh: Divisi Keamanan & Ibadah"
-                  className="w-full h-10 px-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
+                  required
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Contoh: Pengetatan Disiplin Shalat Shubuh & Halaqah"
+                  className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-slate-900 focus:outline-none font-body shadow-2xs"
                 />
               </div>
 
-              <div>
-                <label className="block font-semibold mb-1 text-[#0F172A] font-headline">Prioritas Arahan</label>
-                <select
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value as any)}
-                  className="w-full h-10 px-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
-                >
-                  <option value="tinggi">Tinggi (Mendesak)</option>
-                  <option value="sedang">Sedang</option>
-                  <option value="normal">Normal</option>
-                </select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-semibold mb-1.5 text-[#0F172A] font-headline">
+                    Target Divisi
+                  </label>
+                  <input
+                    type="text"
+                    value={targetDivision}
+                    onChange={(e) => setTargetDivision(e.target.value)}
+                    placeholder="Contoh: Divisi Keamanan & Ibadah"
+                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-slate-900 focus:outline-none font-body shadow-2xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-1.5 text-[#0F172A] font-headline">
+                    Prioritas Arahan
+                  </label>
+                  <select
+                    value={priority}
+                    onChange={(e) => setPriority(e.target.value as any)}
+                    className="w-full h-10 px-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-slate-900 focus:outline-none font-body shadow-2xs cursor-pointer font-medium"
+                  >
+                    <option value="tinggi">Tinggi (Mendesak)</option>
+                    <option value="sedang">Sedang</option>
+                    <option value="normal">Normal</option>
+                  </select>
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block font-semibold mb-1 text-[#0F172A] font-headline">Uraian Petunjuk Teknis *</label>
-              <textarea
-                required
-                rows={3}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Tuliskan petunjuk teknis dan batas waktu pelaksanaan instruksi..."
-                className="w-full p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
-              />
-            </div>
+              <div>
+                <label className="block font-semibold mb-1.5 text-[#0F172A] font-headline">
+                  Uraian Petunjuk Teknis *
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Tuliskan petunjuk teknis dan batas waktu pelaksanaan instruksi..."
+                  className="w-full p-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-slate-900 focus:outline-none font-body shadow-2xs leading-relaxed"
+                />
+              </div>
 
-            <div className="flex justify-end gap-3 pt-2">
-              <Button type="button" variant="ghost" size="sm" onClick={() => setIsCreating(false)}>
-                Batal
-              </Button>
-              <Button type="submit" variant="primary" size="sm" disabled={loading}>
-                {loading ? 'Menyimpan...' : 'Kirim Instruksi'}
-              </Button>
-            </div>
-          </form>
-        </Card>
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-5 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-2"
+                >
+                  {loading ? 'Menyimpan...' : 'Terbitkan Instruksi'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
-      {/* Directives List */}
+      {/* Directives Grid List (2 Cards Per Row) */}
       {directives.length === 0 ? (
-        <Card variant="default" className="p-8 text-center bg-white border border-[#E2E8F0] space-y-2">
+        <div className="p-8 text-center bg-white rounded-lg border border-[#E2E8F0] space-y-2">
           <ScrollText className="w-10 h-10 text-[#64748B] mx-auto" />
           <h3 className="text-sm font-bold text-[#0F172A] font-headline">Belum Ada Instruksi Mudir</h3>
           <p className="text-xs text-[#64748B] font-body">
             Klik tombol "Terbitkan Arahan Mudir" di atas untuk menambahkan instruksi pertama.
           </p>
-        </Card>
+        </div>
       ) : (
-        <div className="space-y-4">
-          {directives.map((dir) => (
-            <Card key={dir.id} variant="default" className="p-6 space-y-4 border-l-4 border-l-[#0F172A]">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <Badge variant={dir.priority === 'tinggi' ? 'danger' : 'warning'}>
-                    PRIORITAS {dir.priority}
-                  </Badge>
-                  <span className="text-xs font-semibold text-[#0F172A] bg-[#F8FAFC] px-2.5 py-0.5 rounded-[4px] border border-[#E2E8F0]">
-                    Target: {dir.targetDivision}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {directives.map((dir) => {
+            const priorityLabel =
+              dir.priority === 'tinggi'
+                ? 'Prioritas Tinggi'
+                : dir.priority === 'sedang'
+                ? 'Prioritas Sedang'
+                : 'Prioritas Normal';
+
+            const statusLabel =
+              dir.status === 'aktif'
+                ? 'Aktif'
+                : dir.status === 'selesai'
+                ? 'Selesai'
+                : 'Arsip';
+
+            return (
+              <div
+                key={dir.id}
+                className="bg-white p-6 rounded-lg border border-[#E2E8F0] shadow-xs flex flex-col justify-between space-y-4 hover:border-slate-300 transition-colors"
+              >
+                {/* 1. Baris Judul & Tanggal (Atas) */}
+                <div className="flex items-baseline justify-between gap-4">
+                  <RunningText
+                    text={dir.title}
+                    className="text-base font-bold text-[#0F172A] font-headline tracking-tight"
+                  />
+                  <span className="text-xs text-[#64748B] shrink-0 font-medium font-body">
+                    {dir.issuedDate}
                   </span>
                 </div>
-                <span className="text-xs text-[#64748B] flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" /> {dir.issuedDate}
-                </span>
-              </div>
 
-              <div>
-                <h2 className="text-base font-bold text-[#0F172A] font-headline">{dir.title}</h2>
-                <p className="text-xs text-[#0F172A] leading-relaxed mt-2 bg-[#F8FAFC] p-4 rounded-md border border-[#E2E8F0] font-body">
-                  "{dir.content}"
+                {/* 2. Deskripsi Instruksi */}
+                <p className="text-xs text-[#334155] leading-relaxed font-body">
+                  {dir.content}
                 </p>
-              </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-[#E2E8F0] text-xs">
-                <span className="text-[#64748B] flex items-center gap-1 font-body">
-                  <ShieldCheck className="w-4 h-4 text-[#059669]" /> Penerbit: <strong>K.H. Mulhat Ali Nuh, Lc., M.A. (Mudir)</strong>
-                </span>
-                <Badge variant="success" icon={<CheckCircle className="w-3.5 h-3.5" />}>
-                  Aktif
-                </Badge>
+                {/* Bottom Metadata */}
+                <div className="pt-3 border-t border-[#F1F5F9] space-y-2 text-xs">
+                  {/* 3. Prioritas & Divisi (Baris Bawah 1) */}
+                  <div className="flex items-center gap-2 text-xs font-body">
+                    <span className="font-bold text-[#0F172A]">
+                      {priorityLabel}
+                    </span>
+                    <span className="text-[#94A3B8]">·</span>
+                    <span className="text-[#475569] font-medium">
+                      {dir.targetDivision}
+                    </span>
+                  </div>
+
+                  {/* 4. Penerbit & Status (Baris Bawah 2) */}
+                  <div className="flex items-center justify-between text-xs font-body">
+                    <span className="text-[#64748B]">
+                      K.H. Mulhat Ali Nuh, Lc., M.A. (Mudir)
+                    </span>
+                    <span className="text-[#059669] font-semibold">
+                      {statusLabel}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </Card>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

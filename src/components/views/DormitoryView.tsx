@@ -77,6 +77,34 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
     return () => observer.disconnect();
   }, []);
 
+  // Global Escape Key Listener for DormitoryView
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (selectedDetailStudent) {
+          setSelectedDetailStudent(null);
+          return;
+        }
+        if (selectedRoomModal) {
+          setSelectedRoomModal(null);
+          return;
+        }
+      }
+    };
+
+    const handleCustomEscape = () => {
+      setSelectedDetailStudent(null);
+      setSelectedRoomModal(null);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('ostifak-escape-pressed', handleCustomEscape);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('ostifak-escape-pressed', handleCustomEscape);
+    };
+  }, [selectedDetailStudent, selectedRoomModal]);
+
   // Subscribe to realtime students if not passed as prop or to ensure reactivity
   useEffect(() => {
     if (propStudents && propStudents.length > 0) {
@@ -200,28 +228,40 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
         </div>
       </div>
 
-      {/* 3 Summary Metric Cards (Clean & Pure Numbers) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card variant="default" className="p-5">
-          <p className="text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">Asrama Terdaftar</p>
-          <div className="flex items-baseline gap-1.5 mt-1">
-            <span className="text-2xl font-bold text-[#0F172A] tracking-tight">{totalDorms}</span>
+      {/* 3 Summary Metrics (Unboxed 1-Row with Dividers) */}
+      <div className="grid grid-cols-3 divide-x divide-[#E2E8F0] py-3.5 border-y border-[#E2E8F0]">
+        <div className="px-3 sm:px-6 first:pl-0">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Asrama Terdaftar
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+              {totalDorms}
+            </span>
           </div>
-        </Card>
+        </div>
 
-        <Card variant="default" className="p-5">
-          <p className="text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">Total Kamar</p>
-          <div className="flex items-baseline gap-1.5 mt-1">
-            <span className="text-2xl font-bold text-[#0F172A] tracking-tight">{totalRooms}</span>
+        <div className="px-3 sm:px-6">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Total Kamar
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+              {totalRooms}
+            </span>
           </div>
-        </Card>
+        </div>
 
-        <Card variant="default" className="p-5">
-          <p className="text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">Total Kapasitas</p>
-          <div className="flex items-baseline gap-1.5 mt-1">
-            <span className="text-2xl font-bold text-[#0F172A] tracking-tight">{totalCapacity}</span>
+        <div className="px-3 sm:px-6 last:pr-0">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Total Kapasitas
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+              {totalCapacity}
+            </span>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Filter Tabs Navigation & Hide Full Checkbox (Clean Single Line Layout) */}

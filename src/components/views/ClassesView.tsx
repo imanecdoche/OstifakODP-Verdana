@@ -68,6 +68,34 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
     return () => unsub();
   }, [propStudents]);
 
+  // Global Escape Key Listener for ClassesView
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (selectedDetailStudent) {
+          setSelectedDetailStudent(null);
+          return;
+        }
+        if (selectedClassModal) {
+          setSelectedClassModal(null);
+          return;
+        }
+      }
+    };
+
+    const handleCustomEscape = () => {
+      setSelectedDetailStudent(null);
+      setSelectedClassModal(null);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('ostifak-escape-pressed', handleCustomEscape);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('ostifak-escape-pressed', handleCustomEscape);
+    };
+  }, [selectedDetailStudent, selectedClassModal]);
+
   const activeStudents = propStudents && propStudents.length > 0 ? propStudents : localStudents;
 
   // Map class name -> array of SantriRecord

@@ -112,8 +112,26 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
     const interval = setInterval(() => {
       setNowTimestamp(Date.now());
     }, 1000);
-    return () => clearInterval(interval);
-  }, [isOpen]);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    const handleCustomEscape = () => {
+      onClose();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('ostifak-escape-pressed', handleCustomEscape);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('ostifak-escape-pressed', handleCustomEscape);
+    };
+  }, [isOpen, onClose]);
 
   const toggleExpand = (id: string) => {
     setExpandedSessionId((prev) => (prev === id ? null : id));
