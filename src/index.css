@@ -203,6 +203,20 @@ html.lenis, html.lenis body {
   font-weight: 700 !important;
 }
 
+/* Gooey Toast: Lebar Mengikuti Panjang Konten Deskripsi */
+.gooey-contentExpanded {
+  min-width: unset !important;
+  width: max-content !important;
+  max-width: min(90vw, 560px) !important;
+}
+
+.gooey-description {
+  width: max-content !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+
 /* Running Ticker / Marquee Animation for Mobile Table Cells */
 @keyframes running-ticker {
   0%, 18% {

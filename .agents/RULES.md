@@ -7,6 +7,12 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Adaptasi Lebar GooeyToast Mengikuti Panjang Konten Deskripsi (Versi v1.1.0.67b):
+  - 1. LEBAR MENYESUAIKAN KONTEN (FIT CONTENT / MAX CONTENT):
+    * Menerapkan aturan CSS `min-width: unset !important; width: max-content !important; max-width: min(90vw, 560px) !important;` pada `.gooey-contentExpanded` dan `.gooey-description` di [`src/index.css`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/index.css).
+    * Lebar morphing fluida blob SVG kini secara dinamis dan presisi mengikuti panjang aktual teks judul dan deskripsi tanpa batasan kaku `min-width: 300px` / `max-width: 380px`.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan kebersihan visual yang proporsional, hemat ruang untuk teks pendek, dan fleksibel untuk teks panjang.
 - **[2026-08-27]**: Pengaturan Durasi Tampil GooeyToast Menjadi Tepat 3 Detik (Versi v1.1.0.66b):
   - 1. DURASI TAMPIL TOAST:
     * Mengatur durasi tampil seluruh toast notifikasi menjadi tepat 3 detik (`3000ms`) sebelum menghilang secara otomatis.
