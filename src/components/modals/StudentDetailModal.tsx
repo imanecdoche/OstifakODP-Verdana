@@ -49,7 +49,10 @@ import {
   QuranSurah,
   calculateQuranPages,
   calculateJuzRange,
-  getJuzFromPage
+  getJuzFromPage,
+  formatHafalanDetail,
+  parseHafalanToPages,
+  calculateStudentZiyadahPages
 } from '../../data/quranSurahs';
 import { gooeyToast } from 'goey-toast';
 import { ScrollArea } from '../ui/ScrollArea';
@@ -911,6 +914,23 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     };
   }, [currentStudent?.hafalanHistory]);
 
+  const capaianHafalanStats = useMemo(() => {
+    const totalPages = calculateStudentZiyadahPages(currentStudent);
+    const juz = Math.floor(totalPages / 20);
+    const remPages = totalPages % 20;
+    const lembar = Math.floor(remPages / 2);
+    const halaman = remPages % 2;
+
+    return {
+      totalPages,
+      juz,
+      lembar,
+      halaman,
+      formatted: `${juz} Juz ${lembar} Lbr. ${halaman} Hal.`,
+    };
+  }, [currentStudent?.hafalanHistory, currentStudent?.hafalan]);
+
+
   const hafalanChartData = useMemo(() => {
     const history = currentStudent?.hafalanHistory || [];
     const now = new Date();
@@ -1119,8 +1139,15 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   const handleConfirmDeleteSetoran = async () => {
     if (!setoranToDelete || !currentStudent) return;
     const updatedHistory = (currentStudent.hafalanHistory || []).filter((h) => h.id !== setoranToDelete.id);
+    const newTotalPages = calculateStudentZiyadahPages({
+      ...currentStudent,
+      hafalanHistory: updatedHistory,
+    });
+    const updatedHafalanFormatted = formatHafalanDetail(newTotalPages);
+
     const updatedStudent: SantriRecord = {
       ...currentStudent,
+      hafalan: updatedHafalanFormatted,
       hafalanHistory: updatedHistory,
     };
     setCurrentStudent(updatedStudent);
@@ -1130,6 +1157,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
     try {
       await updateSantriRecord(currentStudent.id, {
+        hafalan: updatedHafalanFormatted,
         hafalanHistory: updatedHistory,
       });
     } catch (err) {
@@ -1187,8 +1215,15 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       const updatedHistory = (currentStudent.hafalanHistory || []).map((h) =>
         h.id === editingSetoranId ? updatedEntry : h
       );
+      const newTotalPages = calculateStudentZiyadahPages({
+        ...currentStudent,
+        hafalanHistory: updatedHistory,
+      });
+      const updatedHafalanFormatted = formatHafalanDetail(newTotalPages);
+
       const updatedStudent: SantriRecord = {
         ...currentStudent,
+        hafalan: updatedHafalanFormatted,
         hafalanHistory: updatedHistory,
       };
       setCurrentStudent(updatedStudent);
@@ -1198,7 +1233,10 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       gooeyToast.success(`Catatan setoran ${currentStudent.studentName} berhasil diperbarui!`);
 
       try {
-        await updateSantriRecord(currentStudent.id, { hafalanHistory: updatedHistory });
+        await updateSantriRecord(currentStudent.id, {
+          hafalan: updatedHafalanFormatted,
+          hafalanHistory: updatedHistory
+        });
       } catch (err) {
         console.error('Failed to sync edited setoran to Firestore:', err);
       } finally {
@@ -1284,8 +1322,15 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     }
 
     const updatedHafalanList = [...newEntries, ...(currentStudent.hafalanHistory || [])];
+    const newTotalPages = calculateStudentZiyadahPages({
+      ...currentStudent,
+      hafalanHistory: updatedHafalanList,
+    });
+    const updatedHafalanFormatted = formatHafalanDetail(newTotalPages);
+
     const updatedStudent: SantriRecord = {
       ...currentStudent,
+      hafalan: updatedHafalanFormatted,
       hafalanHistory: updatedHafalanList,
     };
 
@@ -1301,6 +1346,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
     try {
       await updateSantriRecord(currentStudent.id, {
+        hafalan: updatedHafalanFormatted,
         hafalanHistory: updatedHafalanList,
       });
     } catch (err) {
@@ -1805,7 +1851,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     <div className="p-4 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-headline">CAPAIAN HAFALAN</p>
-                      <p className="text-xl font-bold text-slate-900 mt-1 font-headline">{currentStudent.hafalan || '0 Juz'}</p>
+                      <p className="text-xl font-bold text-slate-900 mt-1 font-headline">{capaianHafalanStats.formatted}</p>
                     </div>
                     <div className="p-4 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-headline">CAPAIAN MUROJAAH</p>
@@ -2900,7 +2946,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 Statistik & Tren Perkembangan Hafalan
               </h3>
               <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                {currentStudent.studentName} • {currentStudent.kamar} • Capaian: {currentStudent.hafalan}
+                {currentStudent.studentName} • {currentStudent.kamar} • Capaian: {capaianHafalanStats.formatted}
               </p>
             </div>
 

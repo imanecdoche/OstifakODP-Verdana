@@ -139,6 +139,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   // Helper konversi teks hafalan ke numerik juz
   const parseHafalanNumber = (hafalanStr: string): number => {
     if (!hafalanStr) return 0;
+    const juzMatch = hafalanStr.match(/(\d+(\.\d+)?)\s*juz/i);
+    const lbrMatch = hafalanStr.match(/(\d+)\s*(?:lbr|lembar)/i);
+    const halMatch = hafalanStr.match(/(\d+)\s*(?:hal|halaman)/i);
+
+    if (juzMatch || lbrMatch || halMatch) {
+      const juz = juzMatch ? parseFloat(juzMatch[1]) : 0;
+      const lbr = lbrMatch ? parseInt(lbrMatch[1], 10) : 0;
+      const hal = halMatch ? parseInt(halMatch[1], 10) : 0;
+      return Math.round((juz + (lbr * 2 + hal) / 20) * 100) / 100;
+    }
+
     const match = hafalanStr.match(/(\d+(\.\d+)?)/);
     return match ? parseFloat(match[1]) : 0;
   };

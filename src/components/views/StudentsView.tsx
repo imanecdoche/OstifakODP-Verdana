@@ -1065,6 +1065,18 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
 
   // Helper to parse numeric juz from string
   const parseHafalan = (h: string): number => {
+    if (!h) return 0;
+    const juzMatch = h.match(/(\d+(\.\d+)?)\s*juz/i);
+    const lbrMatch = h.match(/(\d+)\s*(?:lbr|lembar)/i);
+    const halMatch = h.match(/(\d+)\s*(?:hal|halaman)/i);
+
+    if (juzMatch || lbrMatch || halMatch) {
+      const juz = juzMatch ? parseFloat(juzMatch[1]) : 0;
+      const lbr = lbrMatch ? parseInt(lbrMatch[1], 10) : 0;
+      const hal = halMatch ? parseInt(halMatch[1], 10) : 0;
+      return Math.round((juz + (lbr * 2 + hal) / 20) * 100) / 100;
+    }
+
     const match = h.match(/(\d+(\.\d+)?)/);
     return match ? parseFloat(match[1]) : 0;
   };

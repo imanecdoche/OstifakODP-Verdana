@@ -175,3 +175,68 @@ export function calculateJuzRange(fromPage: number, toPage: number): string {
   return `${startJuz}-${endJuz}`;
 }
 
+/**
+ * Formats total pages into "N Juz N Lbr. N Hal."
+ */
+export function formatHafalanDetail(totalPages: number): string {
+  const safePages = Math.max(0, Math.round(totalPages));
+  const juz = Math.floor(safePages / 20);
+  const remPages = safePages % 20;
+  const lembar = Math.floor(remPages / 2);
+  const halaman = remPages % 2;
+  return `${juz} Juz ${lembar} Lbr. ${halaman} Hal.`;
+}
+
+/**
+ * Parses a hafalan string (e.g. "12 Juz 3 Lbr. 1 Hal." or "12 Juz" or "12") to total pages.
+ */
+export function parseHafalanToPages(hafalanStr?: string): number {
+  if (!hafalanStr) return 0;
+  const juzMatch = hafalanStr.match(/(\d+(\.\d+)?)\s*juz/i);
+  const lbrMatch = hafalanStr.match(/(\d+)\s*(?:lbr|lembar)/i);
+  const halMatch = hafalanStr.match(/(\d+)\s*(?:hal|halaman)/i);
+
+  if (juzMatch || lbrMatch || halMatch) {
+    const juz = juzMatch ? parseFloat(juzMatch[1]) : 0;
+    const lbr = lbrMatch ? parseInt(lbrMatch[1], 10) : 0;
+    const hal = halMatch ? parseInt(halMatch[1], 10) : 0;
+    return Math.round(juz * 20 + lbr * 2 + hal);
+  }
+
+  const numMatch = hafalanStr.match(/(\d+(\.\d+)?)/);
+  if (numMatch) {
+    const num = parseFloat(numMatch[1]);
+    return Math.round(num * 20);
+  }
+
+  return 0;
+}
+
+/**
+ * Computes total Ziyadah (Hafalan Baru) pages from a student's hafalanHistory or fallback baseline.
+ */
+export function calculateStudentZiyadahPages(student?: {
+  hafalan?: string;
+  hafalanHistory?: { category?: string; pageFrom?: number; pageTo?: number; pageCount?: number }[];
+} | null): number {
+  if (!student) return 0;
+  const history = student.hafalanHistory || [];
+  let totalPages = 0;
+  let hasZiyadahHistory = false;
+
+  history.forEach((h) => {
+    if (!h.category || h.category === 'Hafalan Baru') {
+      const p = h.pageCount || (h.pageTo && h.pageFrom ? Math.max(1, h.pageTo - h.pageFrom + 1) : 1);
+      totalPages += p;
+      hasZiyadahHistory = true;
+    }
+  });
+
+  if (!hasZiyadahHistory && student.hafalan) {
+    totalPages = parseHafalanToPages(student.hafalan);
+  }
+
+  return totalPages;
+}
+
+

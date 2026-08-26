@@ -7,6 +7,14 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Pembaruan Logika Perhitungan Capaian Hafalan Otomatis & Rekonstruksi Kartu Metrik "N Juz N Lbr. N Hal." (Versi v1.1.0.47b):
+  - 1. PEMBARUAN LOGIKA PENGHITUNGAN CAPAIAN HAFALAN:
+    * Setiap catatan setoran dengan kategori **Ziyadah** (Hafalan Baru) dihitung dan dimasukkan secara otomatis ke dalam total **Capaian Hafalan** santri (baik saat menambah setoran baru, mengedit, maupun menghapus setoran).
+    * Penghitungan berbasis konversi presisi Mushaf Standar: 1 Juz = 20 Halaman (10 Lembar), 1 Lembar = 2 Halaman.
+  - 2. REKONSTRUKSI KARTU METRIK CAPAIAN HAFALAN:
+    * Menampilkan rincian lengkap dan akurat dengan format: **"N Juz N Lbr. N Hal."** (contoh: `12 Juz 0 Lbr. 0 Hal.`, `2 Juz 3 Lbr. 1 Hal.`) pada kartu metrik Capaian Hafalan di Tab Hafalan profil santri.
+  - 3. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan desain clean-flat 1-row metric cards tanpa kotak card bertumpuk, bebas ikon dekoratif, divider tipis, dan responsif di seluruh resolusi layar.
 - **[2026-08-27]**: Pembaruan Sistem Pencatatan Hafalan, Mutaba'ah, Otomatisasi Setoran & Rekonstruksi UI Segmen Hafalan Santri (Versi v1.1.0.46b):
   - 1. PEMBARUAN LOGIKA PENCATATAN & OTOMATISASI SETORAN:
     * **Murojaah Otomatis**: Jika santri menyetorkan ayat yang sebelumnya sudah pernah disetorkan sebagai Ziyadah (Hafalan Baru), sistem secara otomatis mengategorikannya sebagai Murojaah.
