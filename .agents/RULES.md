@@ -7,6 +7,13 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Penghapusan Border Kotak Pembungkus Luar pada GooeyToast (Versi v1.1.0.65b):
+  - 1. ELIMINASI BORDER KOTAK (RECTANGULAR WRAPPER):
+    * Menghapus properti `toastOptions.style` pada komponen `<GooeyToaster />` di [`App.tsx`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/App.tsx) yang sebelumnya menempelkan garis tepi kotak kaku pada elemen pembungkus luar (`[data-sonner-toast]`).
+    * Menambahkan reset CSS eksplisit `border: none !important; background: transparent !important; box-shadow: none !important;` pada `[data-sonner-toast]`, `[data-sonner-toaster]`, dan `.gooey-wrapper` di [`index.css`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/index.css).
+    * Garis tepi (#E0E0E0, 1.5px) kini murni mengikuti lengkungan organik fluida blob SVG (`.gooey-blobSvg path`) tanpa ada kotak pembungkus kaku di luarnya.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan keaslian estetika morphing organik clean-flat tanpa kontainer bertumpuk (*unboxed*).
 - **[2026-08-27]**: Pemberian Border Terlihat (#E0E0E0, 1.5px) pada Seluruh Komponen GooeyToast (Versi v1.1.0.64b):
   - 1. VISIBILITAS BORDER GOOEYTOAST:
     * Dibuat modul pembungkus terpusat [`src/lib/toast.ts`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/lib/toast.ts) yang secara otomatis menyuntikkan properti `borderColor: '#E0E0E0'`, `borderWidth: 1.5`, `bounce: 0.05`, dan `showTimestamp: false` ke seluruh panggilan `gooeyToast` (success, error, warning, info, promise, default).

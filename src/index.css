@@ -162,7 +162,28 @@ html.lenis, html.lenis body {
   }
 }
 
-/* Gooey Toast Explicit Visible Border & Styling */
+/* Gooey Toast: Strip Outer Box Container, Retain Pure Blob Stroke */
+[data-sonner-toast] {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+[data-sonner-toaster] {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.gooey-wrapper {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
 .gooey-blobSvg path {
   stroke: #E0E0E0 !important;
   stroke-width: 1.5px !important;

@@ -681,12 +681,6 @@ export default function App() {
           showTimestamp={false}
           duration={3500}
           closeButton
-          toastOptions={{
-            style: {
-              borderColor: '#E0E0E0',
-              borderWidth: '1.5px',
-            },
-          }}
         />
       </>
     );
@@ -859,12 +853,6 @@ export default function App() {
         showTimestamp={false}
         duration={3500}
         closeButton
-        toastOptions={{
-          style: {
-            borderColor: '#E0E0E0',
-            borderWidth: '1.5px',
-          },
-        }}
       />
 
       {/* Global Data Fetching Loading Bar (Thin Overlay, Bright Green, Fast Spin - Disabled in Offline Mode) */}
