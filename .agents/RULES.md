@@ -7,6 +7,14 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Penyesuaian Durasi 650ms & Arah Transisi Responsif (Desktop Horizontal vs Mobile Vertikal) (Versi v1.1.0.42b):
+  - 1. PENYESUAIAN DURASI ANIMASI (+50% LEBIH LAMBAT & HALUS):
+    * Memperlambat durasi pergeseran menjadi 650ms (0.65s) dengan kurva *smooth easing* `cubic-bezier(0.4, 0, 0.2, 1)` agar gerakan transisi terasa jauh lebih elegan, tenang, dan santai.
+  - 2. RESPONSIVE DIRECTION (DESKTOP HORIZONTAL VS MOBILE VERTICAL):
+    * **Desktop / Layar Lebar (>= 768px):** Transisi meluncur dari arah kanan ke kiri (`initial={{ x: '100%', y: 0 }}`) dan kembali ke kanan saat keluar tanpa efek *fading*.
+    * **Mobile / Layar Kecil (< 768px):** Transisi meluncur dari arah bawah ke atas (`initial={{ y: '100%', x: 0 }}`) dan meluncur turun kembali ke bawah saat keluar.
+  - 3. KEPATUHAN PRINSIP DESAIN & SIMULTANEOUS DUAL-LAYER:
+    * Diterapkan secara seragam pada `StudentsView.tsx`, `DormitoryView.tsx`, dan `ClassesView.tsx` menggunakan custom hook `useIsMobile`, menjaga header dan sidebar tetap diam di posisinya.
 - **[2026-08-26]**: Optimalisasi Transisi Slide Bebas Blank Screen dengan Render Simultan Dua Layer & Easing 400ms (Versi v1.1.0.41b):
   - 1. PENYESUAIAN DURASI & EASING ANIMASI ALAMI:
     * Mengatur durasi pergeseran (*slide*) menjadi 400ms (0.4s) dengan kurva *smooth easing* `cubic-bezier(0.4, 0, 0.2, 1)` agar transisi terasa sangat halus, natural, dan tidak terburu-buru.

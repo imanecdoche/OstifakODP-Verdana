@@ -22,6 +22,7 @@ import {
   subscribeToSantri
 } from '../../lib/firestoreService';
 import { useLenisModalLock } from '../../lib/lenis';
+import { useIsMobile } from '../../lib/useIsMobile';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { PillTabs, TabOption } from '../ui/PillTabs';
@@ -39,6 +40,7 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
   rooms = ALL_OFFICIAL_ROOMS,
   students: propStudents
 }) => {
+  const isMobile = useIsMobile(768);
   const [localStudents, setLocalStudents] = useState<SantriRecord[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDormFilter, setSelectedDormFilter] = useState<string>(() => {
@@ -434,11 +436,11 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
         {selectedDetailStudent && (
           <motion.div
             key={`dormitory-student-detail-${selectedDetailStudent.id}`}
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            initial={isMobile ? { y: '100%', x: 0 } : { x: '100%', y: 0 }}
+            animate={{ x: 0, y: 0 }}
+            exit={isMobile ? { y: '100%', x: 0 } : { x: '100%', y: 0 }}
             transition={{
-              duration: 0.4,
+              duration: 0.65,
               ease: [0.4, 0, 0.2, 1],
             }}
             className="absolute top-0 left-0 right-0 z-20 w-full min-h-full bg-[#F8FAFC]"
