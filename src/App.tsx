@@ -661,7 +661,7 @@ export default function App() {
         />
 
         {/* Content Canvas */}
-        <main className="flex-1 p-6 max-w-7xl mx-auto w-full overflow-x-hidden">
+        <main className="flex-1 p-6 mt-16 max-w-7xl mx-auto w-full overflow-x-hidden">
           <AnimatePresence mode="wait">
             {selectedDivision === 'bph' ? (
               <PageTransition key="division-bph">

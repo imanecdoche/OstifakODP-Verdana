@@ -7,6 +7,12 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Header Selalu Tampil Statis Fixed Saat Halaman Detail Santri Terbuka di Mobile (Versi v1.1.0.45b):
+  - 1. PERMANEN FIXED TOPBAR HEADER:
+    * Mengubah positioning `Header.tsx` menjadi `fixed top-0 inset-x-0 lg:left-[260px] z-40 h-16` dan memberikan offset `mt-16` pada elemen `<main>` di `App.tsx`.
+    * Memastikan header utama (OSDIGI, toggle menu hamburger, profil, dan navigasi) selalu tampil permanen di bagian atas layar *mobile* dan tidak pernah tersembunyi atau tertutup saat halaman detail santri dibuka.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Layer detail santri tetap meluncur di area konten tepat di bawah header (`top: 64px`), mempertahankan estetika *clean-flat* yang rapi dan konsisten.
 - **[2026-08-27]**: Penggantian Ikon Tombol Penutup Detail Santri Menjadi Ikon Close Tanda Silang (Versi v1.1.0.44b):
   - 1. GAYA IKON CLOSE / TANDA SILANG (ICON-ONLY):
     * Mengganti ikon panah kembali (`ArrowLeft`) pada tombol penutup halaman detail santri di `StudentDetailModal.tsx` menjadi ikon close / tanda silang (`X` dari `lucide-react`).
