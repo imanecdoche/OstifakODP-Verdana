@@ -129,14 +129,17 @@ export function calculateMonthlyAwards(
     });
   });
 
-  // 2. Hafalan Terbanyak (Top 5 Juz)
+  // 2. Hafalan Terbanyak (Top 5 Juz, khusus santri proses tahfizh aktif yang belum tuntas 30 Juz / juz < 30)
   const topHafalanList = [...students]
-    .filter(s => parseHafalanNumber(s.hafalan) > 0)
+    .filter(s => {
+      const juz = parseHafalanNumber(s.hafalan);
+      return juz > 0 && juz < 30; // Santri yang sudah tuntas 30 Juz (Huffazh) dikecualikan
+    })
     .sort((a, b) => parseHafalanNumber(b.hafalan) - parseHafalanNumber(a.hafalan))
     .slice(0, 5);
 
   topHafalanList.forEach((s, idx) => {
-    const rankLabel = `Peringkat #${idx + 1} Hafalan`;
+    const rankLabel = `Peringkat #${idx + 1} Hafalan (<30 Juz)`;
     awards.push({
       studentId: s.id,
       studentName: s.studentName,

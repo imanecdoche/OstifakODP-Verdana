@@ -7,6 +7,14 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Penyesuaian Logika Otomasi PP: Pengecualian Santri 30 Juz dari Kategori Hafalan Terbanyak (Versi v1.1.0.34b):
+  - 1. PENGECUALIAN UNTUK SANTRI 30 JUZ:
+    * Memperbarui fungsi evaluasi predikat bulanan (`calculateMonthlyAwards` pada `achievementAutomationService.ts`) agar santri yang sudah tuntas 30 Juz (Para Huffazh) dikecualikan dari perolehan otomatis poin PP pada kategori "Hafalan Terbanyak" (`juz > 0 && juz < 30`).
+    * Kategori "Hafalan Terbanyak" difokuskan secara eksklusif bagi santri yang sedang dalam proses tahfizh aktif yang belum mencapai 30 juz.
+  - 2. JADWAL & KETENTUAN OTOMASI BERKALA:
+    * Mempertahankan jadwal otomatisasi resmi pada tanggal terakhir setiap bulan pukul 21:00 WIB untuk seluruh predikat prestasi lainnya (Santri Teladan, Setoran Terbanyak, dan Murojaah Terbanyak).
+  - 3. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan gaya tampilan clean-flat, divider tipis, bebas ikon dekoratif, dan anti-text-wrapping di seluruh resolusi layar.
 - **[2026-08-26]**: Standardisasi Satuan Poin Pelanggaran (PK), Halaman & Sistem Poin Prestasi Santri (PP), serta Otomasi Poin Bulanan (Versi v1.1.0.33b):
   - 1. STANDARDISASI SATUAN POIN PELANGGARAN ("PK"):
     * Mengganti seluruh teks/string satuan poin penalti pelanggaran dari "Pts" / "Poin" menjadi "PK" (contoh: "10 PK", "20 PK", "0 PK") di seluruh tabel, kartu metrik, toast, modal rekam kasus, dan direktori santri.

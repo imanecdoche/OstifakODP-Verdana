@@ -713,7 +713,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                 <p className="font-bold text-[#0F172A]">Ketentuan Sistem Poin PP Otomatis:</p>
                 <ul className="list-disc list-inside text-[#64748B] space-y-1 text-[11px]">
                   <li><strong>Santri Teladan:</strong> Top 5 santri (0 PK + hafalan tertinggi) mendapat <strong>+25 PP</strong> (Juara 1) dan <strong>+20 PP</strong> (Juara 2-5).</li>
-                  <li><strong>Hafalan Terbanyak:</strong> Top 5 hafalan juz tertinggi mendapat <strong>+20 PP</strong>.</li>
+                  <li><strong>Hafalan Terbanyak:</strong> Top 5 hafalan juz tertinggi bagi santri proses aktif (&lt; 30 Juz, santri 30 Juz/Huffazh dikecualikan) mendapat <strong>+20 PP</strong>.</li>
                   <li><strong>Setoran Terbanyak Bulan Ini:</strong> Top 5 rekam setoran baru bulan ini mendapat <strong>+15 PP</strong>.</li>
                   <li><strong>Murojaah Terbanyak Bulan Ini:</strong> Top 5 rekam murojaah bulan ini mendapat <strong>+15 PP</strong>.</li>
                 </ul>
