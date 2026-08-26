@@ -668,36 +668,34 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
       </div>
 
       {/* 1. Mobile Bottom Sheet (Action Sheet) */}
-      {isMobile && activeMenu && (
-        <ActionSheet
-          isOpen={!!activeMenu}
-          onClose={() => setActiveMenu(null)}
-          title={activeMenu.violation.studentName}
-          subtitle={`${activeMenu.violation.violation} • NIS: ${activeMenu.violation.nis} • ${activeMenu.violation.kamar}`}
-          actions={[
-            {
-              label: activeMenu.violation.status === 'selesai' ? 'Tandai Belum Selesai' : 'Tandai Selesai',
-              icon: activeMenu.violation.status === 'selesai' ? (
-                <Clock className="w-5 h-5 text-black" />
-              ) : (
-                <CheckCircle2 className="w-5 h-5 text-black" />
-              ),
-              onClick: () => handleToggleStatus(activeMenu.violation),
-            },
-            {
-              label: 'Edit Kasus',
-              icon: <Pencil className="w-5 h-5 text-black" />,
-              onClick: () => handleOpenEdit(activeMenu.violation),
-            },
-            {
-              label: 'Hapus Kasus',
-              icon: <Trash2 className="w-5 h-5 text-black" />,
-              isDestructive: true,
-              onClick: () => handleOpenDelete(activeMenu.violation),
-            },
-          ]}
-        />
-      )}
+      <ActionSheet
+        isOpen={isMobile && !!activeMenu}
+        onClose={() => setActiveMenu(null)}
+        title={activeMenu?.violation.studentName}
+        subtitle={activeMenu ? `${activeMenu.violation.violation} • NIS: ${activeMenu.violation.nis} • ${activeMenu.violation.kamar}` : undefined}
+        actions={activeMenu ? [
+          {
+            label: activeMenu.violation.status === 'selesai' ? 'Tandai Belum Selesai' : 'Tandai Selesai',
+            icon: activeMenu.violation.status === 'selesai' ? (
+              <Clock className="w-5 h-5 text-black" />
+            ) : (
+              <CheckCircle2 className="w-5 h-5 text-black" />
+            ),
+            onClick: () => handleToggleStatus(activeMenu.violation),
+          },
+          {
+            label: 'Edit Kasus',
+            icon: <Pencil className="w-5 h-5 text-black" />,
+            onClick: () => handleOpenEdit(activeMenu.violation),
+          },
+          {
+            label: 'Hapus Kasus',
+            icon: <Trash2 className="w-5 h-5 text-black" />,
+            isDestructive: true,
+            onClick: () => handleOpenDelete(activeMenu.violation),
+          },
+        ] : []}
+      />
 
       {/* 2. Desktop Floating Fixed Dropdown & Context Menu with Fullscreen Transparent Backdrop */}
       {!isMobile && activeMenu && (

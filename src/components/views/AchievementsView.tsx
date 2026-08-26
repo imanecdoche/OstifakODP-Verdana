@@ -818,27 +818,25 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
       </div>
 
       {/* 1. Mobile Bottom Sheet (Action Sheet) */}
-      {isMobile && activeMenu && (
-        <ActionSheet
-          isOpen={!!activeMenu}
-          onClose={() => setActiveMenu(null)}
-          title={activeMenu.achievement.studentName}
-          subtitle={`${activeMenu.achievement.title} • +${activeMenu.achievement.points} • ${activeMenu.achievement.category}`}
-          actions={[
-            {
-              label: 'Edit Prestasi',
-              icon: <Pencil className="w-5 h-5 text-black" />,
-              onClick: () => handleOpenEdit(activeMenu.achievement),
-            },
-            {
-              label: 'Hapus Prestasi',
-              icon: <Trash2 className="w-5 h-5 text-black" />,
-              isDestructive: true,
-              onClick: () => handleOpenDelete(activeMenu.achievement),
-            },
-          ]}
-        />
-      )}
+      <ActionSheet
+        isOpen={isMobile && !!activeMenu}
+        onClose={() => setActiveMenu(null)}
+        title={activeMenu?.achievement.studentName}
+        subtitle={activeMenu ? `${activeMenu.achievement.title} • +${activeMenu.achievement.points} • ${activeMenu.achievement.category}` : undefined}
+        actions={activeMenu ? [
+          {
+            label: 'Edit Prestasi',
+            icon: <Pencil className="w-5 h-5 text-black" />,
+            onClick: () => handleOpenEdit(activeMenu.achievement),
+          },
+          {
+            label: 'Hapus Prestasi',
+            icon: <Trash2 className="w-5 h-5 text-black" />,
+            isDestructive: true,
+            onClick: () => handleOpenDelete(activeMenu.achievement),
+          },
+        ] : []}
+      />
 
       {/* 2. Desktop Floating Fixed Dropdown & Context Menu with Transparent Backdrop */}
       {!isMobile && activeMenu && (

@@ -7,6 +7,14 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Penambahan Bottom Padding & Animasi Spring Exit pada Action Sheet Mobile (Versi v1.1.0.69b):
+  - 1. BOTTOM SAFE PADDING ACTION SHEET:
+    * Menambahkan padding bawah ekstra `pt-3 pb-8 px-4 sm:pb-5` pada kontainer tombol batal di [`src/components/ui/ActionSheet.tsx`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/components/ui/ActionSheet.tsx) untuk memastikan tombol dan opsi aksi tidak tertutup oleh navigasi bawah ponsel, sistem gesture bar, atau navbar browser.
+  - 2. ANIMASI KELUAR TIPE SPRING (SPRING EXIT ANIMATION):
+    * Menerapkan transisi fisika spring `transition={{ type: 'spring', damping: 28, stiffness: 300, mass: 0.8 }}` pada panel panel bawah `<motion.div>` saat masuk maupun saat keluar (*exit*).
+    * Mengaktifkan caching konten teks/aksi selama proses exit animation berlangsung dan memastikan `<ActionSheet isOpen={isMobile && !!activeMenu} />` tetap ter-mount di DOM pohon komponen sehingga transisi spring exit berjalan mulus tanpa terputus mendadak.
+  - 3. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Pengalaman sentuh mobile menjadi sangat nyaman (*thumb-friendly*), ergonomis, dan interaksi penutupan terasa natural dan taktil.
 - **[2026-08-27]**: Pengaturan Durasi Tampil GooeyToast Deskripsi Menjadi 3.5 Detik (Versi v1.1.0.68b):
   - 1. DURASI TOAST DENGAN DESKRIPSI:
     * Mengatur durasi tampil toast yang memuat deskripsi (`options.description`) menjadi tepat 3.5 detik (`3500ms`) sebelum menghilang secara otomatis, sedangkan toast ringkas tanpa deskripsi tetap berdurasi 3 detik (`3000ms`).

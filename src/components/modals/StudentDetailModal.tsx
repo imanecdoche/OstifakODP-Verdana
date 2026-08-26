@@ -3378,27 +3378,25 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       )}
 
       {/* 7. Mobile Bottom Sheet (Action Sheet) for Setoran Records */}
-      {isMobile && setoranContextMenu && (
-        <ActionSheet
-          isOpen={!!setoranContextMenu}
-          onClose={() => setSetoranContextMenu(null)}
-          title={setoranContextMenu.record.surah}
-          subtitle={`${setoranContextMenu.record.date} • ${setoranContextMenu.record.category || 'Hafalan'}`}
-          actions={[
-            {
-              label: 'Edit Setoran',
-              icon: <Pencil className="w-5 h-5 text-black" />,
-              onClick: () => handleOpenEditSetoran(setoranContextMenu.record),
-            },
-            {
-              label: 'Hapus Setoran',
-              icon: <Trash2 className="w-5 h-5 text-black" />,
-              isDestructive: true,
-              onClick: () => handleOpenDeleteSetoran(setoranContextMenu.record),
-            },
-          ]}
-        />
-      )}
+      <ActionSheet
+        isOpen={isMobile && !!setoranContextMenu}
+        onClose={() => setSetoranContextMenu(null)}
+        title={setoranContextMenu?.record.surah}
+        subtitle={setoranContextMenu ? `${setoranContextMenu.record.date} • ${setoranContextMenu.record.category || 'Hafalan'}` : undefined}
+        actions={setoranContextMenu ? [
+          {
+            label: 'Edit Setoran',
+            icon: <Pencil className="w-5 h-5 text-black" />,
+            onClick: () => handleOpenEditSetoran(setoranContextMenu.record),
+          },
+          {
+            label: 'Hapus Setoran',
+            icon: <Trash2 className="w-5 h-5 text-black" />,
+            isDestructive: true,
+            onClick: () => handleOpenDeleteSetoran(setoranContextMenu.record),
+          },
+        ] : []}
+      />
 
       {/* 7b. Desktop Floating Context Menu for Setoran Records */}
       {!isMobile && setoranContextMenu && (
