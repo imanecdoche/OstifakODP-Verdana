@@ -7,6 +7,12 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Pengaturan Durasi Tampil GooeyToast Menjadi Tepat 3 Detik (Versi v1.1.0.66b):
+  - 1. DURASI TAMPIL TOAST:
+    * Mengatur durasi tampil seluruh toast notifikasi menjadi tepat 3 detik (`3000ms`) sebelum menghilang secara otomatis.
+    * Konfigurasi diterapkan secara terpusat pada properti `duration: 3000` dan `timing: { displayDuration: 3000 }` di [`src/lib/toast.ts`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/lib/toast.ts) serta prop `duration={3000}` pada komponen `<GooeyToaster />` di [`src/App.tsx`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/App.tsx).
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Memberikan waktu baca notifikasi yang ringkas, cepat, dan nyaman tanpa mengganggu alur interaksi pengguna.
 - **[2026-08-27]**: Penghapusan Border Kotak Pembungkus Luar pada GooeyToast (Versi v1.1.0.65b):
   - 1. ELIMINASI BORDER KOTAK (RECTANGULAR WRAPPER):
     * Menghapus properti `toastOptions.style` pada komponen `<GooeyToaster />` di [`App.tsx`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/App.tsx) yang sebelumnya menempelkan garis tepi kotak kaku pada elemen pembungkus luar (`[data-sonner-toast]`).

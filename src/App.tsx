@@ -679,7 +679,7 @@ export default function App() {
           closeOnEscape={false}
           bounce={0.05}
           showTimestamp={false}
-          duration={3500}
+          duration={3000}
           closeButton
         />
       </>
@@ -851,7 +851,7 @@ export default function App() {
         closeOnEscape={false}
         bounce={0.05}
         showTimestamp={false}
-        duration={3500}
+        duration={3000}
         closeButton
       />
 

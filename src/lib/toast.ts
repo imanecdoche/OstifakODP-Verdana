@@ -10,6 +10,10 @@ export const DEFAULT_TOAST_OPTIONS: GooeyToastOptions = {
   borderWidth: 1.5,
   bounce: 0.05,
   showTimestamp: false,
+  duration: 3000,
+  timing: {
+    displayDuration: 3000,
+  },
 };
 
 function mergeOptions(options?: GooeyToastOptions): GooeyToastOptions {
@@ -20,6 +24,8 @@ function mergeOptions(options?: GooeyToastOptions): GooeyToastOptions {
     borderWidth: options?.borderWidth ?? DEFAULT_TOAST_OPTIONS.borderWidth,
     bounce: options?.bounce ?? DEFAULT_TOAST_OPTIONS.bounce,
     showTimestamp: options?.showTimestamp ?? DEFAULT_TOAST_OPTIONS.showTimestamp,
+    duration: options?.duration ?? DEFAULT_TOAST_OPTIONS.duration,
+    timing: options?.timing ?? DEFAULT_TOAST_OPTIONS.timing,
   };
 }
 
@@ -37,6 +43,8 @@ export const gooeyToast = Object.assign(
         borderWidth: data.borderWidth ?? DEFAULT_TOAST_OPTIONS.borderWidth,
         bounce: data.bounce ?? DEFAULT_TOAST_OPTIONS.bounce,
         showTimestamp: data.showTimestamp ?? DEFAULT_TOAST_OPTIONS.showTimestamp,
+        duration: data.duration ?? DEFAULT_TOAST_OPTIONS.duration,
+        timing: data.timing ?? DEFAULT_TOAST_OPTIONS.timing,
       }),
     dismiss: rawGooeyToast.dismiss,
     update: rawGooeyToast.update,
