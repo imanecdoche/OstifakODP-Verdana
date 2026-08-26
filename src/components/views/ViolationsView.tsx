@@ -628,13 +628,13 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
                       <RunningText text={v.penaltyDescription || '-'} className="text-[#0F172A] font-body" />
                     </td>
 
-                    {/* 7. Kolom Status (Zero Icon Policy: Plain Text) */}
+                    {/* 7. Kolom Status (Ikon Murni Tanpa Teks) */}
                     <td className="p-3.5 w-28 min-w-[90px] max-w-[110px] text-center whitespace-nowrap align-middle">
-                      <span className={`font-semibold text-xs ${
-                        v.status === 'selesai' ? 'text-[#059669]' : 'text-amber-600'
-                      }`}>
-                        {v.status === 'selesai' ? 'Selesai' : 'Dalam Proses'}
-                      </span>
+                      {v.status === 'selesai' ? (
+                        <CheckCircle2 className="w-4 h-4 text-[#059669] mx-auto" title="Selesai" />
+                      ) : (
+                        <Clock className="w-4 h-4 text-amber-500 mx-auto" title="Dalam Proses" />
+                      )}
                     </td>
 
                     {/* 8. Kolom Aksi */}

@@ -268,19 +268,19 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
               <div>
                 <p className="text-[11px] text-[#64748B] uppercase font-semibold tracking-wide">Kebersihan</p>
                 <p className="text-lg font-bold text-[#0F172A] mt-0.5">
-                  {cls.cleanlinessScore > 0 ? `${cls.cleanlinessScore} Pts` : '-'}
+                  {cls.cleanlinessScore || 0} PP
                 </p>
               </div>
               <div>
                 <p className="text-[11px] text-[#64748B] uppercase font-semibold tracking-wide">Disiplin</p>
                 <p className="text-lg font-bold text-[#0F172A] mt-0.5">
-                  {cls.disciplineScore > 0 ? `${cls.disciplineScore} Pts` : '-'}
+                  {cls.disciplineScore || 0} PP
                 </p>
               </div>
               <div>
                 <p className="text-[11px] text-[#64748B] uppercase font-semibold tracking-wide">Akademik</p>
                 <p className="text-lg font-bold text-[#0F172A] mt-0.5">
-                  {cls.academicScore > 0 ? `${cls.academicScore} Pts` : '-'}
+                  {cls.academicScore || 0} PP
                 </p>
               </div>
             </div>

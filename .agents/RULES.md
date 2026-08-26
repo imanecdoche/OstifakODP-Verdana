@@ -7,6 +7,22 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Pembaruan Sistem Perhitungan Poin Prestasi (PP) Kamar, Asrama, Kelas & Rekonstruksi Total Metrik Dashboard (Versi v1.1.0.49b):
+  - 1. PEMBARUAN LOGIKA POIN PRESTASI (KAMAR, ASRAMA, & KELAS):
+    * **Kategori Kamar**: Setiap kamar memiliki 3 kategori prestasi (**Indah**, **Rapi**, **Bersih**), masing-masing rentang 0-100 PP. Total PP Kamar = Indah + Rapi + Bersih.
+    * **Kategori Asrama**: Asrama memiliki 3 kategori prestasi yang sama yang merupakan hasil akumulasi total nilai dari seluruh kamar di asrama tersebut (Total PP Asrama = total Indah + total Rapi + total Bersih seluruh kamar).
+    * **Kelas (IPA & IPS)**: Sistem penilaian PP dan PK berlaku untuk kelas 1 sampai 6, di mana kelas IPA dan IPS digabungkan sebagai satu kesatuan kelas yang sama (nilai PK dan PP tidak terpisah).
+  - 2. REKONSTRUKSI METRIK & KARTU DI DASHBOARD:
+    * **Top 5 Kamar Terbaik**: Menampilkan total akumulasi nilai N PP kamar dari ketiga kategori, disertai rincian nilai PP masing-masing kategori di bawahnya tanpa label tambahan (`indah • rapi • bersih`). Menghapus label lama "Rata-rata... PK / Juz".
+    * **Top 5 Santri Teladan**: Nilai metrik yang ditampilkan adalah nilai **PP (Poin Prestasi)** (`+{s.poinPrestasi} PP`), bukan lagi PK.
+    * **Top 5 Hafalan Terbanyak & Para Huffazh**: Santri dengan hafalan 30 Juz **tidak ditampilkan** di Top 5 Hafalan Terbanyak, melainkan khusus ditampilkan pada matriks **Para Huffazh**.
+    * **Matriks Baru**: Menambahkan dua matriks baru: **'Top 5 Ziyadah Terbanyak Bulan Kemarin'** dan **'Top 5 Muroja'ah Terbanyak Bulan Kemarin'**.
+    * **Rekapan & Program Kerja**: Menghapus tombol tersegmentasi (*segmented button*) rekapan, menampilkan langsung matriks **'Rekapitulasi Pelanggaran Santri Terbaru'** dan **'Program Kerja OSTIFAK'** secara berurutan.
+    * **Tampilan Program Kerja OSTIFAK**: Mengganti tabel dengan elemen kartu dari halaman tab 'Program Kerja & Proposal Kegiatan', hanya menampilkan **5 teratas dengan progress terbanyak**, tanpa label keterangan/helper tambahan.
+  - 3. STATUS PENCATATAN PELANGGARAN / MAHKAMAH:
+    * Setiap pencatatan pelanggaran atau sidang mahkamah baru, statusnya default adalah **PROSES** dengan ikon jam (*clock icon*) murni **tanpa label teks**.
+  - 4. KEPATUHAN PRINSIP DATA & DESAIN (ANTI-GRAVITY UI):
+    * Seluruh data yang dirender pada semua matriks bersumber dari data asli database, desain clean-flat, divider tipis, dan responsif.
 - **[2026-08-27]**: Penyesuaian Tipografi Satuan Juz, Lbr., Hal. Menjadi Lebih Kecil & Lebih Transparan (Versi v1.1.0.48b):
   - 1. REFINEMENT TIPOGRAFI SATUAN:
     * Mengubah gaya teks satuan (`Juz`, `Lbr.`, `Hal.`) pada kartu metrik **Capaian Hafalan** dan **Capaian Murojaah** (serta kartu ringkasan setoran) menjadi lebih kecil dan bernuansa transparan / subtle (`text-xs font-normal text-slate-400 font-body`).

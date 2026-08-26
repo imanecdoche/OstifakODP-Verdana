@@ -315,23 +315,47 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
         <div className="space-y-8">
           {filteredDormitories.map((dorm) => (
             <div key={dorm.id} className="space-y-4">
-              {/* Unboxed Dormitory Header with Clean Single Top Divider */}
-              <div className="border-t border-[#E2E8F0] pt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
-              <h2 className="text-4xl font-black text-[#0F172A] font-headline tracking-tight">
-                {dorm.name}
-              </h2>
-              <span className="text-xs font-semibold text-[#059669] bg-[#059669]/10 px-2.5 py-0.5 rounded-full">
-                {dorm.roomCount} Kamar
-              </span>
-              <span className="text-xs text-[#64748B]">
-                • Kapasitas Maksimal: <strong className="text-[#0F172A]">{dorm.id === 'asrama-indonesia' ? '12 Orang / Kamar' : '7 Orang / Kamar'}</strong>
-              </span>
-            </div>
+              {/* Unboxed Dormitory Header with Clean Single Top Divider & PP Accumulation */}
+              {(() => {
+                const dormIndah = dorm.rooms.reduce((acc, r) => acc + (r.aestheticScore || 0), 0);
+                const dormRapi = dorm.rooms.reduce((acc, r) => acc + (r.neatnessScore || 0), 0);
+                const dormBersih = dorm.rooms.reduce((acc, r) => acc + (r.cleanlinessScore || 0), 0);
+                const dormTotalPP = dormIndah + dormRapi + dormBersih;
+
+                return (
+                  <div className="border-t border-[#E2E8F0] pt-6 flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                      <h2 className="text-3xl sm:text-4xl font-black text-[#0F172A] font-headline tracking-tight">
+                        {dorm.name}
+                      </h2>
+                      <span className="text-xs font-semibold text-[#059669] bg-[#059669]/10 px-2.5 py-0.5 rounded-full">
+                        {dorm.roomCount} Kamar
+                      </span>
+                      <span className="text-xs text-[#64748B]">
+                        • Kapasitas Maksimal: <strong className="text-[#0F172A]">{dorm.id === 'asrama-indonesia' ? '12 Orang / Kamar' : '7 Orang / Kamar'}</strong>
+                      </span>
+                    </div>
+
+                    {/* Akumulasi PP Asrama */}
+                    <div className="flex items-center gap-3 text-xs bg-[#F8FAFC] border border-[#E2E8F0] px-3.5 py-1.5 rounded-lg">
+                      <span className="font-bold text-[#059669] font-headline">{dormTotalPP} PP Total</span>
+                      <span className="text-slate-300">|</span>
+                      <span className="text-slate-600 font-medium">{dormIndah} Indah</span>
+                      <span className="text-slate-300">•</span>
+                      <span className="text-slate-600 font-medium">{dormRapi} Rapi</span>
+                      <span className="text-slate-300">•</span>
+                      <span className="text-slate-600 font-medium">{dormBersih} Bersih</span>
+                    </div>
+                  </div>
+                );
+              })()}
 
             {/* Rooms Grid: Exactly 2 Columns per Row for visual breathing space */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {dorm.rooms.map((room) => {
                 const occupancyRate = room.capacity > 0 ? Math.round((room.occupiedCount / room.capacity) * 100) : 0;
+                const roomTotalPP = (room.aestheticScore || 0) + (room.neatnessScore || 0) + (room.cleanlinessScore || 0);
+
                 return (
                   <Card 
                     key={room.id} 
@@ -345,9 +369,14 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
                         <h3 className="text-lg font-bold text-[#0F172A] font-headline tracking-tight">{room.roomName}</h3>
                         <p className="text-xs text-[#64748B] mt-0.5">{dorm.name} • Kapasitas {room.capacity} Santri</p>
                       </div>
-                      <span className="text-xs font-semibold text-[#64748B] bg-[#F8FAFC] border border-[#E2E8F0] px-2.5 py-1 rounded-[4px]">
-                        {room.occupiedCount}/{room.capacity} Santri
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-[#059669] bg-[#059669]/10 px-2.5 py-1 rounded-[4px]">
+                          {roomTotalPP} PP
+                        </span>
+                        <span className="text-xs font-semibold text-[#64748B] bg-[#F8FAFC] border border-[#E2E8F0] px-2.5 py-1 rounded-[4px]">
+                          {room.occupiedCount}/{room.capacity} Santri
+                        </span>
+                      </div>
                     </div>
 
                     {/* Unboxed 3 Aspect Stats (Bersih, Rapi, Indah) */}
@@ -355,19 +384,19 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
                       <div>
                         <p className="text-[11px] text-[#64748B] uppercase font-semibold tracking-wide">Bersih</p>
                         <p className="text-lg font-bold text-[#0F172A] mt-0.5">
-                          {room.cleanlinessScore > 0 ? `${room.cleanlinessScore} Pts` : '-'}
+                          {room.cleanlinessScore || 0} PP
                         </p>
                       </div>
                       <div>
                         <p className="text-[11px] text-[#64748B] uppercase font-semibold tracking-wide">Rapi</p>
                         <p className="text-lg font-bold text-[#0F172A] mt-0.5">
-                          {room.neatnessScore > 0 ? `${room.neatnessScore} Pts` : '-'}
+                          {room.neatnessScore || 0} PP
                         </p>
                       </div>
                       <div>
                         <p className="text-[11px] text-[#64748B] uppercase font-semibold tracking-wide">Indah</p>
                         <p className="text-lg font-bold text-[#0F172A] mt-0.5">
-                          {room.aestheticScore > 0 ? `${room.aestheticScore} Pts` : '-'}
+                          {room.aestheticScore || 0} PP
                         </p>
                       </div>
                     </div>

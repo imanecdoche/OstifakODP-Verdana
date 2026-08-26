@@ -963,7 +963,7 @@ export async function recordCollectiveMahkamahSession(params: {
         category: divisions.join(' & '),
         points: points || 0,
         severity: getSeverityInfo(points || 0).severity,
-        status: 'selesai',
+        status: 'belum_dihukum',
         date,
         penaltyDescription: penalty,
         reportedBy: `Sidang Mahkamah (${divisions.join(', ')})`,

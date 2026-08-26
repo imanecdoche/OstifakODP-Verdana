@@ -5,11 +5,21 @@ import {
   WorkProgram, 
   UserProfile 
 } from '../../types';
-import { PillTabs, TabOption } from '../ui/PillTabs';
 import { Button } from '../ui/Button';
-import { SantriRecord } from '../../lib/firestoreService';
-import { formatBudgetRatio } from './WorkProgramsView';
+import { Card } from '../ui/Card';
+import { 
+  SantriRecord, 
+  Dormitory, 
+  DormitoryRoom, 
+  ALL_OFFICIAL_ROOMS 
+} from '../../lib/firestoreService';
+import { 
+  formatBudgetRatio, 
+  calculateHMinus, 
+  renderProgramStatusIcon 
+} from './WorkProgramsView';
 import { getSeverityInfo } from '../../lib/severityUtils';
+import { Clock, CheckCircle2 } from 'lucide-react';
 
 interface DashboardViewProps {
   currentUser: UserProfile;
@@ -17,14 +27,14 @@ interface DashboardViewProps {
   violations: ViolationRecord[];
   workPrograms: WorkProgram[];
   students?: SantriRecord[];
+  dormitories?: Dormitory[];
+  rooms?: DormitoryRoom[];
   dormitoriesCount?: number;
   roomsCount?: number;
   onOpenNewViolationModal: () => void;
   onOpenNewProgramModal: () => void;
   onSelectView: (view: string) => void;
 }
-
-type DashboardTab = 'all' | 'violations' | 'programs';
 
 // Running Text / Marquee Looping Component for Anti-Wrapping Table Cells
 const RunningText: React.FC<{
@@ -119,23 +129,37 @@ const formatSplitDate = (dateStr: string): { dayName: string; formattedDate: str
   return { dayName: 'Rabu', formattedDate: dateStr };
 };
 
+// Helper fleksibel untuk parsing tanggal catatan hafalan
+const parseHafalanDate = (dateStr: string): Date | null => {
+  if (!dateStr) return null;
+  const monthMap: Record<string, number> = {
+    januari: 0, jan: 0, februari: 1, feb: 1, maret: 2, mar: 2, april: 3, apr: 3,
+    mei: 4, may: 4, juni: 5, jun: 5, juli: 6, jul: 6, agustus: 7, agu: 7, ags: 7,
+    september: 8, sep: 8, oktober: 9, okt: 9, november: 10, nov: 10, desember: 11, des: 11,
+  };
+  const parts = dateStr.trim().toLowerCase().split(/[\s,.-]+/);
+  if (parts.length >= 3) {
+    const day = parseInt(parts[0], 10);
+    const month = monthMap[parts[1]];
+    const year = parseInt(parts[2], 10);
+    if (!isNaN(day) && month !== undefined && !isNaN(year)) {
+      return new Date(year, month, day);
+    }
+  }
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? null : d;
+};
+
 export const DashboardView: React.FC<DashboardViewProps> = ({
   currentUser,
   violations,
   workPrograms,
   students = [],
+  rooms = ALL_OFFICIAL_ROOMS,
   dormitoriesCount = 0,
   roomsCount = 0,
   onSelectView,
 }) => {
-  const [activeTab, setActiveTab] = useState<DashboardTab>('all');
-
-  const filterTabs: TabOption<DashboardTab>[] = [
-    { id: 'all', label: 'Semua Rekap' },
-    { id: 'violations', label: 'Pelanggaran & Mahkamah', count: violations.length },
-    { id: 'programs', label: 'Program Kerja Divisi', count: workPrograms.length },
-  ];
-
   // Helper konversi teks hafalan ke numerik juz
   const parseHafalanNumber = (hafalanStr: string): number => {
     if (!hafalanStr) return 0;
@@ -165,13 +189,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     return `${avg.toFixed(1)} Juz`;
   }, [students]);
 
-  // 2. Baris 1 - Top 5 Santri Teladan (Poin pelanggaran 0 & hafalan tertinggi)
+  // 2. Baris 1 - Top 5 Santri Teladan (Poin pelanggaran 0 / terendah & PP tertinggi)
   const topSantriTeladan = useMemo(() => {
     if (!students || students.length === 0) return [];
     return [...students]
       .sort((a, b) => {
         const pDiff = (a.poinPelanggaran || 0) - (b.poinPelanggaran || 0);
         if (pDiff !== 0) return pDiff;
+        const ppDiff = (b.poinPrestasi || 0) - (a.poinPrestasi || 0);
+        if (ppDiff !== 0) return ppDiff;
         const hafalanDiff = parseHafalanNumber(b.hafalan) - parseHafalanNumber(a.hafalan);
         if (hafalanDiff !== 0) return hafalanDiff;
         return (b.achievementsHistory?.length || 0) - (a.achievementsHistory?.length || 0);
@@ -179,35 +205,40 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       .slice(0, 5);
   }, [students]);
 
-  // 3. Baris 1 - Top 5 Kamar Terbaik (Rata-rata pelanggaran terendah & hafalan tertinggi)
+  // 3. Baris 1 - Top 5 Kamar Terbaik (Total PP dari 3 Kategori: Indah + Rapi + Bersih)
   const topKamarTerbaik = useMemo(() => {
-    if (!students || students.length === 0) return [];
-    const roomMap: Record<string, { kamar: string; students: SantriRecord[]; totalPoints: number; totalHafalan: number }> = {};
-    
-    students.forEach(s => {
-      const k = s.kamar && s.kamar !== '-' ? s.kamar.trim() : 'Lainnya';
-      if (!roomMap[k]) {
-        roomMap[k] = { kamar: k, students: [], totalPoints: 0, totalHafalan: 0 };
-      }
-      roomMap[k].students.push(s);
-      roomMap[k].totalPoints += (s.poinPelanggaran || 0);
-      roomMap[k].totalHafalan += parseHafalanNumber(s.hafalan);
+    const roomList = (rooms && rooms.length > 0) ? rooms : ALL_OFFICIAL_ROOMS;
+    const list = roomList.map(r => {
+      const indah = r.aestheticScore || 0;
+      const rapi = r.neatnessScore || 0;
+      const bersih = r.cleanlinessScore || 0;
+      const totalPP = indah + rapi + bersih;
+
+      const residentStudents = (students || []).filter(s => {
+        if (!s.kamar) return false;
+        const k = s.kamar.toLowerCase().trim();
+        const rName = r.roomName.toLowerCase().trim();
+        const rNum = r.roomNumber.toLowerCase().trim();
+        return k === rName || k.includes(rName) || (k.includes(r.dormitoryName.toLowerCase()) && k.includes(rNum));
+      });
+      const studentCount = residentStudents.length || r.occupiedCount || 0;
+
+      return {
+        id: r.id,
+        roomName: r.roomName,
+        dormitoryName: r.dormitoryName,
+        indah,
+        rapi,
+        bersih,
+        totalPP,
+        studentCount,
+      };
     });
 
-    return Object.values(roomMap)
-      .map(r => ({
-        kamar: r.kamar,
-        studentCount: r.students.length,
-        avgPoints: r.students.length > 0 ? (r.totalPoints / r.students.length) : 0,
-        avgHafalan: r.students.length > 0 ? (r.totalHafalan / r.students.length) : 0,
-      }))
-      .sort((a, b) => {
-        const pDiff = a.avgPoints - b.avgPoints;
-        if (pDiff !== 0) return pDiff;
-        return b.avgHafalan - a.avgHafalan;
-      })
+    return list
+      .sort((a, b) => b.totalPP - a.totalPP)
       .slice(0, 5);
-  }, [students]);
+  }, [rooms, students]);
 
   // 4. Baris 2 - Para Huffazh (Santri tuntas 30 Juz)
   const paraHuffazh = useMemo(() => {
@@ -218,27 +249,32 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     });
   }, [students]);
 
-  // 5. Baris 2 - Top 5 Hafalan Terbanyak
+  // 5. Baris 2 - Top 5 Hafalan Terbanyak (Santri < 30 Juz)
   const topHafalanTerbanyak = useMemo(() => {
     if (!students || students.length === 0) return [];
     return [...students]
+      .filter(s => {
+        const num = parseHafalanNumber(s.hafalan);
+        const is30 = num >= 30 || (s.hafalan && s.hafalan.toLowerCase().includes('30 juz'));
+        return !is30 && num > 0;
+      })
       .sort((a, b) => parseHafalanNumber(b.hafalan) - parseHafalanNumber(a.hafalan))
       .slice(0, 5);
   }, [students]);
 
-  // 6. Baris 3 - Top 5 Setoran Terbanyak Bulan Ini (Murni dari Database Hafalan History)
+  // 6. Baris 3 - Top 5 Setoran Terbanyak Bulan Ini (Ziyadah)
   const topSetoranBulanIni = useMemo(() => {
     if (!students || students.length === 0) return [];
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
 
     const list = students.map(s => {
       const history = s.hafalanHistory || [];
       const setoranEntries = history.filter(h => {
         if (h.category === 'Murojaah') return false;
-        if (!h.date) return false;
-        const d = new Date(h.date);
-        return !isNaN(d.getTime()) && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+        const d = h.timestamp ? new Date(h.timestamp) : parseHafalanDate(h.date || '');
+        return d && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
       });
 
       const totalPages = setoranEntries.reduce((acc, h) => acc + (h.pageCount || 1), 0);
@@ -252,24 +288,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     });
 
     return list
-      .filter(item => item.count > 0)
-      .sort((a, b) => b.count - a.count || b.totalPages - a.totalPages)
+      .filter(item => item.count > 0 || item.totalPages > 0)
+      .sort((a, b) => b.totalPages - a.totalPages || b.count - a.count)
       .slice(0, 5);
   }, [students]);
 
-  // 7. Baris 3 - Top 5 Murojaah Terbanyak Bulan Ini (Murni dari Database Murojaah History)
+  // 7. Baris 3 - Top 5 Murojaah Terbanyak Bulan Ini (Murojaah)
   const topMurojaahBulanIni = useMemo(() => {
     if (!students || students.length === 0) return [];
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
 
     const list = students.map(s => {
       const history = s.hafalanHistory || [];
       const murojaahEntries = history.filter(h => {
         if (h.category !== 'Murojaah') return false;
-        if (!h.date) return false;
-        const d = new Date(h.date);
-        return !isNaN(d.getTime()) && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+        const d = h.timestamp ? new Date(h.timestamp) : parseHafalanDate(h.date || '');
+        return d && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
       });
 
       const totalPages = murojaahEntries.reduce((acc, h) => acc + (h.pageCount || 1), 0);
@@ -283,10 +319,84 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     });
 
     return list
-      .filter(item => item.count > 0)
-      .sort((a, b) => b.count - a.count || b.totalPages - a.totalPages)
+      .filter(item => item.count > 0 || item.totalPages > 0)
+      .sort((a, b) => b.totalPages - a.totalPages || b.count - a.count)
       .slice(0, 5);
   }, [students]);
+
+  // 8. Baris 4 - Top 5 Ziyadah Terbanyak Bulan Kemarin
+  const topZiyadahBulanKemarin = useMemo(() => {
+    if (!students || students.length === 0) return [];
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+    const list = students.map(s => {
+      const history = s.hafalanHistory || [];
+      const entries = history.filter(h => {
+        if (h.category === 'Murojaah') return false;
+        const d = h.timestamp ? new Date(h.timestamp) : parseHafalanDate(h.date || '');
+        return d && d.getMonth() === prevMonth && d.getFullYear() === prevYear;
+      });
+
+      const totalPages = entries.reduce((acc, h) => acc + (h.pageCount || 1), 0);
+      const count = entries.length;
+
+      return {
+        student: s,
+        count,
+        totalPages,
+      };
+    });
+
+    return list
+      .filter(item => item.count > 0 || item.totalPages > 0)
+      .sort((a, b) => b.totalPages - a.totalPages || b.count - a.count)
+      .slice(0, 5);
+  }, [students]);
+
+  // 9. Baris 4 - Top 5 Muroja'ah Terbanyak Bulan Kemarin
+  const topMurojaahBulanKemarin = useMemo(() => {
+    if (!students || students.length === 0) return [];
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+    const list = students.map(s => {
+      const history = s.hafalanHistory || [];
+      const entries = history.filter(h => {
+        if (h.category !== 'Murojaah') return false;
+        const d = h.timestamp ? new Date(h.timestamp) : parseHafalanDate(h.date || '');
+        return d && d.getMonth() === prevMonth && d.getFullYear() === prevYear;
+      });
+
+      const totalPages = entries.reduce((acc, h) => acc + (h.pageCount || 1), 0);
+      const count = entries.length;
+
+      return {
+        student: s,
+        count,
+        totalPages,
+      };
+    });
+
+    return list
+      .filter(item => item.count > 0 || item.totalPages > 0)
+      .sort((a, b) => b.totalPages - a.totalPages || b.count - a.count)
+      .slice(0, 5);
+  }, [students]);
+
+  // 10. Top 5 Work Programs (Progress Terbanyak)
+  const topWorkPrograms = useMemo(() => {
+    if (!workPrograms || workPrograms.length === 0) return [];
+    return [...workPrograms]
+      .sort((a, b) => (b.progress || 0) - (a.progress || 0))
+      .slice(0, 5);
+  }, [workPrograms]);
 
   return (
     <div className="space-y-12 pb-16">
@@ -375,7 +485,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
-      {/* 3. STRUKTUR TOP LIST & STATISTIK REAL DATABASE (3 BARIS / 2 KOLOM) */}
+      {/* 3. STRUKTUR TOP LIST & STATISTIK REAL DATABASE */}
 
       {/* BARIS 1: Top 5 Santri Teladan & Top 5 Kamar Terbaik */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -387,7 +497,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               Top 5 Santri Teladan
             </h2>
             <p className="text-xs text-[#64748B] mt-0.5 font-body">
-              Kedisiplinan tertinggi (0 poin pelanggaran) & capaian hafalan terbaik
+              Akumulasi perolehan Poin Prestasi (PP) santri tertinggi dengan kedisiplinan terbaik
             </p>
           </div>
 
@@ -412,10 +522,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-xs font-bold text-[#059669] font-body">
-                      {s.poinPelanggaran === 0 ? '0 PK' : `${s.poinPelanggaran} PK`}
+                      +{s.poinPrestasi || 0} PP
                     </p>
                     <p className="text-[11px] text-[#64748B] font-body">
-                      {s.hafalan}
+                      {s.poinPelanggaran || 0} PK • {s.hafalan || '0 Juz'}
                     </p>
                   </div>
                 </div>
@@ -431,7 +541,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               Top 5 Kamar Terbaik
             </h2>
             <p className="text-xs text-[#64748B] mt-0.5 font-body">
-              Kamar dengan rata-rata pelanggaran terendah & ketertiban tertinggi
+              Akumulasi perolehan Poin Prestasi (PP) kamar tertinggi (Indah • Rapi • Bersih)
             </p>
           </div>
 
@@ -440,26 +550,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <p className="text-xs text-[#64748B] py-4">Belum ada data kamar terdaftar.</p>
             ) : (
               topKamarTerbaik.map((r, idx) => (
-                <div key={r.kamar} className="py-3.5 flex items-center justify-between gap-4">
+                <div key={r.id || r.roomName} className="py-3.5 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3.5 min-w-0">
                     <span className="text-xs font-mono font-bold text-[#64748B] w-6 shrink-0">
                       0{idx + 1}
                     </span>
                     <div className="min-w-0">
                       <p className="font-bold text-sm text-[#0F172A] font-headline truncate">
-                        {r.kamar}
+                        {r.roomName}
                       </p>
-                      <p className="text-xs text-[#64748B] font-body">
-                        {r.studentCount} Santri Terdaftar
+                      <p className="text-xs text-[#64748B] font-body truncate">
+                        {r.dormitoryName} • {r.studentCount} Santri Terdaftar
                       </p>
                     </div>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-xs font-bold text-[#059669] font-body">
-                      Rata-rata {r.avgPoints.toFixed(1)} PK
+                      {r.totalPP} PP
                     </p>
                     <p className="text-[11px] text-[#64748B] font-body">
-                      {r.avgHafalan.toFixed(1)} Juz Rata-rata
+                      {r.indah} • {r.rapi} • {r.bersih}
                     </p>
                   </div>
                 </div>
@@ -526,7 +636,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               Top 5 Hafalan Terbanyak
             </h2>
             <p className="text-xs text-[#64748B] mt-0.5 font-body">
-              Santri dengan akumulasi kuantitas juz hafalan tertinggi
+              Santri aktif dengan akumulasi kuantitas capaian hafalan tertinggi
             </p>
           </div>
 
@@ -658,195 +768,258 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       </div>
 
-      {/* 4. REKAPITULASI PELANGGARAN & PROGRAM KERJA (UNBOXED CLEAN TABLE) */}
-      <div className="space-y-6 border-t border-[#E2E8F0] pt-10">
+      {/* BARIS 4: Top 5 Ziyadah Terbanyak Bulan Kemarin & Top 5 Muroja'ah Terbanyak Bulan Kemarin */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 border-t border-[#E2E8F0] pt-10">
         
-        {/* Navigation Tabs */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <PillTabs
-            tabs={filterTabs}
-            activeTab={activeTab}
-            onChange={(tab) => setActiveTab(tab)}
-          />
+        {/* Kolom 1: Top 5 Ziyadah Terbanyak Bulan Kemarin */}
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
+              Top 5 Ziyadah Terbanyak Bulan Kemarin
+            </h2>
+            <p className="text-xs text-[#64748B] mt-0.5 font-body">
+              Akumulasi penambahan hafalan baru santri periode bulan lalu
+            </p>
+          </div>
+
+          <div className="divide-y divide-[#E2E8F0]">
+            {topZiyadahBulanKemarin.length === 0 ? (
+              <p className="text-xs text-[#64748B] py-4">Belum ada data ziyadah bulan kemarin.</p>
+            ) : (
+              topZiyadahBulanKemarin.map((item, idx) => (
+                <div key={item.student.id} className="py-3.5 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <span className="text-xs font-mono font-bold text-[#64748B] w-6 shrink-0">
+                      0{idx + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm text-[#0F172A] font-headline truncate">
+                        {item.student.studentName}
+                      </p>
+                      <p className="text-xs text-[#64748B] font-body truncate">
+                        NIS: {item.student.nis} • {item.student.kelas} • {item.student.kamar}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-xs font-bold text-[#059669] font-body">
+                      {item.count} Kali Setoran
+                    </p>
+                    <p className="text-[11px] text-[#64748B] font-body">
+                      {item.totalPages} Halaman Tercatat
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
-        {/* Pelanggaran Section */}
-        {(activeTab === 'all' || activeTab === 'violations') && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
-                  Rekapitulasi Pelanggaran Santri Terbaru
-                </h2>
-                <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                  Pencatatan kasus kedisiplinan berbobot poin oleh Divisi Keamanan
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onSelectView('violations')}
-              >
-                Lihat Semua
-              </Button>
-            </div>
+        {/* Kolom 2: Top 5 Muroja'ah Terbanyak Bulan Kemarin */}
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
+              Top 5 Muroja'ah Terbanyak Bulan Kemarin
+            </h2>
+            <p className="text-xs text-[#64748B] mt-0.5 font-body">
+              Pengulangan hafalan mutqin tertinggi santri periode bulan lalu
+            </p>
+          </div>
 
-            <div className="overflow-x-auto w-full">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-[#F8FAFC] text-[#64748B] font-semibold border-b border-[#E2E8F0] font-headline uppercase tracking-[0.5px]">
-                  <tr>
-                    <th className="p-3.5 w-32 min-w-[120px] max-w-[130px] whitespace-nowrap">TANGGAL</th>
-                    <th className="p-3.5 w-44 min-w-[140px] max-w-[180px] whitespace-nowrap">SANTRI & KAMAR</th>
-                    <th className="p-3.5 min-w-[180px] max-w-[280px] sm:max-w-[340px] whitespace-nowrap">JENIS PELANGGARAN</th>
-                    <th className="p-3.5 w-20 min-w-[60px] max-w-[70px] whitespace-nowrap">POIN</th>
-                    <th className="p-3.5 w-24 min-w-[80px] max-w-[90px] whitespace-nowrap">TINGKAT</th>
-                    <th className="p-3.5 w-28 min-w-[90px] max-w-[110px] text-center whitespace-nowrap">STATUS</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#E2E8F0]">
-                  {violations.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="p-8 text-center text-[#64748B] font-body">
-                        Belum ada data pelanggaran di sistem.
+          <div className="divide-y divide-[#E2E8F0]">
+            {topMurojaahBulanKemarin.length === 0 ? (
+              <p className="text-xs text-[#64748B] py-4">Belum ada data murojaah bulan kemarin.</p>
+            ) : (
+              topMurojaahBulanKemarin.map((item, idx) => (
+                <div key={item.student.id} className="py-3.5 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <span className="text-xs font-mono font-bold text-[#64748B] w-6 shrink-0">
+                      0{idx + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm text-[#0F172A] font-headline truncate">
+                        {item.student.studentName}
+                      </p>
+                      <p className="text-xs text-[#64748B] font-body truncate">
+                        NIS: {item.student.nis} • {item.student.kelas} • {item.student.kamar}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-xs font-bold text-[#059669] font-body">
+                      {item.count} Sesi Murojaah
+                    </p>
+                    <p className="text-[11px] text-[#64748B] font-body">
+                      {item.totalPages} Halaman Mutqin
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+      </div>
+
+      {/* 4. REKAPITULASI PELANGGARAN SANTRI TERBARU (LANGSUNG TAMPIL TANPA SEGMENTED BUTTON) */}
+      <div className="space-y-4 border-t border-[#E2E8F0] pt-10">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
+              Rekapitulasi Pelanggaran Santri Terbaru
+            </h2>
+            <p className="text-xs text-[#64748B] mt-0.5 font-body">
+              Pencatatan kasus kedisiplinan berbobot poin oleh Divisi Keamanan
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onSelectView('violations')}
+          >
+            Lihat Semua
+          </Button>
+        </div>
+
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-[#F8FAFC] text-[#64748B] font-semibold border-b border-[#E2E8F0] font-headline uppercase tracking-[0.5px]">
+              <tr>
+                <th className="p-3.5 w-32 min-w-[120px] max-w-[130px] whitespace-nowrap">TANGGAL</th>
+                <th className="p-3.5 w-44 min-w-[140px] max-w-[180px] whitespace-nowrap">SANTRI & KAMAR</th>
+                <th className="p-3.5 min-w-[180px] max-w-[280px] sm:max-w-[340px] whitespace-nowrap">JENIS PELANGGARAN</th>
+                <th className="p-3.5 w-20 min-w-[60px] max-w-[70px] whitespace-nowrap">POIN</th>
+                <th className="p-3.5 w-24 min-w-[80px] max-w-[90px] whitespace-nowrap">TINGKAT</th>
+                <th className="p-3.5 w-24 min-w-[70px] max-w-[90px] text-center whitespace-nowrap">STATUS</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#E2E8F0]">
+              {violations.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-[#64748B] font-body">
+                    Belum ada data pelanggaran di sistem.
+                  </td>
+                </tr>
+              ) : (
+                violations.slice(0, 5).map((v) => {
+                  const dateObj = formatSplitDate(v.date);
+                  return (
+                    <tr key={v.id} className="h-14 hover:bg-[#F8FAFC] transition-colors">
+                      {/* 1. Tanggal 2 Baris */}
+                      <td className="p-3.5 w-32 min-w-[120px] max-w-[130px] whitespace-nowrap align-middle">
+                        <p className="font-bold text-xs text-[#0F172A] font-headline leading-tight whitespace-nowrap">
+                          {dateObj.dayName}
+                        </p>
+                        <p className="text-[11px] text-[#64748B] font-body mt-0.5 leading-tight whitespace-nowrap">
+                          {dateObj.formattedDate}
+                        </p>
+                      </td>
+
+                      {/* 2. Santri & Kamar */}
+                      <td className="p-3.5 w-44 min-w-[140px] max-w-[180px] align-middle overflow-hidden">
+                        <RunningText text={v.studentName} className="font-bold text-[#0F172A] font-headline" />
+                        <RunningText text={`NIS: ${v.nis} • ${v.kamar}`} className="text-[11px] text-[#64748B] mt-0.5" />
+                      </td>
+
+                      {/* 3. Kasus Pelanggaran */}
+                      <td className="p-3.5 min-w-[180px] max-w-[280px] sm:max-w-[340px] align-middle overflow-hidden">
+                        <RunningText text={v.violation} className="font-semibold text-[#0F172A]" />
+                        <RunningText text={`Kategori: ${v.category}`} className="text-[10px] text-[#64748B] uppercase mt-0.5" />
+                      </td>
+
+                      {/* 4. Poin */}
+                      <td className="p-3.5 w-20 min-w-[60px] max-w-[70px] font-bold text-[#EF4444] whitespace-nowrap align-middle font-mono">
+                        +{v.points} PK
+                      </td>
+
+                      {/* 5. Tingkat */}
+                      <td className="p-3.5 w-24 min-w-[80px] max-w-[90px] whitespace-nowrap align-middle">
+                        <span className={`font-bold text-xs ${getSeverityInfo(v.points).colorClass}`}>
+                          {getSeverityInfo(v.points).label}
+                        </span>
+                      </td>
+
+                      {/* 6. Status (Ikon Murni Tanpa Teks) */}
+                      <td className="p-3.5 w-24 min-w-[70px] max-w-[90px] text-center whitespace-nowrap align-middle">
+                        {v.status === 'selesai' ? (
+                          <CheckCircle2 className="w-4 h-4 text-[#059669] mx-auto" title="Selesai" />
+                        ) : (
+                          <Clock className="w-4 h-4 text-amber-500 mx-auto" title="Dalam Proses" />
+                        )}
                       </td>
                     </tr>
-                  ) : (
-                    violations.slice(0, 5).map((v) => {
-                      const dateObj = formatSplitDate(v.date);
-                      return (
-                        <tr key={v.id} className="h-14 hover:bg-[#F8FAFC] transition-colors">
-                          {/* 1. Tanggal 2 Baris */}
-                          <td className="p-3.5 w-32 min-w-[120px] max-w-[130px] whitespace-nowrap align-middle">
-                            <p className="font-bold text-xs text-[#0F172A] font-headline leading-tight whitespace-nowrap">
-                              {dateObj.dayName}
-                            </p>
-                            <p className="text-[11px] text-[#64748B] font-body mt-0.5 leading-tight whitespace-nowrap">
-                              {dateObj.formattedDate}
-                            </p>
-                          </td>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-                          {/* 2. Santri & Kamar */}
-                          <td className="p-3.5 w-44 min-w-[140px] max-w-[180px] align-middle overflow-hidden">
-                            <RunningText text={v.studentName} className="font-bold text-[#0F172A] font-headline" />
-                            <RunningText text={`NIS: ${v.nis} • ${v.kamar}`} className="text-[11px] text-[#64748B] mt-0.5" />
-                          </td>
-
-                          {/* 3. Kasus Pelanggaran */}
-                          <td className="p-3.5 min-w-[180px] max-w-[280px] sm:max-w-[340px] align-middle overflow-hidden">
-                            <RunningText text={v.violation} className="font-semibold text-[#0F172A]" />
-                            <RunningText text={`Kategori: ${v.category}`} className="text-[10px] text-[#64748B] uppercase mt-0.5" />
-                          </td>
-
-                          {/* 4. Poin */}
-                          <td className="p-3.5 w-20 min-w-[60px] max-w-[70px] font-bold text-[#EF4444] whitespace-nowrap align-middle font-mono">
-                            +{v.points} PK
-                          </td>
-
-                          {/* 5. Tingkat */}
-                          <td className="p-3.5 w-24 min-w-[80px] max-w-[90px] whitespace-nowrap align-middle">
-                            <span className={`font-bold text-xs ${getSeverityInfo(v.points).colorClass}`}>
-                              {getSeverityInfo(v.points).label}
-                            </span>
-                          </td>
-
-                          {/* 6. Status (Plain Text) */}
-                          <td className="p-3.5 w-28 min-w-[90px] max-w-[110px] text-center whitespace-nowrap align-middle">
-                            <span className={`font-semibold text-xs ${
-                              v.status === 'selesai' ? 'text-[#059669]' : 'text-amber-600'
-                            }`}>
-                              {v.status === 'selesai' ? 'Sudah Ditindak' : 'Proses'}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
+      {/* 5. PROGRAM KERJA OSTIFAK (TOP 5 PROGRESS DENGAN ELEMEN KARTU PROGRAM KERJA) */}
+      <div className="space-y-4 border-t border-[#E2E8F0] pt-10">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
+              Program Kerja OSTIFAK
+            </h2>
           </div>
-        )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onSelectView('programs')}
+          >
+            Lihat Semua
+          </Button>
+        </div>
 
-        {/* Program Kerja Section */}
-        {(activeTab === 'all' || activeTab === 'programs') && (
-          <div className="space-y-4 border-t border-[#E2E8F0] pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
-                  Status Program Kerja 9 Divisi
-                </h2>
-                <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                  Progres pelaksanaan dan anggaran operasional organisasi santri
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onSelectView('programs')}
+        {topWorkPrograms.length === 0 ? (
+          <p className="text-xs text-[#64748B] py-4">Belum ada proposal program kerja terdaftar.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {topWorkPrograms.map((p) => (
+              <Card 
+                key={p.id} 
+                variant="default" 
+                className="p-5 space-y-4 hoverable bg-white border border-[#E2E8F0] rounded-xl relative transition-all duration-200"
               >
-                Lihat Semua
-              </Button>
-            </div>
+                {/* 1. Header Card: Nama Program di atas & Nama Divisi di bawah + Ikon Status Tunggal */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-base font-bold text-[#0F172A] leading-snug font-headline line-clamp-2">
+                      {p.title}
+                    </h3>
+                    <p className="text-xs font-semibold text-slate-900 mt-1 font-body">
+                      {p.divisionName || p.divisionId}
+                    </p>
+                  </div>
+                  <div className="flex-shrink-0 pt-0.5">
+                    {renderProgramStatusIcon(p.status)}
+                  </div>
+                </div>
 
-            <div className="overflow-x-auto w-full">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-[#F8FAFC] text-[#64748B] font-semibold border-b border-[#E2E8F0] font-headline uppercase tracking-[0.5px]">
-                  <tr>
-                    <th className="p-3.5 w-32 min-w-[120px] max-w-[130px] whitespace-nowrap">TANGGAL</th>
-                    <th className="p-3.5 min-w-[180px] max-w-[320px] sm:max-w-[400px] whitespace-nowrap">PROGRAM & DIVISI</th>
-                    <th className="p-3.5 w-28 min-w-[90px] max-w-[110px] whitespace-nowrap">STATUS</th>
-                    <th className="p-3.5 w-36 min-w-[130px] max-w-[160px] text-right whitespace-nowrap">ANGGARAN</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#E2E8F0]">
-                  {workPrograms.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="p-8 text-center text-[#64748B] font-body">
-                        Belum ada proposal program kerja terdaftar.
-                      </td>
-                    </tr>
-                  ) : (
-                    workPrograms.slice(0, 5).map((p) => {
-                      const dateObj = formatSplitDate(p.targetDate);
-                      return (
-                        <tr key={p.id} className="h-14 hover:bg-[#F8FAFC] transition-colors">
-                          {/* 1. Target Tanggal 2 Baris */}
-                          <td className="p-3.5 w-32 min-w-[120px] max-w-[130px] whitespace-nowrap align-middle">
-                            <p className="font-bold text-xs text-[#0F172A] font-headline leading-tight whitespace-nowrap">
-                              {dateObj.dayName}
-                            </p>
-                            <p className="text-[11px] text-[#64748B] font-body mt-0.5 leading-tight whitespace-nowrap">
-                              {dateObj.formattedDate}
-                            </p>
-                          </td>
+                {/* 2. Progress Bar & Anggaran */}
+                <div className="space-y-1.5 pt-1">
+                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div
+                      className="bg-[#059669] h-full rounded-full transition-all duration-300"
+                      style={{ width: `${Math.min(100, Math.max(0, p.progress || 0))}%` }}
+                    />
+                  </div>
+                  <div className="text-xs font-semibold text-slate-800 font-body">
+                    {formatBudgetRatio(p.budget, p.progress)}
+                  </div>
+                </div>
 
-                          {/* 2. Program & Divisi */}
-                          <td className="p-3.5 min-w-[180px] max-w-[320px] sm:max-w-[400px] align-middle overflow-hidden">
-                            <RunningText text={p.title} className="font-bold text-[#0F172A] font-headline" />
-                            <RunningText text={p.divisionName || p.divisionId} className="text-[11px] text-[#64748B] mt-0.5" />
-                          </td>
-
-                          {/* 3. Status (Plain Text) */}
-                          <td className="p-3.5 w-28 min-w-[90px] max-w-[110px] whitespace-nowrap align-middle">
-                            <span className="font-semibold text-xs capitalize text-[#0F172A]">
-                              {p.status}
-                            </span>
-                          </td>
-
-                          {/* 4. Anggaran */}
-                          <td className="p-3.5 w-36 min-w-[130px] max-w-[160px] text-right text-[#0F172A] font-mono font-bold text-xs whitespace-nowrap align-middle">
-                            Rp {formatBudgetRatio(p.budget, p.progress)}
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
+                {/* 3. Target Waktu & Countdown H-N */}
+                <div className="flex items-center justify-between text-xs pt-1 font-body">
+                  <span className="font-medium text-slate-600">{p.targetDate}</span>
+                  <span className="font-bold text-slate-900 font-headline">{calculateHMinus(p.targetDate)}</span>
+                </div>
+              </Card>
+            ))}
           </div>
         )}
-
       </div>
 
     </div>

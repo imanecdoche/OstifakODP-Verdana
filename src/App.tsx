@@ -738,6 +738,8 @@ export default function App() {
                   violations={mergedViolations}
                   workPrograms={workPrograms}
                   students={students}
+                  dormitories={dormitories}
+                  rooms={rooms}
                   dormitoriesCount={dormitories.length}
                   roomsCount={rooms.length}
                   onOpenNewViolationModal={() => setIsNewViolationModalOpen(true)}
