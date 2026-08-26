@@ -23,6 +23,7 @@ import {
   Check,
   AlertTriangle,
   ArrowUpRight,
+  ArrowLeft,
   Pencil
 } from 'lucide-react';
 import {
@@ -1052,32 +1053,29 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       {/* 1. HALAMAN UTAMA DETAIL SANTRI (FULL PAGE VIEW) */}
       <div className="space-y-6 font-body pb-16 animate-in fade-in duration-200">
         
-        {/* Top Back Navigation Bar */}
-        <div className="flex items-center justify-between gap-4 pb-4 border-b border-[#E2E8F0]">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#0F172A] rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-2xs active:scale-[0.98] flex items-center gap-2"
-          >
-            <span>← Kembali ke Direktori Santri</span>
-          </button>
+        {/* Page Header (Clean Flat with Inline Icon-Only Back Button) */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#E2E8F0]">
+          <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
+            {/* 1. Icon-Only Back Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Kembali ke Direktori Santri"
+              title="Kembali ke Direktori Santri"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-md bg-[#0F172A] text-white hover:bg-[#1E293B] active:scale-95 transition-all shadow-xs cursor-pointer flex items-center justify-center shrink-0"
+            >
+              <ArrowLeft className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+            </button>
 
-          <div className="text-right">
-            <span className="text-xs font-semibold text-[#64748B] font-headline uppercase tracking-wider">
-              Profil & Rekam Jejak Santri
-            </span>
-          </div>
-        </div>
-
-        {/* Page Header (Clean Flat, Zero Icon Policy) */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-[#E2E8F0]">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] font-headline tracking-tight">
-              {currentStudent.studentName}
-            </h1>
-            <p className="text-xs text-[#64748B] mt-1 font-body">
-              NIS: {currentStudent.nis || '-'} • Kamar: {currentStudent.kamar} • Kelas: {currentStudent.kelas} {currentStudent.angkatan ? `• Angkatan: ${currentStudent.angkatan}` : ''}
-            </p>
+            {/* 2. Nama & Sub-info Santri */}
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] font-headline tracking-tight truncate">
+                {currentStudent.studentName}
+              </h1>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body truncate">
+                NIS: {currentStudent.nis || '-'} • Kamar: {currentStudent.kamar} • Kelas: {currentStudent.kelas} {currentStudent.angkatan ? `• Angkatan: ${currentStudent.angkatan}` : ''}
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

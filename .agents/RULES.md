@@ -7,6 +7,12 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Penataan Tombol Kembali (Icon-Only Back Button) Sejajar Nama Santri (Versi v1.1.0.32b):
+  - 1. POSISI DI SAMPING KIRI NAMA SANTRI & GAYA ICON-ONLY:
+    * Memindahkan tombol kembali dari baris navigasi atas menjadi sejajar tepat di sebelah kiri nama utama santri pada header halaman detail santri.
+    * Mengubah tampilan tombol kembali menjadi **icon-only** minimalis berwarna hitam pekat (`bg-[#0F172A] text-white hover:bg-[#1E293B]`) dengan ikon panah kiri (`ArrowLeft`) tanpa teks tambahan, lengkap dengan `aria-label` dan `title` aksesibilitas.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Menghilangkan baris navigasi atas yang terpisah sehingga tata letak header menjadi jauh lebih ramping, menyatu secara langsung dengan nama santri dan tombol aksi (Rekam Izin, Pindah Kamar, Pindah Kelas), serta responsif dan anti-text-wrapping di perangkat mobile.
 - **[2026-08-26]**: Standarisasi Perataan & Responsivitas Layout Mobile Metric Cards (Versi v1.1.0.31b):
   - 1. RESPONSIVITAS & PERATAAN MOBILE (GRID & DIVIDERS):
     * Merekonstruksi tata letak seluruh barisan Metric Cards pada seluruh halaman aplikasi (`DashboardView`, `StudentsView`, `DormitoryView`, `ViolationsView`, `WorkProgramsView`, `TreasuryView`, `ClassesView`, `DirectivesView`).
