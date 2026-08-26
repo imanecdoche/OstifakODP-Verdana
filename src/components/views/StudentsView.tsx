@@ -37,6 +37,7 @@ import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { ScrollArea } from '../ui/ScrollArea';
 import { StudentDetailModal } from '../modals/StudentDetailModal';
+import { PPIcon, PKIcon } from '../ui/PointIcons';
 import { QURAN_SURAHS, calculateQuranPages, QuranSurah } from '../../data/quranSurahs';
 import { 
   subscribeToSantri, 
@@ -1593,15 +1594,17 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
 
                   <div className="px-2">
                     <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Prestasi</p>
-                    <p className="text-sm font-bold text-[#059669] mt-0.5 truncate font-headline font-mono">
-                      +{getStudentPP(st)} PP
+                    <p className="text-sm font-bold text-[#059669] mt-0.5 truncate font-headline font-mono flex items-center gap-1">
+                      <span>+{getStudentPP(st)}</span>
+                      <PPIcon className="w-3.5 h-3.5" />
                     </p>
                   </div>
 
                   <div className="pl-2">
                     <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Pelanggaran</p>
-                    <p className={`text-sm font-bold mt-0.5 truncate font-headline font-mono ${st.poinPelanggaran > 0 ? 'text-[#EF4444]' : 'text-[#16A34A]'}`}>
-                      {st.poinPelanggaran || 0} PK
+                    <p className={`text-sm font-bold mt-0.5 truncate font-headline font-mono flex items-center gap-1 ${st.poinPelanggaran > 0 ? 'text-[#EF4444]' : 'text-[#16A34A]'}`}>
+                      <span>{st.poinPelanggaran || 0}</span>
+                      <PKIcon className="w-3.5 h-3.5" />
                     </p>
                   </div>
                 </div>
@@ -1913,8 +1916,9 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               >
                 Disiplin & Pelanggaran
                 {editPoin > 0 && (
-                  <span className="ml-1.5 text-[10px] font-mono font-bold text-rose-600">
-                    +{editPoin} PK
+                  <span className="ml-1.5 text-[10px] font-mono font-bold text-rose-600 inline-flex items-center gap-0.5">
+                    <span>+{editPoin}</span>
+                    <PKIcon className="w-2.5 h-2.5" />
                   </span>
                 )}
               </button>
@@ -2242,8 +2246,9 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                               <div className="space-y-1">
                                 <div className="flex items-center gap-2">
                                   <span className="font-bold text-[#0F172A]">{vio.title}</span>
-                                  <span className="text-[10px] font-bold text-[#EF4444] bg-[#FEF2F2] px-2 py-0.2 rounded border border-[#FEE2E2]">
-                                    +{vio.points} PK
+                                  <span className="text-[10px] font-bold text-[#EF4444] bg-[#FEF2F2] px-2 py-0.5 rounded border border-[#FEE2E2] inline-flex items-center gap-1">
+                                    <span>+{vio.points}</span>
+                                    <PKIcon className="w-2.5 h-2.5" />
                                   </span>
                                 </div>
                                 <p className="text-[11px] text-[#64748B]">

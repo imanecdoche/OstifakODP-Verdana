@@ -28,6 +28,7 @@ import { Button } from '../ui/Button';
 import { PillTabs, TabOption } from '../ui/PillTabs';
 import { ScrollArea } from '../ui/ScrollArea';
 import { StudentDetailModal } from '../modals/StudentDetailModal';
+import { PPIcon } from '../ui/PointIcons';
 
 interface DormitoryViewProps {
   dormitories?: Dormitory[];
@@ -338,7 +339,11 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
 
                     {/* Akumulasi PP Asrama */}
                     <div className="flex items-center gap-3 text-xs bg-[#F8FAFC] border border-[#E2E8F0] px-3.5 py-1.5 rounded-lg">
-                      <span className="font-bold text-[#059669] font-headline">{dormTotalPP} PP Total</span>
+                      <span className="font-bold text-[#059669] font-headline inline-flex items-center gap-1">
+                        <span>{dormTotalPP}</span>
+                        <PPIcon className="w-3.5 h-3.5" />
+                        <span>Total</span>
+                      </span>
                       <span className="text-slate-300">|</span>
                       <span className="text-slate-600 font-medium">{dormIndah} Indah</span>
                       <span className="text-slate-300">•</span>
@@ -370,8 +375,9 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
                         <p className="text-xs text-[#64748B] mt-0.5">{dorm.name} • Kapasitas {room.capacity} Santri</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-[#059669] bg-[#059669]/10 px-2.5 py-1 rounded-[4px]">
-                          {roomTotalPP} PP
+                        <span className="text-xs font-bold text-[#059669] bg-[#059669]/10 px-2.5 py-1 rounded-[4px] inline-flex items-center gap-1">
+                          <span>{roomTotalPP}</span>
+                          <PPIcon className="w-3.5 h-3.5" />
                         </span>
                         <span className="text-xs font-semibold text-[#64748B] bg-[#F8FAFC] border border-[#E2E8F0] px-2.5 py-1 rounded-[4px]">
                           {room.occupiedCount}/{room.capacity} Santri
@@ -383,20 +389,23 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
                     <div className="grid grid-cols-3 gap-4 pt-2 border-t border-[#E2E8F0]">
                       <div>
                         <p className="text-[11px] text-[#64748B] uppercase font-semibold tracking-wide">Bersih</p>
-                        <p className="text-lg font-bold text-[#0F172A] mt-0.5">
-                          {room.cleanlinessScore || 0} PP
+                        <p className="text-lg font-bold text-[#0F172A] mt-0.5 flex items-center gap-1">
+                          <span>{room.cleanlinessScore || 0}</span>
+                          <PPIcon className="w-4 h-4" />
                         </p>
                       </div>
                       <div>
                         <p className="text-[11px] text-[#64748B] uppercase font-semibold tracking-wide">Rapi</p>
-                        <p className="text-lg font-bold text-[#0F172A] mt-0.5">
-                          {room.neatnessScore || 0} PP
+                        <p className="text-lg font-bold text-[#0F172A] mt-0.5 flex items-center gap-1">
+                          <span>{room.neatnessScore || 0}</span>
+                          <PPIcon className="w-4 h-4" />
                         </p>
                       </div>
                       <div>
                         <p className="text-[11px] text-[#64748B] uppercase font-semibold tracking-wide">Indah</p>
-                        <p className="text-lg font-bold text-[#0F172A] mt-0.5">
-                          {room.aestheticScore || 0} PP
+                        <p className="text-lg font-bold text-[#0F172A] mt-0.5 flex items-center gap-1">
+                          <span>{room.aestheticScore || 0}</span>
+                          <PPIcon className="w-4 h-4" />
                         </p>
                       </div>
                     </div>

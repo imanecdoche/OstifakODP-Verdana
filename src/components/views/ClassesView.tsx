@@ -26,6 +26,7 @@ import { Button } from '../ui/Button';
 import { PillTabs, TabOption } from '../ui/PillTabs';
 import { ScrollArea } from '../ui/ScrollArea';
 import { StudentDetailModal } from '../modals/StudentDetailModal';
+import { PPIcon } from '../ui/PointIcons';
 
 interface ClassesViewProps {
   classes?: SchoolClass[];
@@ -267,20 +268,23 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
             <div className="grid grid-cols-3 gap-4 pt-2 border-t border-[#E2E8F0]">
               <div>
                 <p className="text-[11px] text-[#64748B] uppercase font-semibold tracking-wide">Kebersihan</p>
-                <p className="text-lg font-bold text-[#0F172A] mt-0.5">
-                  {cls.cleanlinessScore || 0} PP
+                <p className="text-lg font-bold text-[#0F172A] mt-0.5 flex items-center gap-1">
+                  <span>{cls.cleanlinessScore || 0}</span>
+                  <PPIcon className="w-4 h-4" />
                 </p>
               </div>
               <div>
                 <p className="text-[11px] text-[#64748B] uppercase font-semibold tracking-wide">Disiplin</p>
-                <p className="text-lg font-bold text-[#0F172A] mt-0.5">
-                  {cls.disciplineScore || 0} PP
+                <p className="text-lg font-bold text-[#0F172A] mt-0.5 flex items-center gap-1">
+                  <span>{cls.disciplineScore || 0}</span>
+                  <PPIcon className="w-4 h-4" />
                 </p>
               </div>
               <div>
                 <p className="text-[11px] text-[#64748B] uppercase font-semibold tracking-wide">Akademik</p>
-                <p className="text-lg font-bold text-[#0F172A] mt-0.5">
-                  {cls.academicScore || 0} PP
+                <p className="text-lg font-bold text-[#0F172A] mt-0.5 flex items-center gap-1">
+                  <span>{cls.academicScore || 0}</span>
+                  <PPIcon className="w-4 h-4" />
                 </p>
               </div>
             </div>

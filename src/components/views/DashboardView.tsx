@@ -20,6 +20,7 @@ import {
 } from './WorkProgramsView';
 import { getSeverityInfo } from '../../lib/severityUtils';
 import { parseHafalanToPages } from '../../data/quranSurahs';
+import { PPIcon, PKIcon } from '../ui/PointIcons';
 import { Clock, CheckCircle2 } from 'lucide-react';
 
 interface DashboardViewProps {
@@ -542,11 +543,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-xs font-bold text-[#059669] font-body">
-                      +{s.poinPrestasi || 0} PP
+                    <p className="text-xs font-bold text-[#059669] font-body flex items-center justify-end gap-1">
+                      <span>+{s.poinPrestasi || 0}</span>
+                      <PPIcon className="w-3.5 h-3.5" />
                     </p>
-                    <p className="text-[11px] text-[#64748B] font-body">
-                      {s.poinPelanggaran || 0} PK • {s.hafalan || '0 Juz'}
+                    <p className="text-[11px] text-[#64748B] font-body flex items-center justify-end gap-1">
+                      <span className={`font-semibold inline-flex items-center gap-0.5 ${s.poinPelanggaran > 0 ? 'text-[#EF4444]' : 'text-[#16A34A]'}`}>
+                        <span>{s.poinPelanggaran || 0}</span>
+                        <PKIcon className="w-2.5 h-2.5" />
+                      </span>
+                      <span>• {s.hafalan || '0 Juz'}</span>
                     </p>
                   </div>
                 </div>
@@ -586,8 +592,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-xs font-bold text-[#059669] font-body">
-                      {r.totalPP} PP
+                    <p className="text-xs font-bold text-[#059669] font-body flex items-center justify-end gap-1">
+                      <span>{r.totalPP}</span>
+                      <PPIcon className="w-3.5 h-3.5" />
                     </p>
                     <p className="text-[11px] text-[#64748B] font-body">
                       {r.indah} • {r.rapi} • {r.bersih}
@@ -940,7 +947,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
                       {/* 4. Poin */}
                       <td className="p-3.5 w-20 min-w-[60px] max-w-[70px] font-bold text-[#EF4444] whitespace-nowrap align-middle font-mono">
-                        +{v.points} PK
+                        <div className="flex items-center gap-1">
+                          <span>+{v.points}</span>
+                          <PKIcon className="w-3.5 h-3.5" />
+                        </div>
                       </td>
 
                       {/* 5. Tingkat */}

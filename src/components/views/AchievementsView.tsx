@@ -19,6 +19,7 @@ import { recordSessionAction } from '../../lib/sessionLogService';
 import { MoreHorizontal, Pencil, Trash2, X, AlertTriangle } from 'lucide-react';
 import { useIsMobile } from '../../lib/useIsMobile';
 import { ActionSheet } from '../ui/ActionSheet';
+import { PPIcon } from '../ui/PointIcons';
 
 const RunningText: React.FC<{
   text: string;
@@ -628,8 +629,9 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                   <span className="text-[10px] font-mono font-bold text-[#64748B]">
                     0{idx + 1}
                   </span>
-                  <span className="text-xs font-bold font-mono text-[#059669]">
-                    +{item.totalPP} PP
+                  <span className="text-xs font-bold font-mono text-[#059669] inline-flex items-center gap-1">
+                    <span>+{item.totalPP}</span>
+                    <PPIcon className="w-3.5 h-3.5" />
                   </span>
                 </div>
                 <div className="min-w-0">
@@ -733,7 +735,10 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
 
                     {/* 5. Poin PP */}
                     <td className="p-3.5 text-right font-bold text-[#059669] font-mono whitespace-nowrap align-middle">
-                      +{item.points} PP
+                      <div className="inline-flex items-center gap-1 justify-end">
+                        <span>+{item.points}</span>
+                        <PPIcon className="w-3.5 h-3.5" />
+                      </div>
                     </td>
 
                     {/* 6. Penyelenggara */}
@@ -775,7 +780,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
           isOpen={!!activeMenu}
           onClose={() => setActiveMenu(null)}
           title={activeMenu.achievement.studentName}
-          subtitle={`${activeMenu.achievement.title} • +${activeMenu.achievement.points} PP • ${activeMenu.achievement.category}`}
+          subtitle={`${activeMenu.achievement.title} • +${activeMenu.achievement.points} • ${activeMenu.achievement.category}`}
           actions={[
             {
               label: 'Edit Prestasi',
@@ -1164,8 +1169,11 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
 
               <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/80 text-xs space-y-1">
                 <div className="flex justify-between text-[#64748B]">
-                  <span>Poin PP Terkait:</span>
-                  <span className="font-bold text-[#EF4444] font-mono">-{deletingAchievement.points} PP</span>
+                  <span>Poin Prestasi Terkait:</span>
+                  <span className="font-bold text-[#EF4444] font-mono inline-flex items-center gap-1">
+                    <span>-{deletingAchievement.points}</span>
+                    <PPIcon className="w-3.5 h-3.5" />
+                  </span>
                 </div>
                 <div className="flex justify-between text-[#64748B]">
                   <span>Tanggal Terbit:</span>
@@ -1204,7 +1212,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
         <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
           <div className="bg-white w-full max-w-2xl max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
             <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-              <h3 className="text-base font-bold text-[#0F172A] font-headline">Otomasi Poin Prestasi (PP) Akhir Bulan</h3>
+              <h3 className="text-base font-bold text-[#0F172A] font-headline">Otomasi Poin Prestasi Akhir Bulan</h3>
               <p className="text-xs text-[#64748B] mt-0.5 font-body">
                 Jadwal Otomasi Resmi: <strong>{scheduleInfo.formattedSchedule}</strong> (Pukul 21:00 WIB)
               </p>
@@ -1212,18 +1220,18 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
 
             <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0">
               <div className="p-3.5 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] space-y-2">
-                <p className="font-bold text-[#0F172A]">Ketentuan Sistem Poin PP Otomatis:</p>
+                <p className="font-bold text-[#0F172A]">Ketentuan Sistem Poin Otomatis:</p>
                 <ul className="list-disc list-inside text-[#64748B] space-y-1 text-[11px]">
-                  <li><strong>Santri Teladan:</strong> Top 5 santri (0 PK + hafalan tertinggi) mendapat <strong>+25 PP</strong> (Juara 1) dan <strong>+20 PP</strong> (Juara 2-5).</li>
-                  <li><strong>Hafalan Terbanyak:</strong> Top 5 hafalan juz tertinggi bagi santri proses aktif (&lt; 30 Juz, santri 30 Juz/Huffazh dikecualikan) mendapat <strong>+20 PP</strong>.</li>
-                  <li><strong>Setoran Terbanyak Bulan Ini:</strong> Top 5 rekam setoran baru bulan ini mendapat <strong>+15 PP</strong>.</li>
-                  <li><strong>Murojaah Terbanyak Bulan Ini:</strong> Top 5 rekam murojaah bulan ini mendapat <strong>+15 PP</strong>.</li>
+                  <li><strong>Santri Teladan:</strong> Top 5 santri (0 PK + hafalan tertinggi) mendapat <strong>+25</strong> (Juara 1) dan <strong>+20</strong> (Juara 2-5).</li>
+                  <li><strong>Hafalan Terbanyak:</strong> Top 5 hafalan juz tertinggi bagi santri proses aktif (&lt; 30 Juz, santri 30 Juz/Huffazh dikecualikan) mendapat <strong>+20</strong>.</li>
+                  <li><strong>Setoran Terbanyak Bulan Ini:</strong> Top 5 rekam setoran baru bulan ini mendapat <strong>+15</strong>.</li>
+                  <li><strong>Murojaah Terbanyak Bulan Ini:</strong> Top 5 rekam murojaah bulan ini mendapat <strong>+15</strong>.</li>
                 </ul>
               </div>
 
               <div>
                 <p className="font-bold text-xs text-[#0F172A] mb-2 font-headline">
-                  Daftar Santri Calon Penerima PP Bulan Ini ({monthlyPreviewAwards.length} Predikat):
+                  Daftar Santri Calon Penerima Bulan Ini ({monthlyPreviewAwards.length} Predikat):
                 </p>
 
                 <div className="border border-[#E2E8F0] rounded-lg overflow-hidden">
@@ -1233,7 +1241,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                         <th className="p-2.5">Santri</th>
                         <th className="p-2.5">Kategori Predikat</th>
                         <th className="p-2.5">Peringkat</th>
-                        <th className="p-2.5 text-right">Alokasi PP</th>
+                        <th className="p-2.5 text-right">Alokasi Poin</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E2E8F0]">
@@ -1249,7 +1257,12 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                             <td className="p-2.5 font-semibold text-[#0F172A]">{a.studentName}</td>
                             <td className="p-2.5 text-[#64748B]">{a.category}</td>
                             <td className="p-2.5 text-[#64748B]">{a.rank}</td>
-                            <td className="p-2.5 text-right font-bold text-[#059669] font-mono">+{a.points} PP</td>
+                            <td className="p-2.5 text-right font-bold text-[#059669] font-mono">
+                              <span className="inline-flex items-center gap-1">
+                                <span>+{a.points}</span>
+                                <PPIcon className="w-3.5 h-3.5" />
+                              </span>
+                            </td>
                           </tr>
                         ))
                       )}

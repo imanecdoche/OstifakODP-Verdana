@@ -60,6 +60,7 @@ import { Button } from '../ui/Button';
 import { useLenisModalLock } from '../../lib/lenis';
 import { useIsMobile } from '../../lib/useIsMobile';
 import { ActionSheet } from '../ui/ActionSheet';
+import { PPIcon, PKIcon } from '../ui/PointIcons';
 
 export interface SetoranSplitAnalysis {
   murojaahRange: { from: number; to: number } | null;
@@ -1560,8 +1561,9 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 >
                   <span>{t.label}</span>
                   {t.id === 'pelanggaran' && currentStudent.poinPelanggaran > 0 && (
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-red-500 text-white font-bold">
-                      {currentStudent.poinPelanggaran} PK
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-500 text-white font-bold inline-flex items-center gap-1">
+                      <span>{currentStudent.poinPelanggaran}</span>
+                      <PKIcon className="w-2.5 h-2.5 brightness-0 invert" />
                     </span>
                   )}
                   {t.id === 'mahkamah' && currentStudent.mahkamahHistory && currentStudent.mahkamahHistory.length > 0 && (
@@ -2135,8 +2137,9 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                                 <p className="text-[11px] text-slate-500">Sanksi: <span className="font-medium text-slate-700">{v.penalty || v.penaltyDescription || '-'}</span></p>
                               </div>
                               <div className="text-right shrink-0">
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">
-                                  +{v.points || 0} PK
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 inline-flex items-center gap-1">
+                                  <span>+{v.points || 0}</span>
+                                  <PKIcon className="w-3 h-3" />
                                 </span>
                                 <p className="text-[10px] text-slate-400 mt-1">{formatDateDDMMMMYY(v.date)}</p>
                               </div>
@@ -2303,8 +2306,9 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                                 )}
                               </div>
                               <div className="text-right shrink-0">
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#059669] border border-emerald-200 font-mono">
-                                  +{a.points !== undefined ? a.points : 10} PP
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#059669] border border-emerald-200 font-mono inline-flex items-center gap-1">
+                                  <span>+{a.points !== undefined ? a.points : 10}</span>
+                                  <PPIcon className="w-3 h-3" />
                                 </span>
                                 <p className="text-[10px] text-[#64748B] mt-1">{a.date}</p>
                               </div>

@@ -3,6 +3,7 @@ import { SantriRecord, recordCollectiveMahkamahSession } from '../../lib/firesto
 import { getSeverityInfo, sliderFillPercent } from '../../lib/severityUtils';
 import { RollingNumber } from '../modals/NewViolationModal';
 import { gooeyToast } from 'goey-toast';
+import { PKIcon } from '../ui/PointIcons';
 
 interface CollectiveMahkamahViewProps {
   students: SantriRecord[];
@@ -393,8 +394,9 @@ export const CollectiveMahkamahView: React.FC<CollectiveMahkamahViewProps> = ({
                 </label>
 
                 <div className="flex items-center gap-1.5 text-xs font-bold font-headline">
-                  <span className="text-[#0F172A] flex items-center font-mono">
-                    +<RollingNumber value={points} className="text-sm font-bold text-[#0F172A] mx-0.5" /> PK
+                  <span className="text-[#0F172A] flex items-center font-mono gap-0.5">
+                    +<RollingNumber value={points} className="text-sm font-bold text-[#0F172A] mx-0.5" />
+                    <PKIcon className="w-3.5 h-3.5" />
                   </span>
                   <span className="text-[#94A3B8] font-normal">—</span>
                   <span className={`${getSeverityInfo(points).colorClass} font-semibold transition-colors duration-150`}>

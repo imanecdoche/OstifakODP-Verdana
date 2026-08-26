@@ -7,6 +7,13 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Penggantian Teks Satuan "PP" dan "PK" dengan Ikon SVG Asli (pp.svg & pk.svg) (Versi v1.1.0.53b):
+  - 1. PENGGANTIAN SIMBOL PP & PK DENGAN FILE SVG:
+    * Mengganti seluruh teks/string satuan "PP" (Poin Prestasi) di kartu ringkasan, tabel, profil santri, dan laporan dengan file ikon SVG **'pp.svg'** (komponen `<PPIcon />`).
+    * Mengganti seluruh teks/string satuan "PK" (Poin Pelanggaran) dengan file ikon SVG **'pk.svg'** (komponen `<PKIcon />`).
+    * Menyelaraskan ukuran proporsional (inline-block align-baseline/align-middle) langsung berdampingan dengan angka poin.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Menjaga tampilan clean-flat, bebas dari kontainer card bertumpuk, dan konsisten di seluruh perangkat.
 - **[2026-08-27]**: Penyesuaian Menu Aksi Kontekstual Responsif Mobile (Action Sheet / Bottom Sheet) (Versi v1.1.0.52b):
   - 1. BOTTOM SHEET / ACTION SHEET KHUSUS MOBILE:
     * Pada perangkat mobile (layar < 768px), pengetukan menu titik tiga (*three-dot*) maupun sentuh-tahan (*tap and hold/contextmenu*) pada baris tabel kasus pelanggaran, prestasi, dan riwayat setoran otomatis memunculkan panel **Bottom Sheet (Action Sheet)** yang meluncur mulus dari bawah layar.
