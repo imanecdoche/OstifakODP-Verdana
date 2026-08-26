@@ -1056,15 +1056,15 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         {/* Page Header (Clean Flat with Inline Icon-Only Back Button) */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#E2E8F0]">
           <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
-            {/* 1. Icon-Only Back Button */}
+            {/* 1. Icon-Only Close Button (Tanda Silang) */}
             <button
               type="button"
               onClick={onClose}
-              aria-label="Kembali ke Direktori Santri"
-              title="Kembali ke Direktori Santri"
+              aria-label="Tutup Halaman Detail Santri"
+              title="Tutup Halaman Detail Santri"
               className="w-9 h-9 sm:w-10 sm:h-10 rounded-md bg-[#0F172A] text-white hover:bg-[#1E293B] active:scale-95 transition-all shadow-xs cursor-pointer flex items-center justify-center shrink-0"
             >
-              <ArrowLeft className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+              <X className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
             </button>
 
             {/* 2. Nama & Sub-info Santri */}

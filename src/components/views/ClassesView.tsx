@@ -302,6 +302,7 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
         {selectedDetailStudent && (
           <motion.div
             key={`classes-student-detail-${selectedDetailStudent.id}`}
+            data-lenis-prevent
             initial={isMobile ? { y: '100%', x: 0 } : { x: '100%', y: 0 }}
             animate={{ x: 0, y: 0 }}
             exit={isMobile ? { y: '100%', x: 0 } : { x: '100%', y: 0 }}
@@ -309,17 +310,19 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
               duration: 0.65,
               ease: [0.4, 0, 0.2, 1],
             }}
-            className="absolute top-0 left-0 right-0 z-20 w-full min-h-full bg-[#F8FAFC]"
+            className="fixed inset-x-0 bottom-0 top-16 lg:left-[260px] z-30 bg-[#F8FAFC] overflow-y-auto overscroll-contain"
           >
-            <StudentDetailModal
-              student={selectedDetailStudent}
-              classes={classes}
-              onClose={() => setSelectedDetailStudent(null)}
-              onStudentUpdated={(updatedStudent) => {
-                setLocalStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
-                setSelectedDetailStudent(updatedStudent);
-              }}
-            />
+            <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 font-body">
+              <StudentDetailModal
+                student={selectedDetailStudent}
+                classes={classes}
+                onClose={() => setSelectedDetailStudent(null)}
+                onStudentUpdated={(updatedStudent) => {
+                  setLocalStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
+                  setSelectedDetailStudent(updatedStudent);
+                }}
+              />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

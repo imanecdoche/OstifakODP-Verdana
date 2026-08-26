@@ -7,6 +7,20 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Penggantian Ikon Tombol Penutup Detail Santri Menjadi Ikon Close Tanda Silang (Versi v1.1.0.44b):
+  - 1. GAYA IKON CLOSE / TANDA SILANG (ICON-ONLY):
+    * Mengganti ikon panah kembali (`ArrowLeft`) pada tombol penutup halaman detail santri di `StudentDetailModal.tsx` menjadi ikon close / tanda silang (`X` dari `lucide-react`).
+    * Mempertahankan tombol berbentuk icon-only kotak minimalis hitam (`bg-[#0F172A] text-white`) di samping nama santri yang bersih dan tegas.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Tampilan konsisten, transisi slide responsif keluar tetap berjalan mulus, bebas dari border/card container bertumpuk.
+- **[2026-08-27]**: Isolasi Scroll & Posisi Fixed Viewport Transisi Detail Santri Mobile (Versi v1.1.0.43b):
+  - 1. ISOLASI SCROLL & POSISI FIXED VIEWPORT MANDIRI:
+    * Mengubah kontainer layer detail santri di `StudentsView.tsx`, `DormitoryView.tsx`, dan `ClassesView.tsx` menjadi `fixed inset-x-0 bottom-0 top-16 lg:left-[260px] z-30 bg-[#F8FAFC] overflow-y-auto overscroll-contain data-lenis-prevent`.
+    * Kontainer menempel tepat di dalam viewport di bawah header (`top: 64px`), bergerak naik dari luar bawah layar (`translate-y-full` ke `translate-y-0`) secara independen tanpa memengaruhi atau menggeser posisi scroll halaman direktori di latar belakang.
+    * Tombol kembali dan seluruh header detail santri langsung berada di bagian atas layar viewport dan mudah diakses.
+  - 2. TRANSISI KELUAR & KEPATUHAN DESAIN (ANTI-GRAVITY UI):
+    * Saat ditutup, halaman detail bergerak turun (`translate-y-0` ke `translate-y-full`) keluar viewport dengan mulus (650ms, `cubic-bezier(0.4, 0, 0.2, 1)`) tanpa menggeser halaman utama.
+    * Header dan sidebar tetap diam di posisinya, bebas efek fading/opacity.
 - **[2026-08-26]**: Penyesuaian Durasi 650ms & Arah Transisi Responsif (Desktop Horizontal vs Mobile Vertikal) (Versi v1.1.0.42b):
   - 1. PENYESUAIAN DURASI ANIMASI (+50% LEBIH LAMBAT & HALUS):
     * Memperlambat durasi pergeseran menjadi 650ms (0.65s) dengan kurva *smooth easing* `cubic-bezier(0.4, 0, 0.2, 1)` agar gerakan transisi terasa jauh lebih elegan, tenang, dan santai.

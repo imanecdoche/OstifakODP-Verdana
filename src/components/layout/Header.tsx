@@ -188,7 +188,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="sticky top-0 z-30 h-16 bg-[#FFFFFF] border-b border-[#E2E8F0] px-6 flex items-center gap-4 shadow-[0_1px_3px_rgba(15,23,42,0.03)]">
+      <header className="sticky top-0 z-40 h-16 bg-[#FFFFFF] border-b border-[#E2E8F0] px-6 flex items-center gap-4 shadow-[0_1px_3px_rgba(15,23,42,0.03)]">
         {/* Left: Mobile Toggle, Brand "OSDIGI" (Google Sans Flex Black) & Breadcrumbs */}
         <div className="flex-1 flex items-center gap-3">
           <button
