@@ -341,43 +341,48 @@ export const GradientWaves: React.FC<GradientWavesProps> = ({
     if (!container) return;
     const ctx = ctxMap.get(container);
     if (!ctx) return;
-    const { program } = ctx;
-    const u = program.uniforms;
+    try {
+      const { program } = ctx;
+      if (!program || !program.uniforms) return;
+      const u = program.uniforms;
 
-    enableMouseRef.current = mouseInteraction;
+      enableMouseRef.current = mouseInteraction;
 
-    u.uSpeed.value = speed;
-    u.uAmplitude.value = amplitude;
-    u.uWaveScale.value = waveScale;
-    u.uWaveRatio.value = waveRatio;
-    u.uSwell.value = swell;
-    u.uTurbulence.value = turbulence;
-    u.uTilt.value = tilt;
-    u.uZoom.value = zoom;
-    u.uHeight.value = height;
-    u.uFogDepth.value = fogDepth;
-    u.uSteps.value = detailToSteps(detail);
-    u.uBrightness.value = brightness;
-    u.uOpacity.value = opacity;
-    u.uGrain.value = grain ? 1.0 : 0.0;
-    u.uGrainIntensity.value = grainIntensity;
-    u.uParallax.value = parallaxStrength;
-    u.uEnableMouse.value = mouseInteraction;
-    const hc = u.uHorizonColor.value as Float32Array;
-    const wc = u.uWaveColor.value as Float32Array;
-    const cc = u.uCrestColor.value as Float32Array;
-    const h = hexToRgb(horizonColor);
-    const w = hexToRgb(waveColor);
-    const cr = hexToRgb(crestColor);
-    hc[0] = h[0];
-    hc[1] = h[1];
-    hc[2] = h[2];
-    wc[0] = w[0];
-    wc[1] = w[1];
-    wc[2] = w[2];
-    cc[0] = cr[0];
-    cc[1] = cr[1];
-    cc[2] = cr[2];
+      if (u.uSpeed) u.uSpeed.value = speed;
+      if (u.uAmplitude) u.uAmplitude.value = amplitude;
+      if (u.uWaveScale) u.uWaveScale.value = waveScale;
+      if (u.uWaveRatio) u.uWaveRatio.value = waveRatio;
+      if (u.uSwell) u.uSwell.value = swell;
+      if (u.uTurbulence) u.uTurbulence.value = turbulence;
+      if (u.uTilt) u.uTilt.value = tilt;
+      if (u.uZoom) u.uZoom.value = zoom;
+      if (u.uHeight) u.uHeight.value = height;
+      if (u.uFogDepth) u.uFogDepth.value = fogDepth;
+      if (u.uSteps) u.uSteps.value = detailToSteps(detail);
+      if (u.uBrightness) u.uBrightness.value = brightness;
+      if (u.uOpacity) u.uOpacity.value = opacity;
+      if (u.uGrain) u.uGrain.value = grain ? 1.0 : 0.0;
+      if (u.uGrainIntensity) u.uGrainIntensity.value = grainIntensity;
+      if (u.uParallax) u.uParallax.value = parallaxStrength;
+      if (u.uEnableMouse) u.uEnableMouse.value = mouseInteraction;
+      if (u.uHorizonColor?.value) {
+        const hc = u.uHorizonColor.value as Float32Array;
+        const h = hexToRgb(horizonColor);
+        hc[0] = h[0]; hc[1] = h[1]; hc[2] = h[2];
+      }
+      if (u.uWaveColor?.value) {
+        const wc = u.uWaveColor.value as Float32Array;
+        const w = hexToRgb(waveColor);
+        wc[0] = w[0]; wc[1] = w[1]; wc[2] = w[2];
+      }
+      if (u.uCrestColor?.value) {
+        const cc = u.uCrestColor.value as Float32Array;
+        const cr = hexToRgb(crestColor);
+        cc[0] = cr[0]; cc[1] = cr[1]; cc[2] = cr[2];
+      }
+    } catch (err) {
+      console.warn('GradientWaves uniform update error:', err);
+    }
   }, [
     horizonColor,
     waveColor,

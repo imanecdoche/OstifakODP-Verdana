@@ -7,6 +7,10 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Perbaikan Blank Screen pada Vercel Deployment & Service Worker:
+  - PERBAIKAN PWA SERVICE WORKER: Handler fetch pada `sw.js` diperbaiki agar selalu mengembalikan objek `Response` valid (tidak menghasilkan unhandled undefined response error pada asset bundle).
+  - SAFE WEBGL & UNIFORMS: Ditambahkan guard dan error catch pada rendering WebGL background (`GradientWaves.tsx`) untuk memastikan kompatibilitas di seluruh browser mobile/desktop.
+  - ROBUST ROOT MOUNTING: Mounting `main.tsx` dipastikan aman dengan error boundary global dan graceful service worker registration.
 - **[2026-08-26]**: Konfigurasi Vercel-Ready & Push Repository:
   - VERCEL SPA & PWA ROUTING: Ditambahkan file konfigurasi `vercel.json` dengan dukungan rewrite routing SPA (`index.html`), caching header optimal untuk assets, PWA updates immediate header untuk `sw.js` & `manifest.json`, serta header keamanan browser standar.
 - **[2026-08-26]**: Isolasi Swipe Gestures Sidebar dari Scroll Horizontal & Geser Tutup Right Panel:

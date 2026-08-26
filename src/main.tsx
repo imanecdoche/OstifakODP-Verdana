@@ -4,16 +4,20 @@ import App from './App.tsx';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import './index.css';
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
-  </StrictMode>,
-);
+const container = document.getElementById('root');
+if (container) {
+  const root = createRoot(container);
+  root.render(
+    <StrictMode>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </StrictMode>,
+  );
+}
 
-// Register PWA Service Worker
-if ('serviceWorker' in navigator) {
+// Register PWA Service Worker safely
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
       .register('/sw.js')
@@ -21,7 +25,7 @@ if ('serviceWorker' in navigator) {
         console.log('[PWA] Service Worker aktif dengan scope:', reg.scope);
       })
       .catch((err) => {
-        console.warn('[PWA] Service Worker gagal terdaftar:', err);
+        console.warn('[PWA] Service Worker notice:', err);
       });
   });
 }
