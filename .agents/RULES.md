@@ -7,6 +7,12 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Perbaikan Bug Posisi & Transformasi GooeyToast saat Muncul (Versi v1.1.0.63b):
+  - 1. PERBAIKAN BUG POSISI & TRANSFORM:
+    * Menghapus seluruh override CSS `transform: scale(...)` dan `transform-origin` pada `.gooey-wrapper` dan `[data-sonner-toast]` di [`index.css`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/index.css) yang sebelumnya merusak perhitungan rotasi cermin horizontal `scaleX(-1)` internal goey-toast untuk alignment kanan.
+    * Mengembalikan kontrol posisi dan stacking toast ke Sonner murni dengan prop `offset="24px"` dan `gap={12}` pada [`App.tsx`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/App.tsx).
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Memastikan posisi toast di sudut kanan bawah muncul mulus, stabil, dan presisi tanpa loncatan visual (*visual jump/glitch*) atau teks terdistorsi.
 - **[2026-08-27]**: Pembaruan Konfigurasi Komponen GooeyToaster (Versi v1.1.0.62b):
   - 1. KONFIGURASI GOOEYTOASTER:
     * Posisi toaster dipindahkan ke sudut kanan bawah: `position="bottom-right"`.

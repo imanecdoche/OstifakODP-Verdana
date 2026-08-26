@@ -674,6 +674,8 @@ export default function App() {
         <LoginPage onLoginSuccess={handleLoginSuccess} />
         <GooeyToaster
           position="bottom-right"
+          offset="24px"
+          gap={12}
           closeOnEscape={false}
           bounce={0.05}
           showTimestamp={false}
@@ -850,6 +852,8 @@ export default function App() {
       {/* Global Gooey Toast Notifications */}
       <GooeyToaster
         position="bottom-right"
+        offset="24px"
+        gap={12}
         closeOnEscape={false}
         bounce={0.05}
         showTimestamp={false}
