@@ -7,6 +7,12 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Penutupan Penuh Backdrop Card Hover Santri Tanpa Celah Bawah (Versi v1.1.0.37b):
+  - 1. PENUTUPAN BACKDROP CARD SEPENUHNYA:
+    * Mengatasi celah kosong di bawah kartu santri saat hover dengan menerapkan `-inset-1 rounded-[inherit]` dan penyesuaian flex layout `flex flex-col justify-between h-full` pada kartu santri (`StudentsView.tsx`, `DormitoryView.tsx`, `ClassesView.tsx`).
+    * Lapisan penutup semi-transparan (`bg-slate-950/60 backdrop-blur-[2px]`) kini menutupi seluruh permukaan kartu secara presisi hingga ke sudut dan batas border terluar dengan masking `overflow-hidden` yang mulus.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan kebersihan visual minimalis, responsif, dan interaksi shutter hover tombol "Buka Detail Santri" yang elegan tanpa merusak konsistensi layout.
 - **[2026-08-26]**: Penambahan Tiga Metrik Kartu Santri (Hafalan | Prestasi | Pelanggaran) & Fleksibilitas Filter/Sorting PP & PK (Versi v1.1.0.36b):
   - 1. PENAMBAHAN METRIK PRESTASI PADA KARTU SANTRI:
     * Memperbarui kartu ringkasan santri di direktori (`StudentsView.tsx`) menjadi 3 kolom metrik simetris dengan garis pemisah tipis (*divider*): **Hafalan | Prestasi | Pelanggaran** (menampilkan kuantitas Juz Hafalan, akumulasi Poin Prestasi `+X PP`, dan akumulasi Poin Pelanggaran `X PK`).

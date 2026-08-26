@@ -1503,16 +1503,16 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredStudents.map((st) => (
-            <Card key={st.id} variant="default" className={`p-6 space-y-4 transition-all relative overflow-hidden group ${isEditMode ? 'ring-2 ring-[#059669]/30 border-[#059669]' : 'hoverable'}`}>
+            <Card key={st.id} variant="default" className={`p-6 space-y-4 transition-all relative overflow-hidden group flex flex-col justify-between h-full ${isEditMode ? 'ring-2 ring-[#059669]/30 border-[#059669]' : 'hoverable'}`}>
               
-              {/* Overlay Shutter Shortcut (Visible on hover when not in edit mode) */}
+              {/* Overlay Shutter Shortcut (Visible on hover when not in edit mode, fully covering the card with zero gaps) */}
               {!isEditMode && (
                 <div 
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedDetailStudent(st);
                   }}
-                  className="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto flex items-center justify-center z-10 cursor-pointer"
+                  className="absolute -inset-1 rounded-[inherit] bg-slate-950/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto flex items-center justify-center z-20 cursor-pointer"
                 >
                   <button
                     type="button"

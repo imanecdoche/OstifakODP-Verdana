@@ -525,7 +525,7 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
                             e.stopPropagation();
                             setSelectedDetailStudent(res);
                           }}
-                          className="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto flex items-center justify-center z-10 cursor-pointer"
+                          className="absolute -inset-1 rounded-[inherit] bg-slate-950/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto flex items-center justify-center z-20 cursor-pointer"
                         >
                           <button
                             type="button"
