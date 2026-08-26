@@ -29,6 +29,8 @@ import { gooeyToast } from 'goey-toast';
 import { useLenisModalLock } from '../../lib/lenis';
 import { RollingNumber } from '../modals/NewViolationModal';
 import { getSeverityInfo, sliderFillPercent } from '../../lib/severityUtils';
+import { useIsMobile } from '../../lib/useIsMobile';
+import { ActionSheet } from '../ui/ActionSheet';
 import { CollectiveMahkamahView } from './CollectiveMahkamahView';
 
 interface ViolationsViewProps {
@@ -137,6 +139,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
   students = [],
   onOpenNewViolationModal,
 }) => {
+  const isMobile = useIsMobile(768);
   const [currentView, setCurrentView] = useState<'list' | 'collective-trial'>('list');
   const [filter, setFilter] = useState<ViolationFilter>(() => {
     try {
@@ -660,8 +663,40 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
         </table>
       </div>
 
-      {/* Floating Fixed Dropdown & Context Menu with Fullscreen Transparent Backdrop */}
-      {activeMenu && (
+      {/* 1. Mobile Bottom Sheet (Action Sheet) */}
+      {isMobile && activeMenu && (
+        <ActionSheet
+          isOpen={!!activeMenu}
+          onClose={() => setActiveMenu(null)}
+          title={activeMenu.violation.studentName}
+          subtitle={`${activeMenu.violation.violation} • NIS: ${activeMenu.violation.nis} • ${activeMenu.violation.kamar}`}
+          actions={[
+            {
+              label: activeMenu.violation.status === 'selesai' ? 'Tandai Belum Selesai' : 'Tandai Selesai',
+              icon: activeMenu.violation.status === 'selesai' ? (
+                <Clock className="w-5 h-5 text-black" />
+              ) : (
+                <CheckCircle2 className="w-5 h-5 text-black" />
+              ),
+              onClick: () => handleToggleStatus(activeMenu.violation),
+            },
+            {
+              label: 'Edit Kasus',
+              icon: <Pencil className="w-5 h-5 text-black" />,
+              onClick: () => handleOpenEdit(activeMenu.violation),
+            },
+            {
+              label: 'Hapus Kasus',
+              icon: <Trash2 className="w-5 h-5 text-black" />,
+              isDestructive: true,
+              onClick: () => handleOpenDelete(activeMenu.violation),
+            },
+          ]}
+        />
+      )}
+
+      {/* 2. Desktop Floating Fixed Dropdown & Context Menu with Fullscreen Transparent Backdrop */}
+      {!isMobile && activeMenu && (
         <>
           {/* Transparent Backdrop (Catch all clicks outside to close cleanly) */}
           <div

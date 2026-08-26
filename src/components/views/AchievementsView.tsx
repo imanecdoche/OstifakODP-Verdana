@@ -17,6 +17,8 @@ import { Button } from '../ui/Button';
 import { gooeyToast } from 'goey-toast';
 import { recordSessionAction } from '../../lib/sessionLogService';
 import { MoreHorizontal, Pencil, Trash2, X, AlertTriangle } from 'lucide-react';
+import { useIsMobile } from '../../lib/useIsMobile';
+import { ActionSheet } from '../ui/ActionSheet';
 
 const RunningText: React.FC<{
   text: string;
@@ -106,6 +108,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
   students,
   onSelectStudent,
 }) => {
+  const isMobile = useIsMobile(768);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isNewModalOpen, setIsNewModalOpen] = useState<boolean>(false);
@@ -766,8 +769,31 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
         </div>
       </div>
 
-      {/* Floating Fixed Dropdown & Context Menu with Transparent Backdrop */}
-      {activeMenu && (
+      {/* 1. Mobile Bottom Sheet (Action Sheet) */}
+      {isMobile && activeMenu && (
+        <ActionSheet
+          isOpen={!!activeMenu}
+          onClose={() => setActiveMenu(null)}
+          title={activeMenu.achievement.studentName}
+          subtitle={`${activeMenu.achievement.title} • +${activeMenu.achievement.points} PP • ${activeMenu.achievement.category}`}
+          actions={[
+            {
+              label: 'Edit Prestasi',
+              icon: <Pencil className="w-5 h-5 text-black" />,
+              onClick: () => handleOpenEdit(activeMenu.achievement),
+            },
+            {
+              label: 'Hapus Prestasi',
+              icon: <Trash2 className="w-5 h-5 text-black" />,
+              isDestructive: true,
+              onClick: () => handleOpenDelete(activeMenu.achievement),
+            },
+          ]}
+        />
+      )}
+
+      {/* 2. Desktop Floating Fixed Dropdown & Context Menu with Transparent Backdrop */}
+      {!isMobile && activeMenu && (
         <>
           <div
             className="fixed inset-0 z-40 bg-transparent pointer-events-auto cursor-default"
@@ -797,7 +823,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
               onClick={() => handleOpenEdit(activeMenu.achievement)}
               className="w-full flex items-center gap-2 px-2.5 py-1.5 text-slate-700 hover:bg-slate-50 rounded-md transition-colors cursor-pointer font-medium"
             >
-              <Pencil className="w-3.5 h-3.5 text-slate-500" />
+              <Pencil className="w-3.5 h-3.5 text-black" />
               <span>Edit Prestasi</span>
             </button>
 
@@ -806,7 +832,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
               onClick={() => handleOpenDelete(activeMenu.achievement)}
               className="w-full flex items-center gap-2 px-2.5 py-1.5 text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer font-semibold"
             >
-              <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+              <Trash2 className="w-3.5 h-3.5 text-black" />
               <span>Hapus Prestasi</span>
             </button>
           </div>

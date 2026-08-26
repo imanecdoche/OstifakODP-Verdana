@@ -58,6 +58,8 @@ import { gooeyToast } from 'goey-toast';
 import { ScrollArea } from '../ui/ScrollArea';
 import { Button } from '../ui/Button';
 import { useLenisModalLock } from '../../lib/lenis';
+import { useIsMobile } from '../../lib/useIsMobile';
+import { ActionSheet } from '../ui/ActionSheet';
 
 export interface SetoranSplitAnalysis {
   murojaahRange: { from: number; to: number } | null;
@@ -158,6 +160,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   rooms: propRooms,
   classes: propClasses,
 }) => {
+  const isMobile = useIsMobile(768);
   const [currentStudent, setCurrentStudent] = useState<SantriRecord | null>(student);
   const [detailActiveTab, setDetailActiveTab] = useState<'bio' | 'hafalan' | 'pelanggaran' | 'mahkamah' | 'prestasi' | 'izin'>(() => {
     try {
@@ -3369,8 +3372,31 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         </div>
       )}
 
-      {/* 7. FLOATING CONTEXT MENU FOR SETORAN RECORDS */}
-      {setoranContextMenu && (
+      {/* 7. Mobile Bottom Sheet (Action Sheet) for Setoran Records */}
+      {isMobile && setoranContextMenu && (
+        <ActionSheet
+          isOpen={!!setoranContextMenu}
+          onClose={() => setSetoranContextMenu(null)}
+          title={setoranContextMenu.record.surah}
+          subtitle={`${setoranContextMenu.record.date} • ${setoranContextMenu.record.category || 'Hafalan'}`}
+          actions={[
+            {
+              label: 'Edit Setoran',
+              icon: <Pencil className="w-5 h-5 text-black" />,
+              onClick: () => handleOpenEditSetoran(setoranContextMenu.record),
+            },
+            {
+              label: 'Hapus Setoran',
+              icon: <Trash2 className="w-5 h-5 text-black" />,
+              isDestructive: true,
+              onClick: () => handleOpenDeleteSetoran(setoranContextMenu.record),
+            },
+          ]}
+        />
+      )}
+
+      {/* 7b. Desktop Floating Context Menu for Setoran Records */}
+      {!isMobile && setoranContextMenu && (
         <>
           <div
             className="fixed inset-0 z-50 bg-transparent pointer-events-auto cursor-default"

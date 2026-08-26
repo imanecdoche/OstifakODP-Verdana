@@ -7,6 +7,14 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Penyesuaian Menu Aksi Kontekstual Responsif Mobile (Action Sheet / Bottom Sheet) (Versi v1.1.0.52b):
+  - 1. BOTTOM SHEET / ACTION SHEET KHUSUS MOBILE:
+    * Pada perangkat mobile (layar < 768px), pengetukan menu titik tiga (*three-dot*) maupun sentuh-tahan (*tap and hold/contextmenu*) pada baris tabel kasus pelanggaran, prestasi, dan riwayat setoran otomatis memunculkan panel **Bottom Sheet (Action Sheet)** yang meluncur mulus dari bawah layar.
+    * Opsi tindakan menggunakan ikon monokrom tunggal berwarna hitam (`text-black`), tipografi clean-flat yang thumb-friendly, dan garis pemisah tipis (*divider* `divide-y divide-[#E2E8F0]`).
+  - 2. KEBIJAKAN PLATFORM (DESKTOP VS MOBILE):
+    * Tetap mempertahankan floating contextual menu mengambang di samping kursor/tombol pada perangkat desktop, dan otomatis beralih menjadi Bottom Sheet saat diakses melalui perangkat mobile.
+  - 3. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Desain Bottom Sheet bersih, backdrop semi-transparan yang responsif terhadap klik untuk menutup, tombol 'Batal' di bagian bawah, dan drag handle indicator di bagian atas.
 - **[2026-08-27]**: Rekonstruksi Halaman Login Utama & Halaman Pilih Akun (Versi v1.1.0.51b):
   - 1. REKONSTRUKSI HALAMAN LOGIN UTAMA:
     * **Tombol Pilih Akun**: Dipindahkan ke bagian bawah halaman sebagai *secondary button* berupa teks bersih tanpa kotak pembungkus (*box*).
