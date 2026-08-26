@@ -1,7 +1,7 @@
 {
   "name": "ostifak-odp",
   "private": true,
-  "version": "1.1.0.58b",
+  "version": "1.1.0.59b",
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",

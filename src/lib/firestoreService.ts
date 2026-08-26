@@ -30,6 +30,22 @@ import {
 import { OFFICIAL_ACCOUNTS } from '../data/mockData';
 import { broadcastSync, subscribeToSyncMessages } from './realtimeSync';
 import { getSeverityInfo } from './severityUtils';
+import { 
+  isOfflineModeActive, 
+  getOfflineStudents, 
+  saveOfflineStudents,
+  getOfflineViolations,
+  saveOfflineViolations,
+  getOfflinePrograms,
+  saveOfflinePrograms,
+  getOfflineDirectives,
+  saveOfflineDirectives,
+  getOfflineDormitories,
+  getOfflineRooms,
+  saveOfflineDormitoriesAndRooms,
+  getOfflineClasses,
+  saveOfflineClasses
+} from './offlineManager';
 
 /**
  * 2. AUTHENTICATION SERVICES
@@ -166,6 +182,24 @@ export function saveUpdatedViolation(id: string, updates: Partial<ViolationRecor
 
 // Pelanggaran Collection Listener
 export function subscribeToPelanggaran(callback: (records: ViolationRecord[]) => void) {
+  if (isOfflineModeActive()) {
+    const emitOffline = () => {
+      callback(getOfflineViolations());
+    };
+    emitOffline();
+    const handleLocalChange = () => emitOffline();
+    if (typeof window !== 'undefined') {
+      window.addEventListener(EVENT_VIOLATIONS_CHANGED, handleLocalChange);
+      window.addEventListener('storage', handleLocalChange);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener(EVENT_VIOLATIONS_CHANGED, handleLocalChange);
+        window.removeEventListener('storage', handleLocalChange);
+      }
+    };
+  }
+
   const q = query(collection(db, 'pelanggaran'));
 
   const mergeAndEmit = (remoteDocs: ViolationRecord[]) => {
@@ -235,6 +269,16 @@ export function subscribeToPelanggaran(callback: (records: ViolationRecord[]) =>
 }
 
 export async function addPelanggaranRecord(record: Omit<ViolationRecord, 'id'>) {
+  if (isOfflineModeActive()) {
+    const current = getOfflineViolations();
+    const newDoc: ViolationRecord = {
+      ...record,
+      id: `off_vio_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    };
+    saveOfflineViolations([newDoc, ...current]);
+    return { id: newDoc.id };
+  }
+
   const colRef = collection(db, 'pelanggaran');
   const docRef = await addDoc(colRef, {
     ...record,
@@ -246,6 +290,13 @@ export async function addPelanggaranRecord(record: Omit<ViolationRecord, 'id'>) 
 }
 
 export async function updatePelanggaranRecord(id: string, updates: Partial<ViolationRecord>) {
+  if (isOfflineModeActive()) {
+    const current = getOfflineViolations();
+    const next = current.map(v => v.id === id ? { ...v, ...updates } : v);
+    saveOfflineViolations(next);
+    return;
+  }
+
   saveUpdatedViolation(id, updates);
   broadcastSync({ module: 'pelanggaran', action: 'UPDATE', id, payload: updates });
   const docRef = doc(db, 'pelanggaran', id);
@@ -260,6 +311,13 @@ export async function updatePelanggaranRecord(id: string, updates: Partial<Viola
 }
 
 export async function deletePelanggaranRecord(id: string) {
+  if (isOfflineModeActive()) {
+    const current = getOfflineViolations();
+    const next = current.filter(v => v.id !== id);
+    saveOfflineViolations(next);
+    return;
+  }
+
   saveDeletedViolationId(id);
   broadcastSync({ module: 'pelanggaran', action: 'DELETE', id });
   const docRef = doc(db, 'pelanggaran', id);
@@ -274,6 +332,29 @@ export async function deleteUnifiedViolation(
   violation: ViolationRecord,
   students: SantriRecord[] = []
 ) {
+  if (isOfflineModeActive()) {
+    const current = getOfflineViolations();
+    const identity = violationIdentity(violation);
+    const next = current.filter(v => v.id !== violation.id && violationIdentity(v) !== identity);
+    saveOfflineViolations(next);
+
+    const currentStudents = getOfflineStudents();
+    const targetStudent = currentStudents.find(
+      (s) => s.studentName.trim().toLowerCase() === violation.studentName.trim().toLowerCase()
+    );
+    if (targetStudent && targetStudent.violationsHistory && targetStudent.violationsHistory.length > 0) {
+      const updatedHistory = targetStudent.violationsHistory.filter(
+        (entry) => entry.id !== violation.id && entry.title.trim().toLowerCase() !== violation.violation.trim().toLowerCase()
+      );
+      const newPoints = Math.max(0, (targetStudent.poinPelanggaran || 0) - (violation.points || 0));
+      updateSantriRecord(targetStudent.id, {
+        poinPelanggaran: newPoints,
+        violationsHistory: updatedHistory,
+      });
+    }
+    return;
+  }
+
   const identity = violationIdentity(violation);
   
   // 1. Instantly write to persistent storage blacklist
@@ -310,6 +391,42 @@ export async function updateUnifiedViolation(
   updates: Partial<ViolationRecord>,
   students: SantriRecord[] = []
 ) {
+  if (isOfflineModeActive()) {
+    const current = getOfflineViolations();
+    const identity = violationIdentity(violation);
+    const next = current.map(v => (v.id === violation.id || violationIdentity(v) === identity) ? { ...v, ...updates } : v);
+    saveOfflineViolations(next);
+
+    const currentStudents = getOfflineStudents();
+    const targetStudent = currentStudents.find(
+      (s) => s.studentName.trim().toLowerCase() === violation.studentName.trim().toLowerCase()
+    );
+    if (targetStudent && targetStudent.violationsHistory) {
+      let historyChanged = false;
+      const updatedHistory = targetStudent.violationsHistory.map((entry) => {
+        if (entry.id === violation.id || entry.title.trim().toLowerCase() === violation.violation.trim().toLowerCase()) {
+          historyChanged = true;
+          return {
+            ...entry,
+            title: updates.violation !== undefined ? updates.violation : entry.title,
+            points: updates.points !== undefined ? updates.points : entry.points,
+            penalty: updates.penaltyDescription !== undefined ? updates.penaltyDescription : entry.penalty,
+          };
+        }
+        return entry;
+      });
+
+      if (historyChanged) {
+        const deltaPoints = (updates.points !== undefined ? updates.points : violation.points) - violation.points;
+        const newPoints = Math.max(0, (targetStudent.poinPelanggaran || 0) + deltaPoints);
+        updateSantriRecord(targetStudent.id, {
+          poinPelanggaran: newPoints,
+          violationsHistory: updatedHistory,
+        });
+      }
+    }
+    return;
+  }
   const identity = violationIdentity(violation);
 
   // 1. Instantly write to persistent storage
@@ -413,6 +530,24 @@ export function violationIdentity(v: { studentName: string; violation: string; d
 
 // Proposal / Program Kerja Listener
 export function subscribeToProposals(callback: (programs: WorkProgram[]) => void) {
+  if (isOfflineModeActive()) {
+    const emitOffline = () => {
+      callback(getOfflinePrograms());
+    };
+    emitOffline();
+    const handleLocalChange = () => emitOffline();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('ostifak_programs_changed', handleLocalChange);
+      window.addEventListener('storage', handleLocalChange);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('ostifak_programs_changed', handleLocalChange);
+        window.removeEventListener('storage', handleLocalChange);
+      }
+    };
+  }
+
   const q = query(collection(db, 'proposal'));
   const unsubSnapshot = onSnapshot(q, (snapshot) => {
     const programs: WorkProgram[] = snapshot.docs.map((docSnap) => {
@@ -447,6 +582,16 @@ export function subscribeToProposals(callback: (programs: WorkProgram[]) => void
 }
 
 export async function addProposalRecord(program: Omit<WorkProgram, 'id'>) {
+  if (isOfflineModeActive()) {
+    const current = getOfflinePrograms();
+    const newProgram: WorkProgram = {
+      ...program,
+      id: `off_prog_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    };
+    saveOfflinePrograms([newProgram, ...current]);
+    return { id: newProgram.id };
+  }
+
   const colRef = collection(db, 'proposal');
   const docRef = await addDoc(colRef, {
     ...program,
@@ -459,6 +604,13 @@ export async function addProposalRecord(program: Omit<WorkProgram, 'id'>) {
 }
 
 export async function updateProposalRecord(id: string, updates: Partial<WorkProgram>) {
+  if (isOfflineModeActive()) {
+    const current = getOfflinePrograms();
+    const next = current.map(p => p.id === id ? { ...p, ...updates } : p);
+    saveOfflinePrograms(next);
+    return;
+  }
+
   const docRef = doc(db, 'proposal', id);
   try {
     await updateDoc(docRef, {
@@ -472,6 +624,13 @@ export async function updateProposalRecord(id: string, updates: Partial<WorkProg
 }
 
 export async function deleteProposalRecord(id: string) {
+  if (isOfflineModeActive()) {
+    const current = getOfflinePrograms();
+    const next = current.filter(p => p.id !== id);
+    saveOfflinePrograms(next);
+    return;
+  }
+
   const docRef = doc(db, 'proposal', id);
   try {
     await deleteDoc(docRef);
@@ -483,6 +642,24 @@ export async function deleteProposalRecord(id: string) {
 
 // Directives Collection Listener (Instruksi Mudir)
 export function subscribeToDirectives(callback: (directives: MudirDirective[]) => void) {
+  if (isOfflineModeActive()) {
+    const emitOffline = () => {
+      callback(getOfflineDirectives());
+    };
+    emitOffline();
+    const handleLocalChange = () => emitOffline();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('ostifak_directives_changed', handleLocalChange);
+      window.addEventListener('storage', handleLocalChange);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('ostifak_directives_changed', handleLocalChange);
+        window.removeEventListener('storage', handleLocalChange);
+      }
+    };
+  }
+
   const q = query(collection(db, 'directives'));
   const unsubSnapshot = onSnapshot(q, (snapshot) => {
     const directives: MudirDirective[] = snapshot.docs.map((docSnap) => {
@@ -515,6 +692,16 @@ export function subscribeToDirectives(callback: (directives: MudirDirective[]) =
 }
 
 export async function addDirectiveRecord(directive: Omit<MudirDirective, 'id'>) {
+  if (isOfflineModeActive()) {
+    const current = getOfflineDirectives();
+    const newDirective: MudirDirective = {
+      ...directive,
+      id: `off_dir_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    };
+    saveOfflineDirectives([newDirective, ...current]);
+    return { id: newDirective.id };
+  }
+
   const colRef = collection(db, 'directives');
   const docRef = await addDoc(colRef, {
     ...directive,
@@ -526,6 +713,13 @@ export async function addDirectiveRecord(directive: Omit<MudirDirective, 'id'>) 
 }
 
 export async function updateDirectiveRecord(id: string, updates: Partial<MudirDirective>) {
+  if (isOfflineModeActive()) {
+    const current = getOfflineDirectives();
+    const next = current.map(d => d.id === id ? { ...d, ...updates } : d);
+    saveOfflineDirectives(next);
+    return;
+  }
+
   const docRef = doc(db, 'directives', id);
   try {
     await updateDoc(docRef, {
@@ -539,6 +733,13 @@ export async function updateDirectiveRecord(id: string, updates: Partial<MudirDi
 }
 
 export async function deleteDirectiveRecord(id: string) {
+  if (isOfflineModeActive()) {
+    const current = getOfflineDirectives();
+    const next = current.filter(d => d.id !== id);
+    saveOfflineDirectives(next);
+    return;
+  }
+
   const docRef = doc(db, 'directives', id);
   try {
     await deleteDoc(docRef);
@@ -730,6 +931,24 @@ export function saveCustomSantri(santri: SantriRecord) {
 }
 
 export function subscribeToSantri(callback: (santri: SantriRecord[]) => void) {
+  if (isOfflineModeActive()) {
+    const emitOffline = () => {
+      callback(getOfflineStudents());
+    };
+    emitOffline();
+    const handleLocalChange = () => emitOffline();
+    if (typeof window !== 'undefined') {
+      window.addEventListener(EVENT_SANTRI_CHANGED, handleLocalChange);
+      window.addEventListener('storage', handleLocalChange);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener(EVENT_SANTRI_CHANGED, handleLocalChange);
+        window.removeEventListener('storage', handleLocalChange);
+      }
+    };
+  }
+
   let remoteList: SantriRecord[] = [];
 
   const emit = () => {
@@ -817,6 +1036,13 @@ export function subscribeToSantri(callback: (santri: SantriRecord[]) => void) {
 }
 
 export async function updateSantriRecord(id: string, updates: Partial<SantriRecord>) {
+  if (isOfflineModeActive()) {
+    const current = getOfflineStudents();
+    const next = current.map(s => s.id === id ? { ...s, ...updates } : s);
+    saveOfflineStudents(next);
+    return;
+  }
+
   // 1. Instantly write to local persistent storage
   saveUpdatedSantri(id, updates);
   broadcastSync({ module: 'santri', action: 'UPDATE', id, payload: updates });
@@ -834,6 +1060,13 @@ export async function updateSantriRecord(id: string, updates: Partial<SantriReco
 }
 
 export async function deleteSantriRecord(id: string) {
+  if (isOfflineModeActive()) {
+    const current = getOfflineStudents();
+    const next = current.filter(s => s.id !== id);
+    saveOfflineStudents(next);
+    return;
+  }
+
   // 1. Instantly write to local persistent blacklist
   saveDeletedSantriId(id);
   broadcastSync({ module: 'santri', action: 'DELETE', id });
@@ -855,6 +1088,17 @@ export async function deleteSantriRecord(id: string) {
 }
 
 export async function addSantriRecord(santri: Omit<SantriRecord, 'id'>) {
+  if (isOfflineModeActive()) {
+    const current = getOfflineStudents();
+    const localId = `off_santri_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const fullRecord: SantriRecord = {
+      id: localId,
+      ...santri,
+    };
+    saveOfflineStudents([...current, fullRecord]);
+    return { id: localId };
+  }
+
   const localId = `santri_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
   const fullRecord: SantriRecord = {
     id: localId,
@@ -898,6 +1142,73 @@ export async function recordCollectiveMahkamahSession(params: {
   sessionNotes?: string;
 }) {
   const { students, divisions, violation, penalty, date, points = 0, sessionNotes = '' } = params;
+
+  if (isOfflineModeActive()) {
+    const currentStudents = getOfflineStudents();
+    const currentViolations = getOfflineViolations();
+    const newViolations: ViolationRecord[] = [];
+
+    const updatedStudents = currentStudents.map((s) => {
+      const match = students.find((item) => item.id === s.id || item.name.trim().toLowerCase() === s.studentName.trim().toLowerCase());
+      if (!match) return s;
+
+      const mahkamahEntry: StudentMahkamahEntry = {
+        id: `mhk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        divisions,
+        violation,
+        penalty,
+        date,
+        points,
+        sessionNotes,
+        createdAt: new Date().toISOString(),
+      };
+
+      const existingMahkamah = s.mahkamahHistory || [];
+      const newMahkamahHistory = [mahkamahEntry, ...existingMahkamah];
+
+      const existingViolations = s.violationsHistory || [];
+      const newViolationHistory = [
+        {
+          id: `vio_mhk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          title: `[Sidang Mahkamah] ${violation}`,
+          date,
+          points: points || 0,
+          penalty,
+          notes: `Divisi: ${divisions.join(', ')}`,
+        },
+        ...existingViolations,
+      ];
+
+      const currentPoints = s.poinPelanggaran || 0;
+      const newPoints = currentPoints + (points || 0);
+
+      newViolations.push({
+        id: `off_mhk_vio_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        studentName: s.studentName,
+        nis: s.nis || '-',
+        kamar: s.kamar || '-',
+        violation: `[Sidang Mahkamah] ${violation}`,
+        category: divisions.join(' & '),
+        points: points || 0,
+        severity: getSeverityInfo(points || 0).severity,
+        status: 'belum_dihukum',
+        date,
+        penaltyDescription: penalty,
+        reportedBy: `Sidang Mahkamah (${divisions.join(', ')})`,
+      });
+
+      return {
+        ...s,
+        mahkamahHistory: newMahkamahHistory,
+        violationsHistory: newViolationHistory,
+        poinPelanggaran: newPoints,
+      };
+    });
+
+    saveOfflineStudents(updatedStudents);
+    saveOfflineViolations([...newViolations, ...currentViolations]);
+    return;
+  }
 
   for (const s of students) {
     const mahkamahEntry: StudentMahkamahEntry = {

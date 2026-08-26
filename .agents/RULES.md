@@ -7,6 +7,20 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Implementasi Fitur Mode Offline Lengkap (Halaman Login, Header, & Isolasi LocalStorage 100 MB) (Versi v1.1.0.59b):
+  - 1. TOMBOL & DIALOG KONFIRMASI MODE OFFLINE DI HALAMAN LOGIN:
+    * Pada halaman login ([`LoginPage.tsx`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/components/views/LoginPage.tsx)), ditambahkan sebuah *icon button* di pojok kanan bawah menggunakan ikon tidak ada internet / Wi-Fi disilang (`WifiOff`).
+    * Ketika tombol tersebut diklik, menampilkan dialog konfirmasi di tengah halaman yang menyembunyikan seluruh elemen form login, logo, dan tombol utama di belakangnya.
+    * Dialog konfirmasi tampil *unboxed* (tidak dibungkus kontainer box kaku) dengan garis pemisah tipis (*thin divider*), meminta persetujuan pengguna untuk masuk ke mode offline dengan alokasi penyimpanan lokal sebesar **100 MB**.
+  - 2. ISOLASI TOTAL & PENYIMPANAN LOCALSTORAGE:
+    * Ketika mode offline diaktifkan, aplikasi sepenuhnya terisolasi dari internet. Seluruh data sama sekali tidak mengambil atau mengirim dari/ke database cloud Firebase Firestore.
+    * Seluruh mekanisme CRUD dan penyimpanan data (santri, pelanggaran, mahkamah, prestasi, asrama, kelas, dan program kerja) dialihkan sepenuhnya ke dalam `localStorage` via [`offlineManager.ts`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/lib/offlineManager.ts).
+    * Dipastikan nol perubahan data yang menyentuh server atau database cloud selama mode offline aktif.
+  - 3. INDIKATOR VISUAL DI HEADER UTAMA:
+    * Pada header pojok kanan atas ([`Header.tsx`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/components/layout/Header.tsx)), area tombol avatar profil/akun digantikan dengan ikon **No-Internet berwarna merah** (`WifiOff text-[#EF4444]`) sebagai penanda visual jelas bahwa aplikasi sedang beroperasi dalam mode offline.
+    * Pengetukan ikon membuka status popover informasi mode offline dan opsi untuk keluar dari mode offline.
+  - 4. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan estetika minimalis *clean-flat*, tanpa kontainer card bertumpuk berlebihan, divider tipis, dan responsif baik di desktop maupun seluler.
 - **[2026-08-27]**: Penyesuaian Judul & Format Nilai Leaderboard Prestasi (Versi v1.1.0.58b):
   - 1. PENYESUAIAN JUDUL LEADERBOARD:
     * Pada halaman **'Rekam Jejak Prestasi & Poin Penghargaan'** ([`AchievementsView.tsx`](file:///media/fatihfarhat/New%20Volume/PROJECTS/OstifakODP-Verdana/src/components/views/AchievementsView.tsx)), judul section *"Top 5 Santri Akumulasi Poin Prestasi (PP)"* diubah menjadi *"Top 5 Santri Akumulasi Poin Prestasi"*.

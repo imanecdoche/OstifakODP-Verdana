@@ -12,6 +12,7 @@ import {
 import { db } from './firebase';
 import { UserProfile } from '../types';
 import { broadcastSync, subscribeToSyncMessages } from './realtimeSync';
+import { isOfflineModeActive } from './offlineManager';
 
 export interface SessionActionLog {
   id: string;
@@ -210,6 +211,17 @@ export const subscribeToSessionRecords = (callback: (records: SessionRecord[]) =
     window.addEventListener('storage', handleLocalSync);
   }
 
+  // If running in total offline mode, skip remote Firestore listener
+  if (isOfflineModeActive()) {
+    return () => {
+      unsubSync();
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('ostifak_session_records_updated', handleLocalSync);
+        window.removeEventListener('storage', handleLocalSync);
+      }
+    };
+  }
+
   // 3. Listen to Firestore Cloud 'sessions' collection real-time
   const q = query(collection(db, 'sessions'), orderBy('loginTimestamp', 'desc'), limit(100));
   const unsubFirestore = onSnapshot(
@@ -376,17 +388,19 @@ export const recordLoginSession = (user: UserProfile): SessionRecord => {
   saveSessionRecords(finalRecords);
   localStorage.setItem(STORAGE_KEY_ACTIVE_ID, sessionId);
 
-  // Sync new session to Firestore cloud
-  try {
-    const docRef = doc(db, 'sessions', sessionId);
-    setDoc(docRef, {
-      ...newSession,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    }).catch((err) => {
-      console.warn('Remote session setDoc notice:', err);
-    });
-  } catch {}
+  // Sync new session to Firestore cloud (skipped if in offline mode)
+  if (!isOfflineModeActive()) {
+    try {
+      const docRef = doc(db, 'sessions', sessionId);
+      setDoc(docRef, {
+        ...newSession,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      }).catch((err) => {
+        console.warn('Remote session setDoc notice:', err);
+      });
+    } catch {}
+  }
 
   // Broadcast to other open tabs / devices
   broadcastSync({ module: 'sessions', action: 'CREATE', payload: newSession });
@@ -437,16 +451,18 @@ export const recordSessionAction = (
   if (found) {
     saveSessionRecords(updatedRecords);
 
-    // Sync action log to Firestore cloud
-    try {
-      const docRef = doc(db, 'sessions', activeId);
-      updateDoc(docRef, {
-        actions: updatedActions,
-        updatedAt: serverTimestamp(),
-      }).catch((err) => {
-        console.warn('Remote session action updateDoc notice:', err);
-      });
-    } catch {}
+    // Sync action log to Firestore cloud (skipped if in offline mode)
+    if (!isOfflineModeActive()) {
+      try {
+        const docRef = doc(db, 'sessions', activeId);
+        updateDoc(docRef, {
+          actions: updatedActions,
+          updatedAt: serverTimestamp(),
+        }).catch((err) => {
+          console.warn('Remote session action updateDoc notice:', err);
+        });
+      } catch {}
+    }
 
     broadcastSync({ module: 'sessions', action: 'UPDATE', id: activeId, payload: { newAction } });
   }

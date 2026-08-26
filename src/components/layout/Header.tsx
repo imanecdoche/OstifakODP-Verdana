@@ -14,7 +14,8 @@ import {
   User,
   Sliders,
   Check,
-  X
+  X,
+  WifiOff
 } from 'lucide-react';
 import { UserProfile, DivisionId } from '../../types';
 import { mockDivisions } from '../../data/mockData';
@@ -34,6 +35,8 @@ interface HeaderProps {
   isRightPanelOpen: boolean;
   onToggleRightPanel: () => void;
   unreadCount: number;
+  isOfflineMode?: boolean;
+  onExitOfflineMode?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -48,6 +51,8 @@ export const Header: React.FC<HeaderProps> = ({
   isRightPanelOpen,
   onToggleRightPanel,
   unreadCount,
+  isOfflineMode,
+  onExitOfflineMode,
 }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -380,88 +385,149 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
-          {/* User Profile Avatar with Popover Window */}
+          {/* User Profile Avatar with Popover Window OR Red Offline Indicator */}
           <div className="relative pl-3 border-l border-[#E2E8F0] shrink-0">
-            <button
-              ref={avatarButtonRef}
-              type="button"
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className={`w-8 h-8 rounded-md border transition-all cursor-pointer flex items-center justify-center active:scale-[0.97] ${
-                isProfileOpen
-                  ? 'bg-[#0F172A] text-white border-[#0F172A]'
-                  : 'bg-[#FFFFFF] text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] border-[#E2E8F0]'
-              }`}
-              title="Profil & Pengaturan Akun"
-            >
-              <User className="w-4 h-4" />
-            </button>
+            {isOfflineMode ? (
+              <div className="relative">
+                <button
+                  ref={avatarButtonRef}
+                  type="button"
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="w-8 h-8 rounded-md bg-rose-50 border border-rose-200 text-[#EF4444] hover:bg-rose-100 transition-all cursor-pointer flex items-center justify-center active:scale-[0.97]"
+                  title="Aplikasi Berjalan dalam Mode Offline (Lokal 100 MB)"
+                  aria-label="Mode Offline Aktif"
+                >
+                  <WifiOff className="w-4 h-4 text-[#EF4444]" />
+                </button>
 
-            {/* Profile Popover Window */}
-            {isProfileOpen && (
-              <div
-                ref={popupRef}
-                className="absolute right-0 top-11 w-72 bg-[#FFFFFF] rounded-md shadow-[0_8px_32px_rgba(15,23,42,0.12)] border border-[#E2E8F0] overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-150 font-body"
-                style={{ transformOrigin: 'top right' }}
-              >
-                {/* 1. Header Profile Info */}
-                <div className="p-4 bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                  <h3 className="text-sm font-bold text-[#0F172A] font-headline truncate">
-                    {currentUser.name}
-                  </h3>
-                  <p className="text-xs font-semibold text-[#059669] truncate mt-0.5">
-                    {currentUser.role === 'mudir' ? 'Mudir' : currentUser.roleTitle}
-                  </p>
-                </div>
-
-                {/* 2. Menu Navigation Items */}
-                <div className="p-2 space-y-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsProfileOpen(false);
-                      setIsSessionRecordsModalOpen(true);
-                    }}
-                    className="w-full px-3 py-2 text-left rounded-md hover:bg-[#F8FAFC] text-xs font-medium text-[#0F172A] flex items-center justify-between transition-colors cursor-pointer active:scale-[0.97]"
+                {/* Offline Status Popover */}
+                {isProfileOpen && (
+                  <div
+                    ref={popupRef}
+                    className="absolute right-0 top-11 w-72 bg-[#FFFFFF] rounded-md shadow-[0_8px_32px_rgba(15,23,42,0.12)] border border-[#E2E8F0] overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-150 font-body"
+                    style={{ transformOrigin: 'top right' }}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <ShieldCheck className="w-4 h-4 text-[#059669]" />
-                      <span className="font-semibold text-slate-800">Rekam Sesi Login</span>
+                    {/* Header Offline Info */}
+                    <div className="p-4 bg-rose-50/70 border-b border-rose-100">
+                      <div className="flex items-center gap-2">
+                        <WifiOff className="w-4 h-4 text-[#EF4444]" />
+                        <h3 className="text-sm font-bold text-[#0F172A] font-headline">
+                          Mode Offline Aktif
+                        </h3>
+                      </div>
+                      <p className="text-[11px] text-[#64748B] mt-1">
+                        Penyimpanan Lokal: <strong className="text-[#0F172A]">100 MB (LocalStorage)</strong>
+                      </p>
+                      <p className="text-[10px] text-rose-600 font-medium mt-0.5">
+                        Isolasi Total: Nol data dikirim ke cloud database.
+                      </p>
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300">
-                      Audit
-                    </span>
-                  </button>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsProfileOpen(false);
-                      setIsSettingsModalOpen(true);
-                    }}
-                    className="w-full px-3 py-2 text-left rounded-md hover:bg-[#F8FAFC] text-xs font-medium text-[#0F172A] flex items-center justify-between transition-colors cursor-pointer active:scale-[0.97]"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Settings className="w-4 h-4 text-[#64748B]" />
-                      <span>Pengaturan Akun & Preferensi</span>
+                    {/* Exit Offline Button */}
+                    <div className="p-2 bg-[#FFFFFF]">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsProfileOpen(false);
+                          if (onExitOfflineMode) {
+                            onExitOfflineMode();
+                          } else if (onLogout) {
+                            onLogout();
+                          }
+                        }}
+                        className="w-full px-3 py-2 text-left rounded-md hover:bg-rose-50 text-xs font-semibold text-[#EF4444] flex items-center gap-2 transition-colors cursor-pointer active:scale-[0.97]"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        <span>Keluar dari Mode Offline</span>
+                      </button>
                     </div>
-                    <ChevronRight className="w-3.5 h-3.5 text-[#94A3B8]" />
-                  </button>
-                </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div>
+                <button
+                  ref={avatarButtonRef}
+                  type="button"
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className={`w-8 h-8 rounded-md border transition-all cursor-pointer flex items-center justify-center active:scale-[0.97] ${
+                    isProfileOpen
+                      ? 'bg-[#0F172A] text-white border-[#0F172A]'
+                      : 'bg-[#FFFFFF] text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] border-[#E2E8F0]'
+                  }`}
+                  title="Profil & Pengaturan Akun"
+                >
+                  <User className="w-4 h-4" />
+                </button>
 
-                {/* 3. Footer Logout Action */}
-                <div className="p-2 border-t border-[#E2E8F0] bg-[#FFFFFF]">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsProfileOpen(false);
-                      if (onLogout) onLogout();
-                    }}
-                    className="w-full px-3 py-2 text-left rounded-md hover:bg-[#EF4444]/10 text-xs font-semibold text-[#DC2626] flex items-center gap-2.5 transition-colors cursor-pointer active:scale-[0.97]"
+                {/* Profile Popover Window */}
+                {isProfileOpen && (
+                  <div
+                    ref={popupRef}
+                    className="absolute right-0 top-11 w-72 bg-[#FFFFFF] rounded-md shadow-[0_8px_32px_rgba(15,23,42,0.12)] border border-[#E2E8F0] overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-150 font-body"
+                    style={{ transformOrigin: 'top right' }}
                   >
-                    <LogOut className="w-4 h-4 text-[#DC2626]" />
-                    <span>Keluar dari Akun</span>
-                  </button>
-                </div>
+                    {/* 1. Header Profile Info */}
+                    <div className="p-4 bg-[#F8FAFC] border-b border-[#E2E8F0]">
+                      <h3 className="text-sm font-bold text-[#0F172A] font-headline truncate">
+                        {currentUser.name}
+                      </h3>
+                      <p className="text-xs font-semibold text-[#059669] truncate mt-0.5">
+                        {currentUser.role === 'mudir' ? 'Mudir' : currentUser.roleTitle}
+                      </p>
+                    </div>
+
+                    {/* 2. Menu Navigation Items */}
+                    <div className="p-2 space-y-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsProfileOpen(false);
+                          setIsSessionRecordsModalOpen(true);
+                        }}
+                        className="w-full px-3 py-2 text-left rounded-md hover:bg-[#F8FAFC] text-xs font-medium text-[#0F172A] flex items-center justify-between transition-colors cursor-pointer active:scale-[0.97]"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <ShieldCheck className="w-4 h-4 text-[#059669]" />
+                          <span className="font-semibold text-slate-800">Rekam Sesi Login</span>
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300">
+                          Audit
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsProfileOpen(false);
+                          setIsSettingsModalOpen(true);
+                        }}
+                        className="w-full px-3 py-2 text-left rounded-md hover:bg-[#F8FAFC] text-xs font-medium text-[#0F172A] flex items-center justify-between transition-colors cursor-pointer active:scale-[0.97]"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Settings className="w-4 h-4 text-[#64748B]" />
+                          <span>Pengaturan Akun & Preferensi</span>
+                        </div>
+                        <ChevronRight className="w-3.5 h-3.5 text-[#94A3B8]" />
+                      </button>
+                    </div>
+
+                    {/* 3. Footer Logout Action */}
+                    <div className="p-2 border-t border-[#E2E8F0] bg-[#FFFFFF]">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsProfileOpen(false);
+                          if (onLogout) onLogout();
+                        }}
+                        className="w-full px-3 py-2 text-left rounded-md hover:bg-[#EF4444]/10 text-xs font-semibold text-[#DC2626] flex items-center gap-2.5 transition-colors cursor-pointer active:scale-[0.97]"
+                      >
+                        <LogOut className="w-4 h-4 text-[#DC2626]" />
+                        <span>Keluar dari Akun</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

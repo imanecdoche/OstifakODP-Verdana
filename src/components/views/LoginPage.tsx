@@ -6,12 +6,17 @@ import {
   AlertCircle, 
   CheckCircle2, 
   X, 
-  Check 
+  Check,
+  WifiOff,
+  HardDrive,
+  ShieldCheck,
+  Zap
 } from 'lucide-react';
 import { OFFICIAL_ACCOUNTS, OfficialAccountConfig } from '../../data/mockData';
 import { loginWithEmailAndPassword } from '../../lib/firestoreService';
 import { UserProfile } from '../../types';
 import { GradientWaves } from '../ui/GradientWaves';
+import { enableOfflineMode, OFFLINE_STORAGE_QUOTA_LABEL } from '../../lib/offlineManager';
 
 interface LoginPageProps {
   onLoginSuccess: (user: UserProfile) => void;
@@ -28,6 +33,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
   // Mode Fullscreen Pilih Akun (Modal-less & Clean Flat)
   const [isAccountPickerOpen, setIsAccountPickerOpen] = useState(false);
+
+  // Dialog Konfirmasi Mode Offline (Center Fullscreen, Unboxed, Anti-Gravity UI)
+  const [isOfflineDialogOpen, setIsOfflineDialogOpen] = useState(false);
+  const [offlineLoading, setOfflineLoading] = useState(false);
 
   // Normalizer: Jika username diisi nama akun saja ("keamanan"), auto-append "@ostifak.edu"
   const getFullEmail = (val: string) => {
@@ -81,6 +90,39 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     await performLogin(username, password);
   };
 
+  const handleConfirmOfflineMode = () => {
+    setOfflineLoading(true);
+    setTimeout(() => {
+      // Find selected account profile if any, or default offline operator
+      const currentFull = getFullEmail(username).toLowerCase();
+      const matchedAccount = OFFICIAL_ACCOUNTS.find(a => a.email.toLowerCase() === currentFull);
+      
+      const offlineProfile: UserProfile = matchedAccount ? {
+        id: `off_${matchedAccount.email.split('@')[0]}`,
+        name: `${matchedAccount.name} (Offline)`,
+        email: matchedAccount.email,
+        role: matchedAccount.role,
+        roleLevel: matchedAccount.roleLevel,
+        roleTitle: `${matchedAccount.roleTitle} (Mode Offline)`,
+        division: matchedAccount.divisionId,
+        avatar: matchedAccount.avatar,
+      } : {
+        id: 'offline_operator',
+        name: 'Petugas Lapangan',
+        email: 'offline@ostifak.edu',
+        role: 'admin',
+        roleLevel: 2,
+        roleTitle: 'Administrator Mode Offline',
+        division: 'keamanan',
+        assignedDivision: 'keamanan',
+      };
+
+      const user = enableOfflineMode(offlineProfile);
+      setOfflineLoading(false);
+      onLoginSuccess(user);
+    }, 400);
+  };
+
   return (
     <div className="fixed inset-0 w-full h-full min-h-[100dvh] bg-[#050D07] flex flex-col justify-center overflow-y-auto overscroll-contain font-body text-white">
       
@@ -111,8 +153,86 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         />
       </div>
 
-      {/* 2. Kondisional: Tampilan Utama Login ATAU Fullscreen Pilih Akun */}
-      {!isAccountPickerOpen ? (
+      {/* 2. Kondisional: Dialog Konfirmasi Mode Offline ATAU Form Login ATAU Fullscreen Pilih Akun */}
+      {isOfflineDialogOpen ? (
+        /* Dialog Konfirmasi Mode Offline Unboxed (Menyembunyikan Form Login & Logo) */
+        <div className="relative z-20 w-full max-w-lg mx-auto my-auto p-6 sm:p-8 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-250 font-body">
+          
+          {/* Ikon Wi-Fi Disilang Merah Terisolasi */}
+          <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mb-5 text-rose-400">
+            <WifiOff className="w-8 h-8" />
+          </div>
+
+          <h2 className="text-xl sm:text-2xl font-bold text-white font-headline tracking-tight">
+            Konfirmasi Masuk Mode Offline
+          </h2>
+          <p className="text-xs sm:text-sm text-white/60 mt-1 max-w-md font-body leading-relaxed">
+            Aplikasi akan berjalan dalam isolasi penuh dari jaringan internet. Semua data dialihkan ke penyimpanan lokal peramban perangkat.
+          </p>
+
+          {/* Rincian Izin & Alokasi Penyimpanan 100 MB (Unboxed dengan Garis Pemisah Tipis) */}
+          <div className="w-full my-6 divide-y divide-white/10 border-y border-white/10 text-left text-xs font-body">
+            <div className="py-3 flex items-start gap-3">
+              <HardDrive className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-white">Alokasi Penyimpanan Lokal: {OFFLINE_STORAGE_QUOTA_LABEL}</p>
+                <p className="text-white/50 text-[11px] mt-0.5">
+                  Kapasitas dialokasikan penuh di localStorage untuk database santri, catatan pelanggaran, prestasi, asrama, & kelas.
+                </p>
+              </div>
+            </div>
+
+            <div className="py-3 flex items-start gap-3">
+              <ShieldCheck className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-white">Isolasi Total Jaringan (100% Offline)</p>
+                <p className="text-white/50 text-[11px] mt-0.5">
+                  Nol data dikirim atau diambil dari server database cloud selama mode offline aktif.
+                </p>
+              </div>
+            </div>
+
+            <div className="py-3 flex items-start gap-3">
+              <Zap className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-white">Akses & Manajemen Berkas Penuh</p>
+                <p className="text-white/50 text-[11px] mt-0.5">
+                  Semua fungsi pencatatan setoran hafalan, mutabaah, mahkamah, dan prestasi beroperasi normal secara instan.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Tombol Aksi Dialog Konfirmasi Mode Offline */}
+          <div className="w-full space-y-3 pt-1">
+            <button
+              type="button"
+              onClick={handleConfirmOfflineMode}
+              disabled={offlineLoading}
+              className="w-full h-11 bg-white hover:bg-white/90 active:bg-white/80 text-black font-semibold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg active:scale-[0.98] disabled:opacity-50"
+            >
+              {offlineLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-black" />
+              ) : (
+                <>
+                  <WifiOff className="w-4 h-4 text-rose-600" />
+                  <span>SETUJUI & MASUK MODE OFFLINE</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsOfflineDialogOpen(false)}
+              disabled={offlineLoading}
+              className="text-xs text-white/60 hover:text-white transition-colors cursor-pointer tracking-wider uppercase font-medium active:scale-95 py-2 px-4 hover:underline"
+            >
+              Batal / Kembali ke Login
+            </button>
+          </div>
+
+        </div>
+      ) : !isAccountPickerOpen ? (
         /* Tampilan Utama Login (Floating Centered) */
         <div className="relative z-10 w-full max-w-sm sm:max-w-md mx-auto my-auto p-4 flex flex-col items-center animate-in fade-in duration-300">
           
@@ -304,6 +424,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           </div>
 
         </div>
+      )}
+
+      {/* 3. Icon Button Pojok Kanan Bawah: Wi-Fi Disilang / Mode Offline */}
+      {!isOfflineDialogOpen && (
+        <button
+          type="button"
+          onClick={() => setIsOfflineDialogOpen(true)}
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-30 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white/70 hover:text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all cursor-pointer shadow-lg active:scale-95 group"
+          title="Masuk Mode Offline (Isolasi Lokal 100 MB)"
+          aria-label="Mode Offline"
+        >
+          <WifiOff className="w-5 h-5 text-rose-400 group-hover:text-rose-300 transition-colors" />
+        </button>
       )}
 
     </div>

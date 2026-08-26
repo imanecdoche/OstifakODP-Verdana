@@ -49,6 +49,10 @@ import {
   recordSessionAction,
   getStoredSessionRecords 
 } from './lib/sessionLogService';
+import { 
+  isOfflineModeActive, 
+  disableOfflineMode 
+} from './lib/offlineManager';
 
 export default function App() {
   // Activate Lenis Smooth Scroll
@@ -83,6 +87,21 @@ export default function App() {
     } catch {}
     return false;
   });
+
+  // Offline Mode State Tracker
+  const [isOfflineMode, setIsOfflineMode] = useState<boolean>(() => isOfflineModeActive());
+
+  useEffect(() => {
+    const handleOfflineChange = () => {
+      setIsOfflineMode(isOfflineModeActive());
+    };
+    window.addEventListener('ostifak-offline-mode-changed', handleOfflineChange);
+    window.addEventListener('storage', handleOfflineChange);
+    return () => {
+      window.removeEventListener('ostifak-offline-mode-changed', handleOfflineChange);
+      window.removeEventListener('storage', handleOfflineChange);
+    };
+  }, []);
 
   // Navigation State with localStorage Persistence
   const [activeView, setActiveView] = useState<string>(() => {
@@ -407,7 +426,12 @@ export default function App() {
 
   const handleLogout = async () => {
     recordLogoutSession();
-    await logoutUser();
+    if (isOfflineMode) {
+      disableOfflineMode();
+      setIsOfflineMode(false);
+    } else {
+      await logoutUser();
+    }
     setCurrentUser(null);
     setIsLoggedIn(false);
     localStorage.removeItem('ostifak_auth_user');
@@ -418,6 +442,12 @@ export default function App() {
     gooeyToast.info('Sesi Diakhiri', {
       description: 'Anda telah keluar dari akun.',
     });
+  };
+
+  const handleExitOfflineMode = () => {
+    disableOfflineMode();
+    setIsOfflineMode(false);
+    handleLogout();
   };
 
   // Add violation handler (mirrors case into the santri record to keep points in sync)
@@ -657,6 +687,8 @@ export default function App() {
           isRightPanelOpen={isRightPanelOpen}
           onToggleRightPanel={() => setIsRightPanelOpen(!isRightPanelOpen)}
           unreadCount={violations.filter(v => v.status === 'proses' || v.status === 'pending').length}
+          isOfflineMode={isOfflineMode}
+          onExitOfflineMode={handleExitOfflineMode}
         />
 
         {/* Content Canvas */}
