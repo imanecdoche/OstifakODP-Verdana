@@ -205,37 +205,40 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
       </div>
 
       {/* 3 Summary Metrics (Unboxed 1-Row with Dividers) */}
-      <div className="grid grid-cols-3 divide-x divide-[#E2E8F0] py-3.5 border-y border-[#E2E8F0]">
-        <div className="px-3 sm:px-6 first:pl-0">
-          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+      <div className="grid grid-cols-3 divide-x divide-[#E2E8F0] border-y border-[#E2E8F0] overflow-hidden">
+        <div className="p-3 sm:px-5 sm:py-4 first:pl-2 sm:first:pl-4">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Kelas Terdaftar
           </p>
           <div className="flex items-baseline gap-1.5 mt-0.5">
-            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+            <span className="text-lg sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline whitespace-nowrap">
               {totalClasses}
             </span>
+            <span className="text-[11px] sm:text-xs text-[#64748B] font-medium font-body hidden xs:inline">Kelas</span>
           </div>
         </div>
 
-        <div className="px-3 sm:px-6">
-          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+        <div className="p-3 sm:px-5 sm:py-4">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Tingkatan Kelas
           </p>
           <div className="flex items-baseline gap-1.5 mt-0.5">
-            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+            <span className="text-lg sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline whitespace-nowrap">
               {uniqueLevels}
             </span>
+            <span className="text-[11px] sm:text-xs text-[#64748B] font-medium font-body hidden xs:inline">Tingkat</span>
           </div>
         </div>
 
-        <div className="px-3 sm:px-6 last:pr-0">
-          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+        <div className="p-3 sm:px-5 sm:py-4 last:pr-2 sm:last:pr-4">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Total Santri
           </p>
           <div className="flex items-baseline gap-1.5 mt-0.5">
-            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+            <span className="text-lg sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline whitespace-nowrap">
               {totalStudents}
             </span>
+            <span className="text-[11px] sm:text-xs text-[#64748B] font-medium font-body hidden xs:inline">Santri</span>
           </div>
         </div>
       </div>

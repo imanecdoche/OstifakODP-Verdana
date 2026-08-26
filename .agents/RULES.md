@@ -7,6 +7,13 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Standarisasi Perataan & Responsivitas Layout Mobile Metric Cards (Versi v1.1.0.31b):
+  - 1. RESPONSIVITAS & PERATAAN MOBILE (GRID & DIVIDERS):
+    * Merekonstruksi tata letak seluruh barisan Metric Cards pada seluruh halaman aplikasi (`DashboardView`, `StudentsView`, `DormitoryView`, `ViolationsView`, `WorkProgramsView`, `TreasuryView`, `ClassesView`, `DirectivesView`).
+    * Pada layar mobile (<768px), metrik otomatis tertata dalam grid simetris 2x2 (dan baris penutup 1 kolom untuk 5 metrik) dengan pembatas garis vertikal dan horizontal (*cross-border dividers*) yang rapi tanpa border patah/terpotong, padding proporsional (`p-3.5 sm:px-5 sm:py-4`), dan angka metrik yang sejajar serta terbaca jelas dalam satu pandangan.
+    * Pada layar tablet & desktop (≥768px / ≥1024px), barisan metrik otomatis menyatu menjadi 1 baris kontinum dengan garis pemisah vertikal tipis yang elegan.
+  - 2. KEPATUHAN PRINSIP KONSISTENSI (ANTI-GRAVITY UI):
+    * Mempertahankan desain minimalis clean-flat murni tanpa kontainer card bertumpuk, bebas dari ikon dekoratif, dan anti-text-wrapping di seluruh ukuran layar ponsel.
 - **[2026-08-26]**: Sinkronisasi 100% Real-Time Data Riil Database pada Seluruh Metrik & Peringkat Dashboard (Versi v1.1.0.30b):
   - 1. SINKRONISASI DATA RIIL DATABASE:
     * Memverifikasi dan menyempurnakan seluruh agregasi data pada halaman Dashboard (Metric Cards: Total Santri Aktif, Master Asrama & Kamar, Pelanggaran Pekan Ini, Proposal & Program, dan Rata-rata Hafalan; Peringkat: Top 5 Santri Teladan, Top 5 Kamar Terbaik, Para Huffazh 30 Juz, Top 5 Hafalan Terbanyak, Top 5 Setoran Terbanyak Bulan Ini, serta Top 5 Murojaah Terbanyak Bulan Ini).

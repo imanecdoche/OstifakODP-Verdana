@@ -478,10 +478,11 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
         </div>
       </div>
 
-      {/* 4 Summary Metrics (Unboxed 1-Row with Dividers) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-[#E2E8F0] py-3.5 border-y border-[#E2E8F0]">
-        <div className="px-3 sm:px-6 first:pl-0">
-          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+      {/* 4 Summary Metrics (Unboxed 1-Row on Desktop, Symmetrical 2x2 Grid on Mobile with Dividers) */}
+      <div className="grid grid-cols-2 md:grid-cols-4 border-y border-[#E2E8F0] overflow-hidden">
+        {/* Metric 1 */}
+        <div className="p-3.5 sm:px-5 sm:py-4 border-r border-[#E2E8F0]">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Total Kasus
           </p>
           <div className="flex items-baseline gap-1.5 mt-0.5">
@@ -491,8 +492,9 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
           </div>
         </div>
 
-        <div className="px-3 sm:px-6">
-          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+        {/* Metric 2 */}
+        <div className="p-3.5 sm:px-5 sm:py-4 md:border-r border-[#E2E8F0]">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Sidang Mahkamah (Berat)
           </p>
           <div className="flex items-baseline gap-1.5 mt-0.5">
@@ -505,8 +507,9 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
           </div>
         </div>
 
-        <div className="px-3 sm:px-6">
-          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+        {/* Metric 3 */}
+        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-r border-[#E2E8F0]">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Pelanggaran Sedang
           </p>
           <div className="flex items-baseline gap-1.5 mt-0.5">
@@ -516,8 +519,9 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
           </div>
         </div>
 
-        <div className="px-3 sm:px-6 last:pr-0">
-          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+        {/* Metric 4 */}
+        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-[#E2E8F0]">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Belum Eksekusi
           </p>
           <div className="flex items-baseline gap-1.5 mt-0.5">

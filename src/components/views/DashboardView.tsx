@@ -293,10 +293,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </p>
       </div>
 
-      {/* 2. Executive KPI Stats (Unboxed 1-Row with Dividers) */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 divide-x divide-[#E2E8F0] py-3.5 border-y border-[#E2E8F0]">
-        <div className="px-3 sm:px-6 first:pl-0">
-          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+      {/* 2. Executive KPI Stats (Unboxed 1-Row on Desktop, Clean Symmetrical Grid on Mobile with Dividers) */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 border-y border-[#E2E8F0] overflow-hidden">
+        {/* Metric 1 */}
+        <div className="p-3.5 sm:px-5 sm:py-4 border-r border-[#E2E8F0]">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Total Santri Aktif
           </p>
           <div className="flex items-baseline gap-1.5 mt-0.5">
@@ -307,8 +308,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         </div>
 
-        <div className="px-3 sm:px-6">
-          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+        {/* Metric 2 */}
+        <div className="p-3.5 sm:px-5 sm:py-4 md:border-r border-[#E2E8F0]">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Master Asrama & Kamar
           </p>
           <div className="flex items-baseline gap-3 mt-0.5">
@@ -323,8 +325,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         </div>
 
-        <div className="px-3 sm:px-6">
-          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+        {/* Metric 3 */}
+        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-r md:border-r-0 lg:border-r border-[#E2E8F0]">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Pelanggaran Pekan Ini
           </p>
           <div className="flex items-baseline gap-1.5 mt-0.5">
@@ -335,8 +338,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         </div>
 
-        <div className="px-3 sm:px-6">
-          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+        {/* Metric 4 */}
+        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t lg:border-t-0 md:border-r border-[#E2E8F0]">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Proposal & Program
           </p>
           <div className="flex items-baseline gap-1.5 mt-0.5">
@@ -347,8 +351,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         </div>
 
-        <div className="px-3 sm:px-6 last:pr-0">
-          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+        {/* Metric 5 */}
+        <div className="p-3.5 sm:px-5 sm:py-4 col-span-2 md:col-span-1 border-t md:border-t lg:border-t-0 border-[#E2E8F0]">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Rata-rata Hafalan
           </p>
           <div className="flex items-baseline gap-1.5 mt-0.5">
