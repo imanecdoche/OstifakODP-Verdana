@@ -332,7 +332,7 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
               {/* Dynamic Jackpot Rolling Number & Plain Text Category (No Badges / No Boxes) */}
               <div className="flex items-center gap-1.5 text-xs font-bold font-headline">
                 <span className="text-slate-900 flex items-center font-mono">
-                  +<RollingNumber value={points} className="text-sm font-bold text-slate-900 mx-0.5" /> Poin
+                  +<RollingNumber value={points} className="text-sm font-bold text-slate-900 mx-0.5" /> PK
                 </span>
                 <span className="text-slate-400 font-normal">—</span>
                 <span className={`${severityInfo.colorClass} font-semibold transition-colors duration-150`}>

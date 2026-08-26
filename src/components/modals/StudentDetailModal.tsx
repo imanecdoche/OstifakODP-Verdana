@@ -1156,7 +1156,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                   <span>{t.label}</span>
                   {t.id === 'pelanggaran' && currentStudent.poinPelanggaran > 0 && (
                     <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-red-500 text-white font-bold">
-                      {currentStudent.poinPelanggaran} Pts
+                      {currentStudent.poinPelanggaran} PK
                     </span>
                   )}
                   {t.id === 'mahkamah' && currentStudent.mahkamahHistory && currentStudent.mahkamahHistory.length > 0 && (
@@ -1649,7 +1649,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         Akumulasi Poin Pelanggaran
                       </p>
                       <p className="text-2xl font-bold text-red-600 mt-0.5 font-headline">
-                        {currentStudent.poinPelanggaran} <span className="text-xs font-semibold text-slate-500 font-body">Pts</span>
+                        {currentStudent.poinPelanggaran} <span className="text-xs font-semibold text-slate-500 font-body">PK</span>
                       </p>
                     </div>
                     <div className="text-right">
@@ -1682,7 +1682,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                               </div>
                               <div className="text-right shrink-0">
                                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">
-                                  +{v.points || 0} Pts
+                                  +{v.points || 0} PK
                                 </span>
                                 <p className="text-[10px] text-slate-400 mt-1">{formatDateDDMMMMYY(v.date)}</p>
                               </div>
@@ -1808,37 +1808,63 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 </div>
               )}
 
-              {/* TAB 4: PRESTASI */}
+              {/* TAB 4: PRESTASI & POIN PP */}
               {detailActiveTab === 'prestasi' && (
                 <div className="space-y-4 animate-in fade-in duration-150">
+                  {/* Unboxed Poin Prestasi & Plain Text Summary */}
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        Akumulasi Poin Prestasi (PP)
+                      </p>
+                      <p className="text-2xl font-bold text-[#059669] mt-0.5 font-headline">
+                        +{currentStudent.poinPrestasi || (currentStudent.achievementsHistory || []).reduce((acc, a) => acc + (a.points || 10), 0)} <span className="text-xs font-semibold text-slate-500 font-body">PP</span>
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Penghargaan</p>
+                      <p className="text-xs font-bold text-[#0F172A] mt-0.5 font-headline">
+                        {(currentStudent.achievementsHistory || (currentStudent as any).achievementHistory || []).length} Rekam Terbit
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="space-y-2.5">
                     <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">
-                      PENGHARGAAN & PRESTASI SANTRI
+                      DAFTAR PENGHARGAAN & PRESTASI SANTRI
                     </h4>
-                    {(currentStudent.achievementHistory && currentStudent.achievementHistory.length > 0) ? (
-                      <div className="space-y-2">
-                        {currentStudent.achievementHistory.map((a) => (
-                          <div key={a.id} className="p-3.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs flex items-start justify-between gap-3">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-200/60">
-                                <Trophy className="w-4 h-4" />
+                    {(() => {
+                      const achList = currentStudent.achievementsHistory || (currentStudent as any).achievementHistory || [];
+                      return achList.length > 0 ? (
+                        <div className="space-y-2">
+                          {achList.map((a: any) => (
+                            <div key={a.id} className="p-3.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs flex items-start justify-between gap-3">
+                              <div className="space-y-1">
+                                <p className="font-bold text-xs text-[#0F172A]">{a.title}</p>
+                                <p className="text-[11px] text-[#64748B]">
+                                  Kategori: <strong className="text-[#0F172A]">{a.category}</strong> {a.rank ? `• Peringkat: ${a.rank}` : ''}
+                                </p>
+                                {a.organizer && (
+                                  <p className="text-[10px] text-[#94A3B8]">Penyelenggara: {a.organizer}</p>
+                                )}
                               </div>
-                              <div>
-                                <p className="font-bold text-xs text-slate-900">{a.title}</p>
-                                <p className="text-[11px] text-slate-500">{a.category}</p>
+                              <div className="text-right shrink-0">
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#059669] border border-emerald-200 font-mono">
+                                  +{a.points !== undefined ? a.points : 10} PP
+                                </span>
+                                <p className="text-[10px] text-[#64748B] mt-1">{a.date}</p>
                               </div>
                             </div>
-                            <span className="text-[10px] text-slate-400 shrink-0">{a.date}</span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="p-6 bg-white rounded-xl border border-dashed border-slate-200 text-center text-slate-500 space-y-1.5">
-                        <Trophy className="w-6 h-6 text-slate-300 mx-auto" />
-                        <p className="font-semibold text-slate-800">Belum Ada Rekam Prestasi</p>
-                        <p className="text-[11px] text-slate-400">Prestasi akademik, tahfizh, atau kejuaraan akan dicatat di sini.</p>
-                      </div>
-                    )}
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-8 bg-white rounded-xl border border-dashed border-slate-200 text-center text-slate-500 space-y-1.5">
+                          <CheckCircle2 className="w-6 h-6 text-slate-300 mx-auto" />
+                          <p className="font-semibold text-slate-800">Belum Ada Rekam Prestasi</p>
+                          <p className="text-[11px] text-slate-400">Prestasi akademik, tahfizh, atau kejuaraan akan tercatat di sini dan menambahkan poin PP otomatis.</p>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               )}

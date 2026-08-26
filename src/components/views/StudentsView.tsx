@@ -985,7 +985,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
     setNewVioTitle('');
     setNewVioPenalty('');
     gooeyToast.info('Kasus Pelanggaran Ditambahkan', {
-      description: `${newEntry.title} (+${newEntry.points} Pts)`,
+      description: `${newEntry.title} (+${newEntry.points} PK)`,
     });
   };
 
@@ -994,7 +994,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
     setEditViolationsHistory(updated);
     setEditPoin((prev) => Math.max(0, prev - points));
     gooeyToast.warning('Riwayat Kasus Dihapus', {
-      description: `Poin pelanggaran santri dikurangi ${points} Pts.`,
+      description: `Poin pelanggaran santri dikurangi ${points} PK.`,
     });
   };
 
@@ -1250,7 +1250,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
         {/* Metric 3 */}
         <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-r border-[#E2E8F0]">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
-            Bebas Pelanggaran (0 Pts)
+            Bebas Pelanggaran (0 PK)
           </p>
           <div className="flex items-baseline gap-1.5 mt-0.5">
             <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
@@ -1530,7 +1530,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 <div>
                   <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide">Poin Pelanggaran</p>
                   <p className={`text-sm font-bold mt-0.5 ${st.poinPelanggaran > 0 ? 'text-[#EF4444]' : 'text-[#16A34A]'}`}>
-                    {st.poinPelanggaran} Pts
+                    {st.poinPelanggaran} PK
                   </p>
                 </div>
               </div>
@@ -1809,7 +1809,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 Disiplin & Pelanggaran
                 {editPoin > 0 && (
                   <span className="ml-1.5 text-[10px] font-mono font-bold text-rose-600">
-                    +{editPoin} Pts
+                    +{editPoin} PK
                   </span>
                 )}
               </button>
@@ -2016,7 +2016,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                             }}
                             className="w-20 h-9 px-2.5 bg-white border border-[#CBD5E1] rounded text-center text-sm font-bold text-[#EF4444] focus:border-[#0F172A] focus:outline-none"
                           />
-                          <span className="font-bold text-xs text-[#64748B]">Pts</span>
+                          <span className="font-bold text-xs text-[#64748B]">PK</span>
                         </div>
                         <button
                           type="button"
@@ -2138,7 +2138,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                                 <div className="flex items-center gap-2">
                                   <span className="font-bold text-[#0F172A]">{vio.title}</span>
                                   <span className="text-[10px] font-bold text-[#EF4444] bg-[#FEF2F2] px-2 py-0.2 rounded border border-[#FEE2E2]">
-                                    +{vio.points} Pts
+                                    +{vio.points} PK
                                   </span>
                                 </div>
                                 <p className="text-[11px] text-[#64748B]">

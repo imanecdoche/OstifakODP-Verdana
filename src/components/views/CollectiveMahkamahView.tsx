@@ -394,7 +394,7 @@ export const CollectiveMahkamahView: React.FC<CollectiveMahkamahViewProps> = ({
 
                 <div className="flex items-center gap-1.5 text-xs font-bold font-headline">
                   <span className="text-[#0F172A] flex items-center font-mono">
-                    +<RollingNumber value={points} className="text-sm font-bold text-[#0F172A] mx-0.5" /> Poin
+                    +<RollingNumber value={points} className="text-sm font-bold text-[#0F172A] mx-0.5" /> PK
                   </span>
                   <span className="text-[#94A3B8] font-normal">—</span>
                   <span className={`${getSeverityInfo(points).colorClass} font-semibold transition-colors duration-150`}>

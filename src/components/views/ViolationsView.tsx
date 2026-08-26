@@ -620,7 +620,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
 
                     {/* 5. Kolom Poin */}
                     <td className="p-3.5 w-24 min-w-[70px] max-w-[80px] font-bold text-[#EF4444] whitespace-nowrap align-middle font-mono">
-                      +{v.points} Pts
+                      +{v.points} PK
                     </td>
 
                     {/* 6. Kolom Bentuk Takzir */}
@@ -783,7 +783,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
                   {/* Dynamic Jackpot Rolling Number & Plain Text Category */}
                   <div className="flex items-center gap-1.5 text-xs font-bold font-headline">
                     <span className="text-[#0F172A] flex items-center font-mono">
-                      +<RollingNumber value={editPoints} className="text-sm font-bold text-[#0F172A] mx-0.5" /> Poin
+                      +<RollingNumber value={editPoints} className="text-sm font-bold text-[#0F172A] mx-0.5" /> PK
                     </span>
                     <span className="text-[#64748B]">•</span>
                     <span className={getSeverityInfo(editPoints).colorClass}>
@@ -884,7 +884,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
 
               <div className="p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] text-[11px] text-[#64748B] space-y-1">
                 <p>Santri: <strong className="text-[#0F172A]">{deletingViolation.studentName}</strong> ({deletingViolation.kamar})</p>
-                <p>Bobot Poin: <strong className="text-rose-600">+{deletingViolation.points} Pts</strong></p>
+                <p>Bobot Poin: <strong className="text-rose-600">+{deletingViolation.points} PK</strong></p>
               </div>
 
               <div className="flex items-center justify-end gap-2.5 pt-2">

@@ -9,6 +9,7 @@ import { DashboardView } from './components/views/DashboardView';
 import { ViolationsView } from './components/views/ViolationsView';
 import { WorkProgramsView } from './components/views/WorkProgramsView';
 import { StudentsView } from './components/views/StudentsView';
+import { AchievementsView } from './components/views/AchievementsView';
 import { DormitoryView } from './components/views/DormitoryView';
 import { ClassesView } from './components/views/ClassesView';
 import { DirectivesView } from './components/views/DirectivesView';
@@ -86,7 +87,7 @@ export default function App() {
 
   // Navigation State with localStorage Persistence
   const [activeView, setActiveView] = useState<string>(() => {
-    const VALID_VIEWS = ['dashboard', 'students', 'dormitory', 'classes', 'violations', 'programs', 'directives'];
+    const VALID_VIEWS = ['dashboard', 'students', 'achievements', 'dormitory', 'classes', 'violations', 'programs', 'directives'];
     try {
       const savedView = localStorage.getItem('ostifak_active_view');
       if (savedView && VALID_VIEWS.includes(savedView)) return savedView;
@@ -426,7 +427,7 @@ export default function App() {
     recordSessionAction(
       'Kedisiplinan & Mahkamah',
       'Pencatatan Pelanggaran',
-      `Mencatat pelanggaran santri ${record.studentName} (+${record.points} Pts): ${record.violation}`
+      `Mencatat pelanggaran santri ${record.studentName} (+${record.points} PK): ${record.violation}`
     );
     const target = students.find(
       (s) => s.studentName.trim().toLowerCase() === record.studentName.trim().toLowerCase()
@@ -445,7 +446,7 @@ export default function App() {
       });
     }
     gooeyToast.warning('Pelanggaran Berhasil Dicatat', {
-      description: `${record.studentName} • ${record.violation} (+${record.points} Pts)`,
+      description: `${record.studentName} • ${record.violation} (+${record.points} PK)`,
     });
   };
 
@@ -687,6 +688,15 @@ export default function App() {
                   rooms={rooms}
                   classes={classes}
                   students={students}
+                />
+              </PageTransition>
+            ) : activeView === 'achievements' ? (
+              <PageTransition key="achievements">
+                <AchievementsView
+                  students={students}
+                  onSelectStudent={(st) => {
+                    setActiveView('students');
+                  }}
                 />
               </PageTransition>
             ) : activeView === 'dormitory' ? (

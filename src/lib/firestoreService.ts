@@ -580,6 +580,9 @@ export interface StudentAchievementEntry {
   date: string;
   rank: string;
   organizer: string;
+  points?: number; // Poin Prestasi (PP)
+  description?: string;
+  level?: string;
 }
 
 export interface StudentPermissionEntry {
@@ -611,6 +614,7 @@ export interface SantriRecord {
   kelas: string;
   hafalan: string;
   poinPelanggaran: number;
+  poinPrestasi?: number; // Akumulasi Poin Prestasi (PP)
   statusIbadah: string;
   birthDate?: string;
   domicile?: string;

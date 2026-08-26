@@ -7,6 +7,21 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Standardisasi Satuan Poin Pelanggaran (PK), Halaman & Sistem Poin Prestasi Santri (PP), serta Otomasi Poin Bulanan (Versi v1.1.0.33b):
+  - 1. STANDARDISASI SATUAN POIN PELANGGARAN ("PK"):
+    * Mengganti seluruh teks/string satuan poin penalti pelanggaran dari "Pts" / "Poin" menjadi "PK" (contoh: "10 PK", "20 PK", "0 PK") di seluruh tabel, kartu metrik, toast, modal rekam kasus, dan direktori santri.
+  - 2. HALAMAN & SISTEM POIN PRESTASI SANTRI ("PP"):
+    * Menambahkan halaman dan tab baru **PRESTASI** (`AchievementsView.tsx`) terintegrasi pada navigasi Sidebar, memuat rekam jejak penghargaan, tabel prestasi clean-flat, dan leaderboard akumulasi Poin Prestasi (**PP**).
+    * Mengubah dan menyelaraskan satuan penghargaan seluruh santri menggunakan format resmi **"PP"** (contoh: "10 PP", "20 PP", "25 PP").
+  - 3. SISTEM OTOMASI PENAMBAHAN POIN PP BERKALA:
+    * Mengimplementasikan modul otomatisasi (`achievementAutomationService.ts`) yang menjadwalkan penambahan poin PP pada tanggal terakhir di setiap bulan pukul 21:00 WIB.
+    * Kriteria otomatisasi predikat:
+      - **Santri Teladan**: Top 5 (0 PK + hafalan tertinggi) mendapat +25 PP (Juara 1) dan +20 PP (#2-5).
+      - **Hafalan Terbanyak**: Top 5 hafalan tertinggi mendapat +20 PP.
+      - **Setoran Terbanyak Bulan Ini**: Top 5 akumulasi setoran mendapat +15 PP.
+      - **Murojaah Terbanyak Bulan Ini**: Top 5 akumulasi murojaah mendapat +15 PP.
+  - 4. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Desain tabel minimalis clean-flat berbasis garis pemisah vertikal/horizontal tipis, tanpa border kotak bertumpuk, bebas ikon dekoratif, dan anti-text-wrapping di perangkat seluler.
 - **[2026-08-26]**: Penataan Tombol Kembali (Icon-Only Back Button) Sejajar Nama Santri (Versi v1.1.0.32b):
   - 1. POSISI DI SAMPING KIRI NAMA SANTRI & GAYA ICON-ONLY:
     * Memindahkan tombol kembali dari baris navigasi atas menjadi sejajar tepat di sebelah kiri nama utama santri pada header halaman detail santri.

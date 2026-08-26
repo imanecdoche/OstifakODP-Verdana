@@ -16,7 +16,8 @@ import {
   SlidersHorizontal,
   LogOut,
   ShieldCheck,
-  GraduationCap
+  GraduationCap,
+  Trophy
 } from 'lucide-react';
 import { UserProfile, DivisionId } from '../../types';
 import { mockDivisions } from '../../data/mockData';
@@ -60,6 +61,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'students', label: 'Profil Santri', icon: <Users className="w-4 h-4" /> },
+    { id: 'achievements', label: 'Prestasi Santri', icon: <Trophy className="w-4 h-4" /> },
     { id: 'dormitory', label: 'Asrama', icon: <Building2 className="w-4 h-4" /> },
     { id: 'classes', label: 'Kelas', icon: <GraduationCap className="w-4 h-4" /> },
     { id: 'violations', label: 'Pelanggaran & Mahkamah', icon: <ShieldAlert className="w-4 h-4" /> },

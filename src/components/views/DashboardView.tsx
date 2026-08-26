@@ -401,7 +401,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-xs font-bold text-[#059669] font-body">
-                      {s.poinPelanggaran === 0 ? '0 Poin' : `${s.poinPelanggaran} Poin`}
+                      {s.poinPelanggaran === 0 ? '0 PK' : `${s.poinPelanggaran} PK`}
                     </p>
                     <p className="text-[11px] text-[#64748B] font-body">
                       {s.hafalan}
@@ -445,7 +445,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-xs font-bold text-[#059669] font-body">
-                      Rata-rata {r.avgPoints.toFixed(1)} Poin
+                      Rata-rata {r.avgPoints.toFixed(1)} PK
                     </p>
                     <p className="text-[11px] text-[#64748B] font-body">
                       {r.avgHafalan.toFixed(1)} Juz Rata-rata
@@ -728,7 +728,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
                           {/* 4. Poin */}
                           <td className="p-3.5 w-20 min-w-[60px] max-w-[70px] font-bold text-[#EF4444] whitespace-nowrap align-middle font-mono">
-                            +{v.points} Pts
+                            +{v.points} PK
                           </td>
 
                           {/* 5. Tingkat */}
