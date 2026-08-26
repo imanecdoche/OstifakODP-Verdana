@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { mockNotifications } from './data/mockData';
 import { UserProfile, DivisionId, ViolationRecord, WorkProgram } from './types';
 import { Sidebar } from './components/layout/Sidebar';
@@ -12,6 +12,8 @@ import { StudentsView } from './components/views/StudentsView';
 import { DormitoryView } from './components/views/DormitoryView';
 import { ClassesView } from './components/views/ClassesView';
 import { DirectivesView } from './components/views/DirectivesView';
+import { WhoAmIView } from './components/views/WhoAmIView';
+import { TreasuryView } from './components/views/TreasuryView';
 import { DivisionDetailView } from './components/views/DivisionDetailView';
 import { LoginPage } from './components/views/LoginPage';
 import { PageTransition } from './components/ui/PageTransition';
@@ -146,39 +148,100 @@ export default function App() {
   const [rooms, setRooms] = useState<DormitoryRoom[]>(ALL_OFFICIAL_ROOMS);
   const [classes, setClasses] = useState<SchoolClass[]>(OFFICIAL_CLASSES);
 
+  // Data Fetching & Sync Status (Global Bottom Loading Bar)
+  const [isDataFetching, setIsDataFetching] = useState<boolean>(true);
+  const [dataFetchMessage, setDataFetchMessage] = useState<string>('Memuat & menyinkronkan data database...');
+
   // Subscribe to Live Collections
   useEffect(() => {
-    if (!isLoggedIn) return;
+    if (!isLoggedIn) {
+      setIsDataFetching(false);
+      return;
+    }
+
+    setIsDataFetching(true);
+    setDataFetchMessage('Memuat & menyinkronkan data database...');
+
+    let loadedCount = 0;
+    const checkAllLoaded = () => {
+      loadedCount++;
+      if (loadedCount >= 5) {
+        setIsDataFetching(false);
+      }
+    };
+
+    // Safety auto-dismiss fallback
+    const timeout = setTimeout(() => {
+      setIsDataFetching(false);
+    }, 3500);
 
     const unsubViolations = subscribeToPelanggaran((list) => {
       setViolations(list);
+      checkAllLoaded();
     });
 
     const unsubProposals = subscribeToProposals((list) => {
       setWorkPrograms(list);
+      checkAllLoaded();
     });
 
     const unsubSantri = subscribeToSantri((list) => {
       setStudents(list);
+      checkAllLoaded();
     });
 
     const unsubClasses = subscribeToClasses((classList) => {
       setClasses(classList);
+      checkAllLoaded();
     });
 
     const unsubDorms = subscribeToDormitories((dormList, roomList) => {
       setDormitories(dormList);
       setRooms(roomList);
+      checkAllLoaded();
     });
 
+    const handleCustomDataLoading = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail) {
+        setIsDataFetching(detail.isLoading ?? true);
+        if (detail.message) setDataFetchMessage(detail.message);
+      }
+    };
+    window.addEventListener('ostifak-data-loading', handleCustomDataLoading);
+
     return () => {
+      clearTimeout(timeout);
       unsubViolations();
       unsubProposals();
       unsubSantri();
       unsubDorms();
       unsubClasses();
+      window.removeEventListener('ostifak-data-loading', handleCustomDataLoading);
     };
   }, [isLoggedIn]);
+
+  // Global Wheel Scroll Prevention on Comboboxes, Select Dropdowns, & Number Inputs
+  useEffect(() => {
+    const handleGlobalWheel = (e: WheelEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      if (
+        target.tagName === 'SELECT' ||
+        (target.tagName === 'INPUT' && (target as HTMLInputElement).type === 'number') ||
+        target.getAttribute('role') === 'combobox' ||
+        target.closest('select') ||
+        target.closest('input[type="number"]')
+      ) {
+        if (document.activeElement === target || target.contains(document.activeElement)) {
+          (document.activeElement as HTMLElement)?.blur?.();
+        }
+      }
+    };
+
+    window.addEventListener('wheel', handleGlobalWheel, { passive: true, capture: true });
+    return () => window.removeEventListener('wheel', handleGlobalWheel, { capture: true });
+  }, []);
 
   // Global Keyboard Shortcuts (Ctrl+S / Cmd+S & Escape)
   useEffect(() => {
@@ -557,7 +620,11 @@ export default function App() {
         {/* Content Canvas */}
         <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
           <AnimatePresence mode="wait">
-            {selectedDivision ? (
+            {selectedDivision === 'bph' ? (
+              <PageTransition key="division-bph">
+                <TreasuryView />
+              </PageTransition>
+            ) : selectedDivision ? (
               <PageTransition key={`division-${selectedDivision}`}>
                 <DivisionDetailView
                   divisionId={selectedDivision}
@@ -566,6 +633,10 @@ export default function App() {
                   onOpenNewViolationModal={() => setIsNewViolationModalOpen(true)}
                   onOpenNewProgramModal={() => setIsNewProgramModalOpen(true)}
                 />
+              </PageTransition>
+            ) : activeView === 'bph' ? (
+              <PageTransition key="bph">
+                <TreasuryView />
               </PageTransition>
             ) : activeView === 'students' ? (
               <PageTransition key="students">
@@ -602,6 +673,10 @@ export default function App() {
             ) : activeView === 'directives' ? (
               <PageTransition key="directives">
                 <DirectivesView />
+              </PageTransition>
+            ) : activeView === 'whoami' ? (
+              <PageTransition key="whoami">
+                <WhoAmIView />
               </PageTransition>
             ) : (
               <PageTransition key="dashboard">
@@ -651,6 +726,26 @@ export default function App() {
 
       {/* Global Gooey Toast Notifications */}
       <GooeyToaster position="top-center" duration={3500} closeButton />
+
+      {/* Global Data Fetching Loading Bar (Thin Overlay, Bright Green, Fast Spin) */}
+      <AnimatePresence>
+        {isDataFetching && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 30 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none"
+          >
+            <div className="bg-[#22C55E] border-t border-[#16A34A] px-4 py-1.5 flex items-center justify-center gap-2.5 shadow-[0_-4px_16px_rgba(34,197,94,0.35)]">
+              <div className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-[spin_0.45s_linear_infinite] shrink-0" />
+              <span className="text-xs font-bold text-black font-headline tracking-tight select-none">
+                {dataFetchMessage}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

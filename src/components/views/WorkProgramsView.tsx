@@ -232,11 +232,10 @@ export const WorkProgramsView: React.FC<WorkProgramsViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header (Unboxed) */}
+      {/* Header (Unboxed, Zero Icon Policy) */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
         <div>
-          <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2.5 font-headline tracking-tight">
-            <CalendarCheck className="w-7 h-7 text-[#0F172A]" />
+          <h1 className="text-3xl sm:text-4xl font-black text-[#0F172A] font-headline tracking-tight">
             Program Kerja & Proposal Kegiatan
           </h1>
           <p className="text-xs text-[#64748B] mt-1 font-body">
@@ -248,10 +247,57 @@ export const WorkProgramsView: React.FC<WorkProgramsViewProps> = ({
           variant="primary"
           size="md"
           onClick={onOpenNewProgramModal}
-          icon={<Plus className="w-4 h-4 text-white" />}
+          className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
         >
-          Ajukan Proposal Baru
+          + Ajukan Proposal Baru
         </Button>
+      </div>
+
+      {/* 4 Summary Metrics (Unboxed 1-Row with Dividers) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-[#E2E8F0] py-3.5 border-y border-[#E2E8F0]">
+        <div className="px-3 sm:px-6 first:pl-0">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Total Proposal
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+              {workPrograms.length}
+            </span>
+          </div>
+        </div>
+
+        <div className="px-3 sm:px-6">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Dalam Pelaksanaan
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+              {workPrograms.filter(p => p.status === 'dalam_proses').length}
+            </span>
+          </div>
+        </div>
+
+        <div className="px-3 sm:px-6">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Menunggu Persetujuan
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-amber-600 tracking-tight font-headline">
+              {workPrograms.filter(p => p.status === 'menunggu_persetujuan').length}
+            </span>
+          </div>
+        </div>
+
+        <div className="px-3 sm:px-6 last:pr-0">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Selesai LPJ
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#059669] tracking-tight font-headline">
+              {workPrograms.filter(p => p.status === 'selesai').length}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Filter Tabs */}
@@ -263,13 +309,12 @@ export const WorkProgramsView: React.FC<WorkProgramsViewProps> = ({
 
       {/* Cards Grid */}
       {filteredPrograms.length === 0 ? (
-        <Card variant="default" className="p-8 text-center bg-white border border-[#E2E8F0] space-y-2">
-          <CalendarCheck className="w-10 h-10 text-[#64748B] mx-auto" />
+        <div className="p-8 text-center bg-white border border-dashed border-[#E2E8F0] rounded-xl space-y-1.5">
           <h3 className="text-sm font-bold text-[#0F172A] font-headline">Belum Ada Proposal Terdaftar</h3>
           <p className="text-xs text-[#64748B] font-body">
             Klik "Ajukan Proposal Baru" untuk mengajukan rencana program kegiatan.
           </p>
-        </Card>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredPrograms.map((p) => (

@@ -1055,24 +1055,14 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
           <div className="bg-white w-full max-w-4xl h-[92dvh] sm:h-[85vh] max-h-[95dvh] sm:max-h-[90vh] flex flex-col rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto animate-in fade-in zoom-in-95">
             
-            {/* Header Modal (Clean, No Icon, Red Close Box) */}
-            <div className="bg-[#142A18] text-white px-5 sm:px-6 py-4 flex items-center justify-between shrink-0">
-              <div className="min-w-0 pr-2">
-                <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-white truncate">
-                  {currentStudent.studentName}
-                </h3>
-                <p className="text-xs text-white/70 truncate mt-0.5">
-                  NIS: {currentStudent.nis || '-'} | {currentStudent.kamar} | {currentStudent.kelas}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="w-8 h-8 rounded-md bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
-                title="Tutup Modal"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            {/* Header Modal (Clean Flat Header, Zero Icon Policy) */}
+            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A] truncate">
+                {currentStudent.studentName}
+              </h3>
+              <p className="text-xs text-[#64748B] truncate mt-0.5 font-body">
+                NIS: {currentStudent.nis || '-'} • {currentStudent.kamar} • {currentStudent.kelas}
+              </p>
             </div>
 
             {/* Navigasi Tab (Segmented Button 1 Row dengan Shadow Edge & Auto-Centering) */}
@@ -1635,30 +1625,33 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                     <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">
                       REKAM KASUS & TINDAKAN DISIPLIN
                     </h4>
-                    {(currentStudent.violationHistory && currentStudent.violationHistory.length > 0) ? (
-                      <div className="space-y-2">
-                        {currentStudent.violationHistory.map((v) => (
-                          <div key={v.id} className="p-3.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs flex items-start justify-between gap-3">
-                            <div className="space-y-1">
-                              <p className="font-semibold text-xs text-slate-900">{v.title}</p>
-                              <p className="text-[11px] text-slate-500">Sanksi: <span className="font-medium text-slate-700">{v.penalty}</span></p>
+                    {(() => {
+                      const list = currentStudent.violationsHistory || (currentStudent as any).violationHistory || [];
+                      return list.length > 0 ? (
+                        <div className="space-y-2">
+                          {list.map((v: any) => (
+                            <div key={v.id} className="p-3.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs flex items-start justify-between gap-3">
+                              <div className="space-y-1">
+                                <p className="font-semibold text-xs text-slate-900">{v.title || v.violation}</p>
+                                <p className="text-[11px] text-slate-500">Sanksi: <span className="font-medium text-slate-700">{v.penalty || v.penaltyDescription || '-'}</span></p>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+                                  +{v.points || 0} Pts
+                                </span>
+                                <p className="text-[10px] text-slate-400 mt-1">{formatDateDDMMMMYY(v.date)}</p>
+                              </div>
                             </div>
-                            <div className="text-right shrink-0">
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">
-                                +{v.points} Pts
-                              </span>
-                              <p className="text-[10px] text-slate-400 mt-1">{formatDateDDMMMMYY(v.date)}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="p-6 bg-white rounded-xl border border-dashed border-slate-200 text-center text-slate-500 space-y-1.5">
-                        <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto" />
-                        <p className="font-semibold text-slate-800">Catatan Pelanggaran Bersih</p>
-                        <p className="text-[11px] text-slate-400">Santri ini belum memiliki catatan pelanggaran tata tertib.</p>
-                      </div>
-                    )}
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-6 bg-white rounded-xl border border-dashed border-slate-200 text-center text-slate-500 space-y-1.5">
+                          <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto" />
+                          <p className="font-semibold text-slate-800">Catatan Pelanggaran Bersih</p>
+                          <p className="text-[11px] text-slate-400">Santri ini belum memiliki catatan pelanggaran tata tertib.</p>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               )}
@@ -1884,13 +1877,14 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 </button>
               </div>
 
-              <button
-                type="button"
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={onClose}
-                className="px-5 py-2 bg-[#142A18] text-white rounded-full text-xs font-semibold hover:bg-[#2E5B37] transition-colors cursor-pointer shadow-xs active:scale-[0.98]"
+                className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
               >
                 Tutup Detail
-              </button>
+              </Button>
             </div>
 
           </div>
@@ -1901,18 +1895,14 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       {isIzinModalOpen && (
         <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
           <div className="bg-white w-full max-w-lg max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
-            <div className="bg-[#142A18] text-white px-6 py-4 flex items-center justify-between shrink-0">
-              <h3 className="text-base font-bold font-headline tracking-tight text-white">
-                Rekam Izin: {currentStudent.studentName}
+            {/* Header Modal */}
+            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
+                Rekam Izin Santri
               </h3>
-              <button
-                type="button"
-                onClick={() => setIsIzinModalOpen(false)}
-                className="w-8 h-8 rounded-md bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
-                title="Tutup Form Izin"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                {currentStudent.studentName} • {currentStudent.kamar}
+              </p>
             </div>
 
             <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-6">
@@ -1921,7 +1911,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 <select
                   value={izinType}
                   onChange={(e) => setIzinType(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:border-[#142A18] focus:outline-none"
+                  className="w-full h-10 px-3 bg-white border border-[#E2E8F0] rounded-lg text-xs font-medium focus:border-[#0F172A] focus:outline-none"
                 >
                   <option value="Pulang (Sakit)">Pulang (Sakit)</option>
                   <option value="Pulang (Keluarga/Acara)">Pulang (Keluarga/Acara)</option>
@@ -1938,7 +1928,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                     type="date"
                     value={izinStartDate}
                     onChange={(e) => setIzinStartDate(e.target.value)}
-                    className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs focus:border-[#142A18] focus:outline-none"
+                    className="w-full h-10 px-3 bg-white border border-[#E2E8F0] rounded-lg text-xs focus:border-[#0F172A] focus:outline-none"
                   />
                 </div>
                 <div>
@@ -1947,7 +1937,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                     type="date"
                     value={izinEndDate}
                     onChange={(e) => setIzinEndDate(e.target.value)}
-                    className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs focus:border-[#142A18] focus:outline-none"
+                    className="w-full h-10 px-3 bg-white border border-[#E2E8F0] rounded-lg text-xs focus:border-[#0F172A] focus:outline-none"
                   />
                 </div>
               </div>
@@ -1959,27 +1949,29 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                   value={izinReason}
                   onChange={(e) => setIzinReason(e.target.value)}
                   placeholder="Contoh: Berobat ke RS dan istirahat dokter selama 3 hari..."
-                  className="w-full p-3 bg-white border border-slate-200 rounded-lg text-xs focus:border-[#142A18] focus:outline-none resize-none"
+                  className="w-full p-3 bg-white border border-[#E2E8F0] rounded-lg text-xs focus:border-[#0F172A] focus:outline-none resize-none"
                 />
               </div>
             </div>
 
-            <div className="bg-[#F8FAFC] px-6 py-3.5 border-t border-slate-200/80 flex items-center justify-end gap-3 shrink-0">
+            <div className="bg-[#F8FAFC] px-6 py-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
               <Button
-                variant="secondary"
+                variant="ghost"
                 size="sm"
                 type="button"
                 onClick={() => setIsIzinModalOpen(false)}
               >
                 Batal
               </Button>
-              <button
+              <Button
+                variant="primary"
+                size="sm"
                 type="button"
                 onClick={handleSaveIzin}
-                className="px-5 py-2 bg-[#142A18] text-white rounded-full text-xs font-semibold hover:bg-[#2E5B37] transition-colors cursor-pointer shadow-xs active:scale-[0.98]"
+                className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
               >
                 Simpan Surat Izin
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -1989,24 +1981,20 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       {isMoveKamarModalOpen && (
         <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
           <div className="bg-white w-full max-w-md max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
-            <div className="bg-[#142A18] text-white px-6 py-4 flex items-center justify-between shrink-0">
-              <h3 className="text-base font-bold font-headline tracking-tight text-white">
+            {/* Header Modal */}
+            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
                 Pindah Kamar Asrama
               </h3>
-              <button
-                type="button"
-                onClick={() => setIsMoveKamarModalOpen(false)}
-                className="w-8 h-8 rounded-md bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
-                title="Tutup Modal Pindah Kamar"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                {currentStudent.studentName} (Saat ini: {currentStudent.kamar})
+              </p>
             </div>
 
             <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-6">
-              <div className="p-3 bg-[#F8FAFC] rounded-lg border border-slate-200">
-                <p className="text-slate-500">Santri: <strong className="text-slate-900">{currentStudent.studentName}</strong></p>
-                <p className="text-slate-500 mt-1">Kamar Saat Ini: <strong className="text-emerald-700">{currentStudent.kamar}</strong></p>
+              <div className="p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+                <p className="text-[#64748B]">Santri: <strong className="text-[#0F172A]">{currentStudent.studentName}</strong></p>
+                <p className="text-[#64748B] mt-1">Kamar Saat Ini: <strong className="text-[#059669]">{currentStudent.kamar}</strong></p>
               </div>
 
               <div>
@@ -2014,7 +2002,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 <select
                   value={targetKamar}
                   onChange={(e) => setTargetKamar(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:border-[#142A18] focus:outline-none"
+                  className="w-full h-10 px-3 bg-white border border-[#E2E8F0] rounded-lg text-xs font-medium focus:border-[#0F172A] focus:outline-none"
                 >
                   {liveRooms.map((r) => (
                     <option key={r.id || r.roomName} value={r.roomName}>
@@ -2025,22 +2013,24 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               </div>
             </div>
 
-            <div className="bg-[#F8FAFC] px-6 py-3.5 border-t border-slate-200/80 flex items-center justify-end gap-3 shrink-0">
+            <div className="bg-[#F8FAFC] px-6 py-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
               <Button
-                variant="secondary"
+                variant="ghost"
                 size="sm"
                 type="button"
                 onClick={() => setIsMoveKamarModalOpen(false)}
               >
                 Batal
               </Button>
-              <button
+              <Button
+                variant="primary"
+                size="sm"
                 type="button"
                 onClick={handleSaveMoveKamar}
-                className="px-5 py-2 bg-[#142A18] text-white rounded-full text-xs font-semibold hover:bg-[#2E5B37] transition-colors cursor-pointer shadow-xs active:scale-[0.98]"
+                className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
               >
                 Konfirmasi Pindah Kamar
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -2050,18 +2040,14 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       {isMoveKelasModalOpen && (
         <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
           <div className="bg-white w-full max-w-md max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
-            <div className="bg-[#142A18] text-white px-6 py-4 flex items-center justify-between shrink-0">
-              <h3 className="text-base font-bold font-headline tracking-tight text-white">
+            {/* Header Modal */}
+            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
                 Pindah Kelas / Tingkat
               </h3>
-              <button
-                type="button"
-                onClick={() => setIsMoveKelasModalOpen(false)}
-                className="w-8 h-8 rounded-md bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
-                title="Tutup Modal Pindah Kelas"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                {currentStudent.studentName} (Saat ini: {currentStudent.kelas})
+              </p>
             </div>
 
             <div className="p-6 space-y-4 text-xs">
@@ -2112,23 +2098,14 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
           <div className="bg-white w-full max-w-2xl max-h-[92dvh] sm:max-h-[90vh] flex flex-col rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto animate-in fade-in zoom-in-95">
             
-            <div className="bg-[#142A18] text-white px-6 py-4 flex items-center justify-between shrink-0">
-              <div>
-                <h3 className="text-base font-bold font-headline tracking-tight text-white flex items-center gap-2">
-                  Catat Setoran Mutaba'ah Tahfizh
-                </h3>
-                <p className="text-xs text-white/70 mt-0.5">
-                  Santri: {currentStudent.studentName} | {currentStudent.kamar} | {currentStudent.kelas}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsSetoranModalOpen(false)}
-                className="w-8 h-8 rounded-md bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
-                title="Tutup Form Setoran"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            {/* Header Modal */}
+            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
+                Catat Setoran Mutaba'ah Tahfizh
+              </h3>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                Santri: {currentStudent.studentName} • {currentStudent.kamar} • {currentStudent.kelas}
+              </p>
             </div>
 
             <ScrollArea
@@ -2288,6 +2265,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         max={selectedSurah?.totalAyat || 286}
                         value={setoranAyatFrom}
                         onChange={(e) => handleAyatFromChange(e.target.value)}
+                        onWheel={(e) => e.currentTarget.blur()}
                         className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
                       />
                     </div>
@@ -2299,6 +2277,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         max={selectedSurah?.totalAyat || 286}
                         value={setoranAyatTo}
                         onChange={(e) => handleAyatToChange(e.target.value)}
+                        onWheel={(e) => e.currentTarget.blur()}
                         className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
                       />
                     </div>
@@ -2325,6 +2304,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         max={604}
                         value={setoranPageFrom}
                         onChange={(e) => setSetoranPageFrom(e.target.value)}
+                        onWheel={(e) => e.currentTarget.blur()}
                         className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
                       />
                     </div>
@@ -2336,6 +2316,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         max={604}
                         value={setoranPageTo}
                         onChange={(e) => setSetoranPageTo(e.target.value)}
+                        onWheel={(e) => e.currentTarget.blur()}
                         className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
                       />
                     </div>
@@ -2410,22 +2391,24 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               </div>
             </ScrollArea>
 
-            <div className="bg-[#F8FAFC] px-6 py-3.5 border-t border-slate-200/80 flex items-center justify-end gap-3 shrink-0">
+            <div className="bg-[#F8FAFC] px-6 py-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
               <Button
-                variant="secondary"
+                variant="ghost"
                 size="sm"
                 type="button"
                 onClick={() => setIsSetoranModalOpen(false)}
               >
                 Batal
               </Button>
-              <button
+              <Button
+                variant="primary"
+                size="sm"
                 type="button"
                 onClick={handleSaveSetoran}
-                className="px-5 py-2 bg-[#142A18] text-white rounded-full text-xs font-semibold hover:bg-[#2E5B37] transition-colors cursor-pointer shadow-xs active:scale-[0.98]"
+                className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
               >
                 Simpan Setoran
-              </button>
+              </Button>
             </div>
 
           </div>
@@ -2437,23 +2420,14 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
           <div className="bg-white w-full max-w-3xl max-h-[92dvh] sm:max-h-[90vh] flex flex-col rounded-xl shadow-[0_16px_48px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto animate-in fade-in zoom-in-95">
             
-            <div className="bg-[#142A18] text-white px-6 py-4 flex items-center justify-between shrink-0">
-              <div>
-                <h3 className="text-base font-bold font-headline tracking-tight text-white flex items-center gap-2">
-                  Statistik & Tren Perkembangan Hafalan
-                </h3>
-                <p className="text-xs text-white/70 mt-0.5">
-                  {currentStudent.studentName} | {currentStudent.kamar} | Capaian: {currentStudent.hafalan}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsHafalanChartModalOpen(false)}
-                className="w-8 h-8 rounded-md bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
-                title="Tutup Grafik"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            {/* Header Modal */}
+            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
+                Statistik & Tren Perkembangan Hafalan
+              </h3>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                {currentStudent.studentName} • {currentStudent.kamar} • Capaian: {currentStudent.hafalan}
+              </p>
             </div>
 
             <ScrollArea

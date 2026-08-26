@@ -7,6 +7,191 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Global Anti-Scroll Wheel on Dropdowns & Number Inputs + Global Bottom Loading Bar Overlay (Versi v1.1.0.27b):
+  - 1. MATIKAN SCROLL WHEEL GLOBAL PADA DROPDOWN & INPUT NUMERIK:
+    * Menerapkan event listener wheel global di level window (`App.tsx`) dengan capture mode untuk otomatis melakukan `.blur()` pada setiap elemen `<select>`, combobox kustom, dan `<input type="number">` saat kursor berada di atasnya, sehingga nilai tidak pernah berubah secara tidak sengaja akibat scrolling mouse.
+  - 2. GLOBAL DATA FETCHING LOADING BAR (OVERLAY BOTTOM):
+    * Menambahkan bar tipis melintang fixed di bagian paling bawah layar (`fixed bottom-0 left-0 right-0 z-50`) berwarna hijau cerah (`bg-[#22C55E]`) dengan teks hitam tebal (`text-black font-bold`) dan spinner putaran cepat (`animate-[spin_0.45s_linear_infinite]`).
+    * Sifat overlay murni: tidak menggeser komponen lain dan tidak memakan ruang layout aplikasi, muncul otomatis saat data sedang dimuat/disinkronkan dan hilang secara mulus setelah sinkronisasi selesai.
+- **[2026-08-26]**: Perbaikan Fungsional Input Hafalan & Anti-Scroll Wheel Blur (Versi v1.1.0.26b):
+  - 1. MATIKAN EFEK MOUSE SCROLL PADA INPUT NUMBER:
+    * Cegah nilai numerik berubah secara tidak sengaja saat mouse wheel scroll di atas input field dengan menambahkan event handler `onWheel={(e) => e.currentTarget.blur()}` pada seluruh input numerik (Total Hafalan Al-Quran Juz, Filter Range Hafalan & Poin, Setoran Ayat & Halaman).
+  - 2. KEPATUHAN PRINSIP DESAIN POP-UP & INPUT:
+    * Input numerik tetap bersih, responsif diketik manual via keyboard, dan konsisten dengan prinsip Anti-Gravity UI.
+- **[2026-08-26]**: Standarisasi Global Desain Pop-Up / Modal (Clean Flat Header, Zero Icon Policy, No Close X Button) (Versi v1.1.0.25b):
+  - 1. STANDARISASI GLOBAL POP-UP / MODAL:
+    * Header Bersih Tanpa Ikon & Tanpa Tombol Tutup (X): Header modal di seluruh aplikasi hanya memuat judul utama dan sub-judul deskripsi tipografi murni, tanpa ikon dekoratif dan tanpa tombol close "X" di pojok kanan atas (penutupan modal cukup melalui tombol Batal, Tutup Detail, atau shortcut Escape / klik backdrop).
+    * Struktur Layout Form & Konten: Menggunakan garis pembatas tipis (`border-b` / `border-t border-[#E2E8F0]`) yang elegan, input field bersih (*clean flat style*), serta tata letak elemen longgar dan bernapas (*breathable*).
+    * Anti-Text Wrapping: Tidak ada konten teks yang ter-wrap secara kaku di tampilan mobile maupun desktop.
+  - 2. KEPATUHAN MUTLAK PRINSIP ANTI-GRAVITY UI:
+    * Zero Icon Policy pada seluruh header dan elemen modal (`Modal.tsx`, `NewViolationModal.tsx`, `DormitoryView.tsx` room modal, `ClassesView.tsx` class modal, `StudentsView.tsx` add/edit/delete modals, `StudentDetailModal.tsx` beserta sub-modals, `LoginModal.tsx`, `SessionRecordsModal.tsx`).
+    * No Container Box Berlebih: Bebas dari kontainer card bertumpuk dan bebas dari badge/kapsul dekoratif tidak esensial.
+- **[2026-08-26]**: Standarisasi Global Metric Cards (Style Vertical Divider 1-Row) (Versi v1.1.0.24b):
+  - 1. STANDARISASI GLOBAL METRIC CARDS (STYLE DIVIDER):
+    * Gunakan satu baris metrik terpadu yang dipisahkan menggunakan garis pembatas vertikal tipis (`divide-x divide-[#E2E8F0] py-3.5 border-y border-[#E2E8F0]`) di seluruh halaman aplikasi (Dashboard, Santri, Kamar, Kelas, Bendahara Kas, Pelanggaran, Program Kerja, Instruksi Mudir).
+    * Hierarki tipografi konsisten: label kategori kecil uppercase di bagian atas (`text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]`) dan angka metrik tebal besar di bagian bawah (`text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline`).
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Seluruh barisan metrik lapang, bernapas (*breathable*), tanpa kotak card pembungkus terpisah-pisah, serta bebas dari seluruh ikon dekoratif.
+- **[2026-08-26]**: Sinkronisasi Data Bobot Poin & Kasus Pelanggaran Tabel Rekapitulasi (Versi v1.1.0.23b):
+  - 1. SINKRONISASI PEMETAAN DATA POIN & KASUS:
+    * Perbaiki fungsi `deriveViolationsFromSantri` & `subscribeToPelanggaran` di `firestoreService.ts` agar poin dan jenis kasus dipetakan secara akurat dari rekam jejak database santri.
+    * Sinkronisasi kalkulasi tingkat keparahan (*severity*) secara dinamis menggunakan `getSeverityInfo(v.points)` di kolom kasus pelanggaran dan filter tab.
+    * Perbaiki mapping `recordCollectiveMahkamahSession` agar tidak menimpa severity secara hardcode.
+  - 2. KEPATUHAN PRINSIP TAMPILAN BERSIH:
+    * Pertahankan format tabel clean flat dengan divider tipis, anti-text wrapping dengan `RunningText` marquee pada mobile & desktop, tanpa icon dekoratif, dan tipografi mono pada kolom poin (+{pts} Pts).
+- **[2026-08-26]**: Sinkronisasi Logika Severity & Interactive Slider Bobot Poin (Versi v1.1.0.22b):
+  - 1. CENTRALIZED SEVERITY UTILS (`src/lib/severityUtils.ts`):
+    * Fungsi `getSeverityInfo()` terpusat: 1-12 Ringan, 13-25 Sedang, 26-38 Berat, 39-50 Sangat Berat.
+    * Fungsi `sliderFillPercent()` untuk konsistensi gradient slider di seluruh form.
+    * Eliminasi duplikasi `getSeverityInfo` dari `NewViolationModal.tsx`, `ViolationsView.tsx`.
+  - 2. INTERACTIVE SLIDER di `CollectiveMahkamahView.tsx`:
+    * Ganti input angka biasa menjadi range slider (1-50) dengan RollingNumber + severity label real-time.
+    * Threshold milestones teks di bawah slider berubah bold/warna sesuai posisi.
+  - 3. ANTI-GRAVITY UI: Slider tanpa kontainer card box berlebih, tanpa ikon dekoratif.
+- **[2026-08-26]**: Pembersihan Unused State & Perbaikan Runtime Error Sidang Mahkamah Kolektif (Versi v1.1.0.21b):
+  - 1. BERSIHKAN VARIABEL STATE MODAL:
+    * Hapus total seluruh referensi lama `isCollectiveModalOpen`.
+    * Gunakan standard sub-view routing `currentView === 'collective-trial'` untuk transisi halaman penuh.
+  - 2. ELIMINASI UNUSED MODAL COMPONENT:
+    * Hapus file modal lama `CollectiveMahkamahModal.tsx` dan pastikan zero unused state / broken handlers.
+- **[2026-08-26]**: Rekonstruksi Sidang Mahkamah Kolektif Menjadi Full View Page (Bukan Modal Popup) (Versi v1.1.0.20b):
+  - 1. UBAH JADI HALAMAN PENUH:
+    * Hapus total kontainer modal dialog/backdrop popup overlay (`fixed inset-0`).
+    * Render sebagai full page view menyatu di bawah layout header dashboard.
+  - 2. TOMBOL KEMBALI & AKSI:
+    * Ganti tombol tutup modal dengan tombol navigasi "← Kembali ke Rekapitulasi" dan aksi simpan yang otomatis kembali ke halaman sebelumnya.
+  - 3. KEPATUHAN ANTI-GRAVITY UI:
+    * Zero Icon Policy (tanpa ikon dekoratif di header/kategori), judul besar tebal tanpa numbering, flat horizontal divider, dan layout lapang tanpa box berlebihan.
+- **[2026-08-26]**: Standarisasi Styling Tabel Bersih Seluruh Modul (Divider-Based, Anti-Wrapping Running Ticker, Kolom TANGGAL Dua Baris, Anti-Gravity UI) (Versi v1.1.0.19b):
+  - 1. STANDARISASI GLOBAL TABEL:
+    * Seluruh tabel di semua modul menggunakan flat divider layout tanpa border kotak kaku.
+    * Anti-text wrapping di mobile & desktop dengan max-width kolom tegas dan running text marquee looping (`RunningText`).
+    * Kolom tanggal dinamai tegas "TANGGAL" dengan konten 2 baris (Baris 1 Nama Hari, Baris 2 Tanggal Lengkap).
+  - 2. KEPATUHAN ANTI-GRAVITY UI:
+    * Zero Icon Policy (tanpa ikon di sel status/baris tabel) dan No Badges/Capsules (plain text color-coded).
+- **[2026-08-26]**: Penyempurnaan Modal Form Transaksi Kas Baru (Toggle Button, Custom UI Date, Thousand Separator Prefix, No Header Close Button) (Versi v1.1.0.18b):
+  - 1. TOGGLE BUTTON JENIS TRANSAKSI:
+    * Ganti dropdown dengan toggle button clean-flat murni teks tanpa ikon: MASUK dan KELUAR.
+  - 2. INPUT TANGGAL TRANSAKSI:
+    * Gunakan input tipe date yang selaras dan bersih, otomatis mengonversi ke format penanggalan ID.
+  - 3. FORMAT NOMINAL KAS (PREFIX RP & THOUSAND SEPARATOR):
+    * Prefix "Rp" tersemat permanen di dalam input dan otomatis memformat ribuan titik secara realtime (misal: Rp 15.000.000).
+  - 4. HAPUS TOMBOL TUTUP HEADER:
+    * Hapus tombol Tutup di header modal sesuai Anti-Gravity UI, ditutup via Batal atau Escape key.
+- **[2026-08-26]**: Format Kolom Tanggal Dua Baris & Running Ticker Anti-Wrapping Tabel Kas (Versi v1.1.0.17b):
+  - 1. ATURAN LEBAR KOLOM & ANTI-WRAPPING:
+    * Dilarang keras terjadi multi-line wrapping pada sel tabel ledger kas.
+    * Terapkan batas max-width tegas dan running text marquee animation jika teks melebihi lebar sel (`RunningText`).
+  - 2. FORMAT KOLOM TANGGAL DUA BARIS:
+    * Header kolom dinamai "TANGGAL".
+    * Data dibagi 2 baris: Baris 1 Nama Hari (Rabu, Kamis, dll.), Baris 2 Tanggal Lengkap (26 Agustus 2026).
+  - 3. KEPATUHAN ANTI-GRAVITY UI:
+    * Clean flat divider layout tanpa kotak kaku, tanpa ikon, dan tanpa badge warna-warni.
+- **[2026-08-26]**: Pengembangan Modul Bendahara (BPH & Kas Organisasi) (Versi v1.1.0.16b):
+  - 1. HEADER & METRIK FINANSIAL:
+    * Judul "BPH & Kas Organisasi" berfont besar dan tebal tanpa ikon.
+    * 4 metrik unboxed finansial murni tipografi: Saldo Kas Saat Ini, Total Pemasukan Bulan Ini, Total Pengeluaran Bulan Ini, Kas Belum Tertagih / Piutang.
+  - 2. FITUR PENCATATAN & TRANSAKSI KAS:
+    * Tombol aksi di kanan atas untuk form transaksi baru (Tanggal, Jenis Masuk/Keluar, Nominal, Keterangan, Divisi).
+  - 3. TABEL RIWAYAT ARUS KAS (LEDGER):
+    * Tabel riwayat transaksi dengan garis tipis (*divider*), filter rentang waktu (Bulan Ini, 3 Bulan Terakhir, Semua Waktu), dan kolom pencarian.
+  - 4. KEPATUHAN MUTLAK ANTI-GRAVITY UI:
+    * Zero Icon Policy (tanpa ikon dekoratif).
+    * No Container Box (unboxed & whitespace luas).
+    * No Badges/Capsules/Tags (plain text tanpa warna badge mencolok).
+- **[2026-08-26]**: Perbaikan Bug toLocaleString pada Budget Program Kerja Dashboard (Versi v1.1.0.15b):
+  - 1. FIX BUDGET FORMATTING:
+    * Gunakan fungsi helper `formatBudgetRatio(p.budget, p.progress)` yang aman dan konsisten pada tabel program kerja di `DashboardView.tsx` untuk mencegah error runtime undefined `p.budgetSpent.toLocaleString`.
+- **[2026-08-26]**: Perombakan Total Dashboard Utama (Tanpa Ikon, Header Bold Besar, Top List Analitik Real Database, Anti-Gravity UI) (Versi v1.1.0.14b):
+  - 1. PENGHAPUSAN IKON & TIPOGRAFI HEADER BESAR BOLD:
+    * Hapus seluruh ikon dekoratif pada setiap judul kategori/section informasi di dashboard.
+    * Perbesar ukuran font judul section menjadi lebih besar dan tebal (`text-xl sm:text-2xl font-black text-[#0F172A] tracking-tight font-headline`).
+  - 2. STRUKTUR TOP LIST & STATISTIK REAL DATABASE:
+    * Baris 1: Top 5 Santri Teladan & Top 5 Kamar Terbaik (2 kolom berdampingan).
+    * Baris 2: Para Huffazh (Santri 30 Juz) & Top 5 Hafalan Terbanyak (2 kolom berdampingan).
+    * Baris 3: Top 5 Setoran Terbanyak Bulan Ini & Top 5 Murojaah Terbanyak Bulan Ini (2 kolom berdampingan).
+  - 3. KEPATUHAN MUTLAK PRINSIP ANTI-GRAVITY UI:
+    * Dilarang menggunakan box/card container, badge, kapsul warna-warni, atau shadow tebal.
+    * Gunakan garis pembatas tipis (`divider`), whitespace luas (*breathable*), dan tipografi teks polos terstruktur.
+- **[2026-08-26]**: Header Teks OSDIGI Google Sans Flex Black & Sidebar Logo SVG Only (Versi v1.1.0.13b):
+  - 1. HEADER UTAMA:
+    * Hapus logo SVG di Header. Tampilkan teks nama aplikasi "OSDIGI" menggunakan tipografi murni dengan font Google Sans Flex Black (`font-['Google_Sans_Flex','Google_Sans','Plus_Jakarta_Sans',sans-serif] font-black`).
+  - 2. SIDEBAR UTAMA:
+    * Hapus teks "OSDIGI" di bagian atas Sidebar. Tampilkan hanya file `logo.svg` secara eksklusif sebagai identitas visual utama dengan ukuran yang proporsional dan rapi.
+- **[2026-08-26]**: Penghapusan Footer Password Default di Halaman Login (Versi v1.1.0.12b):
+  - 1. HAPUS FOOTER HELPER PASSWORD:
+    * Hapus seluruh teks "Password Default Semua Akun: ostifak1234" di bagian bawah form login `LoginPage.tsx` agar form bersih dan rapi.
+- **[2026-08-26]**: Hapus Teks OSDIGI & Logo Putih 100% Lebih Besar Tanpa Glow/Kontainer (Versi v1.1.0.11b):
+  - 1. HAPUS TEKS OSDIGI:
+    * Hapus sepenuhnya teks judul "OSDIGI" di bawah logo.
+  - 2. LOGO PUTIH TANPA GLOW & TANPA KONTAINER:
+    * Logo `logo.svg` berwarna putih bersih (`brightness-0 invert opacity-90`), tanpa kontainer box/border pembungkus, dan tanpa efek glow/drop-shadow berpendar.
+  - 3. UKURAN 100% LEBIH BESAR:
+    * Ukuran logo diperbesar 2x lipat (100% lebih besar) menjadi `w-32 h-32 sm:w-40 sm:h-40` pada tata letak floating centered terpadu.
+- **[2026-08-26]**: Revert Tampilan Halaman Login ke Semula (Versi v1.1.0.10b):
+  - 1. RESTORE ORIGINAL LAYOUT:
+    * Kembalikan tata letak `LoginPage.tsx` ke tampilan awal yang centered floating terpadu (logo, judul OSDIGI, tagline, form input, dan tombol aksi dalam satu kesatuan layout terpusat).
+- **[2026-08-26]**: Penyesuaian Penurunan Posisi Logo Halaman Login (Versi v1.1.0.9b):
+  - 1. TURUNKAN POSISI LOGO DARI ATAS:
+    * Turunkan posisi `logo.svg` agar tidak terlalu mepet ke tepi atas layar (tambahkan padding top yang seimbang `pt-12 sm:pt-18` sehingga berada di posisi atas-tengah yang proporsional dan harmonis).
+- **[2026-08-26]**: Pemisahan Tata Letak Top-Centered Logo & Middle-Bottom Form pada Halaman Login (Versi v1.1.0.8b):
+  - 1. AREA LOGO (TOP-CENTERED):
+    * Posisikan elemen `logo.svg` bersama subjudulnya di area bagian atas layar secara terpusat (`pt-8 sm:pt-12 flex flex-col items-center text-center`).
+  - 2. AREA FORM LOGIN (CENTERED / MIDDLE-BOTTOM):
+    * Posisikan keseluruhan blok form (field email, password, tombol MASUK & PILIH AKUN) di area tengah-bawah layar secara terpusat (`w-full max-w-sm sm:max-w-md mx-auto pb-8 sm:pb-12`).
+  - 3. STRUKTUR FLEXBOX UTAMA:
+    * Gunakan `flex flex-col items-center justify-between min-h-[100dvh]` dengan pembagian spasi yang responsif agar konsisten di desktop dan mobile.
+- **[2026-08-26]**: Tata Letak Centered Mobile, Logo Lebih Tinggi & Hapus Efek Glow (Versi v1.1.0.7b):
+  - 1. POSISI FORM & TOMBOL CENTERED DI MOBILE:
+    * Pada tampilan layar mobile, atur agar keseluruhan blok form (field email, password, tombol MASUK & PILIH AKUN) berada persis di tengah vertikal dan horizontal (`flex flex-col items-center justify-center min-h-[100dvh]`).
+  - 2. NAIKKAN POSISI LOGO LEBIH TINGGI:
+    * Posisikan elemen `logo.svg` jauh lebih tinggi di atas form input agar tercipta ruang napas (*whitespace*) yang proporsional dan tidak berhimpitan dengan teks subjudul.
+  - 3. HAPUS EFEK GLOW SECARA GLOBAL:
+    * Hapus seluruh properti CSS glow, pendaran cahaya, drop-shadow berpendar, atau box-shadow terang di seluruh komponen halaman login (clean-flat minimalist murni).
+- **[2026-08-26]**: Penghapusan Info Password Default di Halaman Login (Versi v1.1.0.6b):
+  - 1. HAPUS FOOTER HELPER PASSWORD:
+    * Hapus teks "Password Default Semua Akun: ostifak1234" pada `LoginPage.tsx` agar form login lebih bersih dan aman.
+- **[2026-08-26]**: Unboxed Clean Logo & Posisi Naik pada Halaman Login (Versi v1.1.0.5b):
+  - 1. HAPUS KOTAK KONTAINER LOGO:
+    * Hapus total kontainer box/border/background pembungkus logo di `LoginPage.tsx`. Logo SVG tampil *clean* langsung menyatu di atas background tanpa kotak gelap.
+  - 2. PERBESAR DIMENSI & NAIKKAN POSISI:
+    * Perbesar ukuran `logo.svg` secara signifikan (`w-32 h-32 sm:w-40 sm:h-40`).
+    * Naikkan posisi logo lebih tinggi dengan margin bawah yang lapang (`mb-10 sm:mb-12`) agar memberikan ruang napas (*whitespace*) yang lega terhadap kolom input di bawahnya.
+- **[2026-08-26]**: Rekonstruksi Halaman Login (Hapus Teks OSDIGI, Styling Logo SVG & Animasi Masuk, Versi v1.1.0.4b):
+  - 1. HAPUS TEKS OSDIGI:
+    * Hapus sepenuhnya teks judul "OSDIGI" di bawah logo untuk mencegah redundansi visual.
+  - 2. STYLING LOGO SVG (`logo.svg`):
+    * Perbesar ukuran logo agar lebih proporsional dan menonjol (`w-24 h-24 sm:w-28 sm:h-28`).
+    * Ubah warna menjadi putih bersih dengan sedikit transparansi (`brightness-0 invert opacity-80` / `drop-shadow`).
+    * Tambahkan efek latar belakang blur tipis (*backdrop-blur*) halus di sekitar area logo.
+  - 3. ANIMASI MASUK (*ENTRANCE ANIMATION*):
+    * Terapkan animasi masuk halus (*fade-in* + *slide-up*) saat pertama kali dimuat pada seluruh kontainer form login.
+- **[2026-08-26]**: Info Metadata Aplikasi & Developer di Pojok Kanan Atas Halaman Login (Versi v1.1.0.3b):
+  - 1. POSISI & KONTEN METADATA:
+    * Pada layar login (`LoginPage.tsx`), letakkan teks info di sudut kanan atas (`absolute top-4 right-4 sm:top-6 sm:right-6`).
+    * Memuat versi aktif (`v1.1.0.3b`) dan nama pembuat (`Fatih Farhat Asshidiq`).
+  - 2. GAYA VISUAL MINIMALIS:
+    * Tipografi teks polos bersih, transparan (`text-white/40 text-xs tracking-wider`), tanpa kontainer kotak card border atau background kapsul.
+- **[2026-08-26]**: Halaman "SIAPA AKU" & Aturan Global Auto-Versioning (BETA Format):
+  - 1. MENU SIDEBAR "SIAPA AKU":
+    * Tautan menu bertuliskan "SIAPA AKU" diletakkan tepat di paling bawah sidebar navigasi utama.
+    * Sesuai Global Anti-Gravity Rules: Tampil bersih tanpa kontainer box/card dan tanpa ikon dekoratif (plain text tipografi yang rapi).
+    * Ketika diklik, membuka halaman full-content view yang bersih, minimalis, unboxed, dan breathable.
+  - 2. KONTEN HALAMAN "SIAPA AKU":
+    * Developer Profil: Fatih Farhat Asshidiq (Alumni Pondok Pesantren Tahfizh Fajrul Karim, Angkatan ke-7 / INGENIOUS GENERATION).
+    * Deskripsi App: OSDIGI — Portal Manajemen Santri & Organisasi Santri Pondok Pesantren Fajrul Karim.
+    * Framework & Stack: React 19, TypeScript, Vite, Tailwind CSS v4, Firebase Firestore & Realtime Sync, Framer Motion, Lenis Smooth Scroll, Goey Toast, OGL Canvas/WebGL.
+    * Bar Distribusi Bahasa: Horizontal multi-segment bar visual yang menampilkan persentase distribusi bahasa pemrograman proyek.
+    * Versi Aplikasi: Menampilkan versi aplikasi saat ini secara transparan.
+  - 3. ATURAN GLOBAL AUTO-VERSIONING (BETA FORMAT):
+    * Setiap kali ada perubahan major, minor, fitur baru, refactoring, atau bug fixing, nomor versi aplikasi **WAJIB terperbarui secara otomatis** di sistem/metadata aplikasi (`src/config/version.ts` dan `package.json`).
+    * Format versi **WAJIB selalu menggunakan pola 4-digit BETA diakhiri huruf 'b'** (contoh: `v1.1.0.2b`, berurutan `v1.0.0.1b`, `v1.0.0.2b`, `v1.1.0.0b`, `v1.1.0.1b`, `v1.1.0.2b`, dst.).
+- **[2026-08-26]**: Konfigurasi Aset Logo Berdasarkan Kebutuhan Platform:
+  - 1. FAVICON & IN-APP LOGO (GUNAKAN `logo.svg`):
+    * HTML Favicon: `<link rel="icon" href="/logo.svg" type="image/svg+xml">` di `index.html`.
+    * In-App Visuals: Seluruh elemen logo visual di dalam antarmuka (halaman login `LoginPage.tsx` dan sidebar `Sidebar.tsx`) menggunakan `/logo.svg`.
+  - 2. PWA INSTALLED APP ICON (PERTAHANKAN `logo.png`):
+    * Web Manifest / PWA: Ikon untuk manifest aplikasi seluler (`manifest.json` / `site.webmanifest`) tetap merujuk pada `logo.png` demi kompatibilitas penuh sistem operasi Android dan iOS.
 - **[2026-08-26]**: Ringkasan Metrik Halaman Per-asramaan (1 Row & Unboxed):
   - 1 ROW METRIK RINGKASAN: Metrik ringkasan (Asrama Terdaftar, Total Kamar, Total Kapasitas) pada halaman Sistem & Manajemen Per-asramaan ditata sejajar dalam 1 baris (`grid grid-cols-3`).
   - UNBOXED DENGAN DIVIDER: Menghilangkan kartu/kontainer pembungkus card, hanya dipisahkan dengan garis pembatas/divider vertikal (`divide-x`) dan horizontal (`border-y`).

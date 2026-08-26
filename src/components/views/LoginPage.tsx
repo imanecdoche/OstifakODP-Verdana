@@ -12,6 +12,7 @@ import { OFFICIAL_ACCOUNTS, OfficialAccountConfig } from '../../data/mockData';
 import { loginWithEmailAndPassword } from '../../lib/firestoreService';
 import { UserProfile } from '../../types';
 import { GradientWaves } from '../ui/GradientWaves';
+import { APP_VERSION_INFO } from '../../config/version';
 
 interface LoginPageProps {
   onLoginSuccess: (user: UserProfile) => void;
@@ -24,50 +25,37 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Mode Fullscreen Pilih Akun (Modal-less & Clean Flat)
   const [isAccountPickerOpen, setIsAccountPickerOpen] = useState(false);
 
-  const getFullEmail = (userVal: string) => {
-    const clean = userVal.trim();
-    if (!clean) return '';
-    return clean.includes('@') ? clean : `${clean}@ostifak.edu`;
+  // Normalizer: Jika username diisi nama akun saja ("keamanan"), auto-append "@ostifak.edu"
+  const getFullEmail = (val: string) => {
+    const trimmed = val.trim();
+    if (!trimmed) return '';
+    return trimmed.includes('@') ? trimmed : `${trimmed}@ostifak.edu`;
   };
 
-  const performLogin = async (targetEmail: string, targetPass: string) => {
-    const cleanEmail = getFullEmail(targetEmail);
-    if (!cleanEmail || !targetPass) return;
+  const performLogin = async (usr: string, pwd: string) => {
+    const fullEmail = getFullEmail(usr);
     setLoading(true);
     setErrorMessage('');
     setSuccessMessage('');
 
     try {
-      const user = await loginWithEmailAndPassword(cleanEmail, targetPass);
-      if (user) {
-        setSuccessMessage(`Berhasil masuk sebagai ${user.name}`);
-        setTimeout(() => {
-          onLoginSuccess(user);
-        }, 400);
-      } else {
-        setErrorMessage('Gagal masuk. Periksa kembali email dan password.');
-      }
+      const user = await loginWithEmailAndPassword(fullEmail, pwd);
+      setSuccessMessage(`Selamat datang, ${user.name}`);
+      setTimeout(() => {
+        onLoginSuccess(user);
+      }, 500);
     } catch (err: any) {
       console.error('Login error:', err);
-      const officialMatch = OFFICIAL_ACCOUNTS.find(a => a.email.toLowerCase() === cleanEmail.toLowerCase());
-      if (officialMatch && targetPass === 'ostifak1234') {
-        const fallbackUser: UserProfile = {
-          id: officialMatch.email.replace(/[^a-zA-Z0-9]/g, '_'),
-          name: officialMatch.name,
-          role: officialMatch.role,
-          roleLevel: officialMatch.roleLevel,
-          roleTitle: officialMatch.roleTitle,
-          division: officialMatch.divisionId || undefined,
-          avatar: officialMatch.avatar,
-        };
-        setSuccessMessage(`Berhasil masuk sebagai ${fallbackUser.name}`);
-        setTimeout(() => {
-          onLoginSuccess(fallbackUser);
-        }, 400);
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        setErrorMessage('Username/Email atau kata sandi tidak sesuai.');
+      } else if (err.code === 'auth/too-many-requests') {
+        setErrorMessage('Terlalu banyak percobaan masuk gagal. Coba lagi beberapa saat.');
       } else {
-        setErrorMessage(err.message || 'Gagal autentikasi. Silakan periksa kembali email & password.');
+        setErrorMessage(err.message || 'Gagal masuk ke sistem.');
       }
     } finally {
       setLoading(false);
@@ -91,6 +79,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   return (
     <div className="fixed inset-0 w-full h-full min-h-[100dvh] bg-[#050D07] flex flex-col justify-center overflow-y-auto overscroll-contain font-body text-white">
       
+      {/* Top-Right App Metadata & Developer Info (Clean & Breathable) */}
+      <div className="absolute top-6 right-6 z-20 text-right pointer-events-none select-none">
+        <p className="text-xs font-mono font-medium text-white/40 tracking-wider">
+          {APP_VERSION_INFO.version}
+        </p>
+        <p className="text-xs text-white/40 tracking-wider mt-0.5">
+          {APP_VERSION_INFO.author.name}
+        </p>
+      </div>
+
       {/* 1. Full Viewport Interactive Animated Gradient Waves Backdrop */}
       <div className="absolute inset-0 w-full h-full pointer-events-none -z-10 bg-[#050D07]">
         <GradientWaves
@@ -123,17 +121,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         /* Tampilan Utama Login (Floating Centered) */
         <div className="relative z-10 w-full max-w-sm sm:max-w-md mx-auto my-auto p-4 flex flex-col items-center animate-in fade-in duration-300">
           
-          {/* Header Aplikasi (Logo, Nama & Tagline) */}
+          {/* Header Aplikasi (Logo SVG Putih Bersih 2x, Tanpa Teks OSDIGI, Tanpa Glow, Tanpa Kontainer) */}
           <div className="text-center mb-8 flex flex-col items-center">
             <img
-              src="/logo.png"
+              src="/logo.svg"
               alt="Logo OSTIFAK"
-              className="w-16 h-16 sm:w-20 sm:h-20 object-contain mb-3 drop-shadow-[0_8px_20px_rgba(0,0,0,0.5)] select-none"
+              className="w-32 h-32 sm:w-40 sm:h-40 object-contain brightness-0 invert opacity-90 select-none mb-3 transition-transform duration-500 hover:scale-105"
             />
-            <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white font-headline leading-tight drop-shadow-md select-none">
-              OSDIGI
-            </h1>
-            <p className="text-xs sm:text-sm text-white/70 font-medium tracking-wide mt-2">
+            <p className="text-xs sm:text-sm text-white/70 font-medium tracking-wide">
               Portal Manajemen Santri & Divisi OSTIFAK
             </p>
           </div>
@@ -223,11 +218,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               </button>
             </div>
           </form>
-
-          {/* Footer Info / Default Password Helper */}
-          <p className="mt-8 text-center text-xs text-white/40 font-medium">
-            Password Default Semua Akun: <span className="text-emerald-400 font-semibold">ostifak1234</span>
-          </p>
         </div>
       ) : (
         /* Interaksi Fullscreen "Pilih Akun" (Langsung di atas Waves Canvas) */

@@ -107,25 +107,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/40 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain">
       <div className="bg-[#FFFFFF] w-full max-w-2xl rounded-lg shadow-[0_8px_32px_rgba(15,23,42,0.15)] border border-[#E2E8F0] overflow-hidden my-auto max-h-[92dvh] sm:max-h-[90vh] flex flex-col font-body">
         
-        {/* Header Modal */}
-        <div className="bg-[#0F172A] text-white px-6 py-4 flex items-center justify-between border-b border-white/10 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-md bg-[#059669] flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-white font-headline">Autentikasi OSTIFAK</h3>
-              <p className="text-xs text-[#94A3B8]">
-                Masuk dengan email & password resmi divisi
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-md flex items-center justify-center text-[#94A3B8] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
+        {/* Header Modal (Clean Flat Header, Zero Icon Policy) */}
+        <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+          <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">Autentikasi Akun Resmi</h3>
+          <p className="text-xs text-[#64748B] mt-0.5 font-body">
+            Masuk dengan email & password resmi pengurus divisi
+          </p>
         </div>
 
         {/* Content Body */}
@@ -248,20 +235,24 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             </ScrollArea>
           </div>
 
-          {/* Database Setup Button */}
+          {/* Database Setup & Close Button */}
           <div className="pt-3 border-t border-[#E2E8F0] flex items-center justify-between">
-            <span className="text-[11px] text-[#64748B]">
-              Inisialisasi data akun resmi divisi
-            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+            >
+              Tutup
+            </Button>
             <Button
               type="button"
               variant="secondary"
               size="sm"
               onClick={handleSeedAccounts}
               disabled={seedingLoading}
-              icon={seedingLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0F172A]" /> : <Database className="w-3.5 h-3.5 text-[#0F172A]" />}
             >
-              Inisialisasi Data Akun
+              {seedingLoading ? 'Menginisialisasi...' : 'Inisialisasi Data Akun'}
             </Button>
           </div>
 

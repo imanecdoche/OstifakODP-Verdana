@@ -127,11 +127,10 @@ export const DirectivesView: React.FC = () => {
 
   return (
     <div className="space-y-6 font-body">
-      {/* Header (Unboxed) */}
+      {/* Header (Unboxed, Zero Icon Policy) */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2.5 font-headline tracking-tight text-[#0F172A]">
-            <ScrollText className="w-7 h-7 text-[#0F172A]" />
+          <h1 className="text-3xl sm:text-4xl font-black text-[#0F172A] font-headline tracking-tight">
             Instruksi Top-Down & Arahan Mudir
           </h1>
           <p className="text-xs text-[#64748B] mt-1 max-w-xl font-body">
@@ -143,10 +142,46 @@ export const DirectivesView: React.FC = () => {
           variant="sage"
           size="md"
           onClick={() => setIsModalOpen(true)}
-          icon={<Plus className="w-4 h-4 text-white" />}
+          className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
         >
-          Terbitkan Arahan Mudir
+          + Terbitkan Arahan Mudir
         </Button>
+      </div>
+
+      {/* 3 Summary Metrics (Unboxed 1-Row with Dividers) */}
+      <div className="grid grid-cols-3 divide-x divide-[#E2E8F0] py-3.5 border-y border-[#E2E8F0]">
+        <div className="px-3 sm:px-6 first:pl-0">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Total Instruksi
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+              {directives.length}
+            </span>
+          </div>
+        </div>
+
+        <div className="px-3 sm:px-6">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Prioritas Tinggi
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#EF4444] tracking-tight font-headline">
+              {directives.filter(d => d.priority === 'tinggi').length}
+            </span>
+          </div>
+        </div>
+
+        <div className="px-3 sm:px-6 last:pr-0">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Instruksi Aktif
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#059669] tracking-tight font-headline">
+              {directives.filter(d => d.status === 'aktif').length}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Popup Modal (Jendela Mengapung / Dialog Overlay) */}
@@ -158,29 +193,14 @@ export const DirectivesView: React.FC = () => {
           className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200 font-body"
         >
           <div className="relative w-full max-w-xl bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[92vh]">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-white">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-slate-900 text-white flex items-center justify-center shrink-0">
-                  <Send className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-[#0F172A] font-headline tracking-tight">
-                    Penerbitan Instruksi Resmi
-                  </h2>
-                  <p className="text-xs text-[#64748B] mt-0.5">
-                    Arahan Mudir: K.H. Mulhat Ali Nuh, Lc., M.A.
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-                title="Tutup Modal"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            {/* Modal Header (Clean Flat Header, Zero Icon Policy) */}
+            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+              <h2 className="text-base sm:text-lg font-bold text-[#0F172A] font-headline tracking-tight">
+                Penerbitan Instruksi Resmi
+              </h2>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                Arahan Mudir: K.H. Mulhat Ali Nuh, Lc., M.A.
+              </p>
             </div>
 
             {/* Modal Form Content */}

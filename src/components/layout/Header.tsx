@@ -181,6 +181,7 @@ export const Header: React.FC<HeaderProps> = ({
       case 'violations': return 'Kedisiplinan & Mahkamah';
       case 'programs': return 'Program Kerja & Proposal';
       case 'directives': return 'Instruksi Mudir';
+      case 'whoami': return 'Siapa Aku';
       default: return 'Dashboard';
     }
   };
@@ -188,7 +189,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <>
       <header className="sticky top-0 z-30 h-16 bg-[#FFFFFF] border-b border-[#E2E8F0] px-6 flex items-center gap-4 shadow-[0_1px_3px_rgba(15,23,42,0.03)]">
-        {/* Left: Mobile Toggle & Breadcrumbs */}
+        {/* Left: Mobile Toggle, Brand "OSDIGI" (Google Sans Flex Black) & Breadcrumbs */}
         <div className="flex-1 flex items-center gap-3">
           <button
             onClick={onOpenMobileSidebar}
@@ -197,23 +198,19 @@ export const Header: React.FC<HeaderProps> = ({
             <Menu className="w-5 h-5" />
           </button>
 
-          <div>
-            {/* Mobile View: Teks Header Menampilkan Nama App OSDIGI & Logo */}
-            <div className="lg:hidden flex items-center gap-2">
-              <img
-                src="/logo.png"
-                alt="Logo OSTIFAK"
-                className="w-6 h-6 object-contain shrink-0 drop-shadow-xs select-none"
-              />
-              <h2 className="text-xl font-black text-[#0F172A] font-headline tracking-tight leading-tight">
-                OSDIGI
+          <div className="flex items-center gap-3">
+            {/* Teks OSDIGI Murni Tanpa Logo SVG (Google Sans Flex Black) */}
+            <h1 className="text-xl lg:text-2xl font-black text-[#0F172A] font-['Google_Sans_Flex','Google_Sans','Plus_Jakarta_Sans',sans-serif] tracking-tight leading-none select-none">
+              OSDIGI
+            </h1>
+
+            {/* Desktop View: Menampilkan Breadcrumbs Sub-Halaman */}
+            <div className="hidden lg:flex items-center gap-2 text-[#94A3B8]">
+              <span className="text-sm font-medium">/</span>
+              <h2 className="text-sm font-semibold text-[#64748B] font-body tracking-tight">
+                {getBreadcrumbTitle()}
               </h2>
             </div>
-
-            {/* Desktop View: Menampilkan Judul Breadcrumbs Halaman */}
-            <h2 className="hidden lg:block text-lg lg:text-xl font-bold text-[#0F172A] font-headline tracking-tight">
-              {getBreadcrumbTitle()}
-            </h2>
           </div>
         </div>
 

@@ -17,6 +17,7 @@ Lihat [`.agents/RULES.md`](./.agents/RULES.md) untuk panduan aturan mutlak dan l
 - [`.agents/rules/ui-grid-system.md`](./.agents/rules/ui-grid-system.md)
 - [`.agents/rules/icon-button-priority.md`](./.agents/rules/icon-button-priority.md)
 - [`.agents/rules/extreme-minimalism.md`](./.agents/rules/extreme-minimalism.md)
+- [`.agents/rules/auto-versioning-beta.md`](./.agents/rules/auto-versioning-beta.md)
 
 ## 📦 Installed Skills & Agents
 - 105 Skills tersedia di [`.agents/skills/`](./.agents/skills/)

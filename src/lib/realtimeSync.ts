@@ -8,7 +8,7 @@
  */
 
 export interface SyncMessage<T = any> {
-  module: 'santri' | 'pelanggaran' | 'proposals' | 'directives' | 'dorms' | 'classes' | 'sessions';
+  module: 'santri' | 'pelanggaran' | 'proposals' | 'directives' | 'dorms' | 'classes' | 'sessions' | 'kas';
   action: 'CREATE' | 'UPDATE' | 'DELETE' | 'REVALIDATE';
   id?: string;
   payload?: T;

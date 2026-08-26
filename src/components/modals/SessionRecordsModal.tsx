@@ -8,6 +8,7 @@ import {
   SessionRecord 
 } from '../../lib/sessionLogService';
 import { ScrollArea } from '../ui/ScrollArea';
+import { Button } from '../ui/Button';
 import { UserProfile } from '../../types';
 
 interface SessionRecordsModalProps {
@@ -178,21 +179,26 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
       data-lenis-prevent
       className="fixed inset-0 z-50 w-full h-full min-h-[100dvh] bg-white flex flex-col font-body animate-in fade-in duration-150 overflow-hidden"
     >
-      {/* 1. Header (Hanya Title & Close Icon X) */}
-      <div className="bg-[#142A18] text-white px-6 py-4 border-b border-emerald-950/40 shrink-0">
+      {/* 1. Header (Clean Flat Header, Zero Icon Policy) */}
+      <div className="bg-[#F8FAFC] px-6 py-4 border-b border-[#E2E8F0] shrink-0">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-          <h2 className="text-lg md:text-xl font-bold font-headline tracking-tight text-white">
-            Rekam Sesi Login & Log Aktivitas
-          </h2>
+          <div>
+            <h2 className="text-lg md:text-xl font-bold font-headline tracking-tight text-[#0F172A]">
+              Rekam Sesi Login & Log Aktivitas
+            </h2>
+            <p className="text-xs text-[#64748B] mt-0.5 font-body">
+              Audit log autentikasi dan aktivitas sesi pengurus
+            </p>
+          </div>
 
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            size="sm"
             onClick={onClose}
-            className="w-9 h-9 rounded-lg border border-white/20 bg-white/5 hover:bg-white/15 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95"
-            title="Tutup Jendela"
+            className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
           >
-            <X className="w-5 h-5" />
-          </button>
+            Tutup Log
+          </Button>
         </div>
       </div>
 
@@ -458,14 +464,14 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
                                         />
                                       </td>
                                       <td className="py-2.5 px-3 text-right whitespace-nowrap">
-                                        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                                        <span className={`text-[11px] font-semibold tracking-wider ${
                                           act.status === 'Sukses'
-                                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                            ? 'text-[#059669]'
                                             : act.status === 'Terverifikasi'
-                                            ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                                            ? 'text-blue-600'
                                             : act.status === 'Peringatan'
-                                            ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                                            : 'bg-rose-100 text-rose-800 border border-rose-200'
+                                            ? 'text-amber-600'
+                                            : 'text-[#EF4444]'
                                         }`}>
                                           {act.status}
                                         </span>

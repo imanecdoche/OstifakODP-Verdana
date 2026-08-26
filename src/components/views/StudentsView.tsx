@@ -1138,11 +1138,10 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
 
   return (
     <div className="space-y-6 font-body">
-      {/* Header (Unboxed, Enlarge Title, Icon-Only Buttons with Custom UI Tooltip) */}
+      {/* Header (Unboxed, Zero Icon Policy) */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
         <div>
-          <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2.5 font-headline tracking-tight">
-            <Users className="w-7 h-7 text-[#0F172A]" />
+          <h1 className="text-3xl sm:text-4xl font-black text-[#0F172A] font-headline tracking-tight">
             Direktori & Profil Santri
           </h1>
           <p className="text-xs text-[#64748B] mt-1 font-body">
@@ -1158,7 +1157,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Cari Nama, NIS, atau Kamar..."
-              className="w-full h-10 pl-10 pr-4 bg-white border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10 font-body shadow-2xs"
+              className="w-full h-10 pl-10 pr-4 bg-white border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A] font-body"
             />
           </div>
 
@@ -1200,6 +1199,58 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 <div className="absolute -top-1 right-3.5 w-2 h-2 bg-[#0F172A] rotate-45" />
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4 Summary Metrics (Unboxed 1-Row with Dividers) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-[#E2E8F0] py-3.5 border-y border-[#E2E8F0]">
+        <div className="px-3 sm:px-6 first:pl-0">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Total Santri Terdaftar
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+              {students.length}
+            </span>
+            <span className="text-xs text-[#64748B] font-medium font-body">Santri</span>
+          </div>
+        </div>
+
+        <div className="px-3 sm:px-6">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Lulus Tahsin Al-Qur'an
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#059669] tracking-tight font-headline">
+              {students.filter(s => s.isTahsinPassed).length}
+            </span>
+            <span className="text-xs text-[#64748B] font-medium font-body">Santri</span>
+          </div>
+        </div>
+
+        <div className="px-3 sm:px-6">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Bebas Pelanggaran (0 Pts)
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+              {students.filter(s => (s.poinPelanggaran || 0) === 0).length}
+            </span>
+            <span className="text-xs text-[#64748B] font-medium font-body">Santri</span>
+          </div>
+        </div>
+
+        <div className="px-3 sm:px-6 last:pr-0">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Rata-rata Hafalan
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#059669] tracking-tight font-headline">
+              {students.length > 0 
+                ? `${(students.reduce((acc, s) => acc + parseHafalan(s.hafalan), 0) / students.length).toFixed(1)} Juz`
+                : '0 Juz'}
+            </span>
           </div>
         </div>
       </div>
@@ -1252,6 +1303,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 placeholder="Min"
                 value={minHafalan}
                 onChange={(e) => setMinHafalan(e.target.value)}
+                onWheel={(e) => e.currentTarget.blur()}
                 className="w-14 h-8 px-2 bg-white border border-[#E2E8F0] rounded text-xs text-[#0F172A] text-center focus:border-[#0F172A] focus:outline-none"
               />
               <span className="text-[#64748B]">-</span>
@@ -1262,6 +1314,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 placeholder="Maks"
                 value={maxHafalan}
                 onChange={(e) => setMaxHafalan(e.target.value)}
+                onWheel={(e) => e.currentTarget.blur()}
                 className="w-14 h-8 px-2 bg-white border border-[#E2E8F0] rounded text-xs text-[#0F172A] text-center focus:border-[#0F172A] focus:outline-none"
               />
             </div>
@@ -1278,6 +1331,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 placeholder="Min"
                 value={minPoints}
                 onChange={(e) => setMinPoints(e.target.value)}
+                onWheel={(e) => e.currentTarget.blur()}
                 className="w-14 h-8 px-2 bg-white border border-[#E2E8F0] rounded text-xs text-[#0F172A] text-center focus:border-[#0F172A] focus:outline-none"
               />
               <span className="text-[#64748B]">-</span>
@@ -1288,6 +1342,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 placeholder="Maks"
                 value={maxPoints}
                 onChange={(e) => setMaxPoints(e.target.value)}
+                onWheel={(e) => e.currentTarget.blur()}
                 className="w-14 h-8 px-2 bg-white border border-[#E2E8F0] rounded text-xs text-[#0F172A] text-center focus:border-[#0F172A] focus:outline-none"
               />
             </div>
@@ -1455,19 +1510,14 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-1 sm:p-4 overflow-y-auto overscroll-contain font-body">
           <div className="w-[800px] max-w-full h-[calc(var(--modal-viewport-height,100dvh)-8px)] max-h-[calc(var(--modal-viewport-height,100dvh)-8px)] sm:h-[620px] sm:max-h-[90vh] bg-white rounded-md sm:rounded-lg shadow-[0_12px_40px_rgba(15,23,42,0.22)] border border-[#E2E8F0] flex flex-col overflow-hidden my-auto animate-in fade-in zoom-in-95">
             
-            {/* 1. Modal Fixed Header (Height: 64px) - Clean, No Icon, No Tagline, Red Close Box */}
-            <div className="h-16 shrink-0 bg-[#0F172A] text-white px-6 flex items-center justify-between border-b border-[#1E293B]">
-              <h3 className="text-base font-bold font-headline tracking-tight leading-tight">
+            {/* 1. Modal Fixed Header (Clean Flat Header, Zero Icon Policy) */}
+            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
                 Tambah Profil Santri Baru
               </h3>
-              <button
-                type="button"
-                onClick={() => setIsAdding(false)}
-                className="w-8 h-8 rounded-md bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white flex items-center justify-center transition-colors cursor-pointer"
-                title="Tutup Modal"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                Lengkapi biodata santri, alokasi kelas, kamar, dan target hafalan
+              </p>
             </div>
 
             {/* 2. Modal Scrollable Content Body (Fixed Area) */}
@@ -1572,6 +1622,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                         step={1}
                         value={hafalanCount}
                         onChange={(e) => setHafalanCount(e.target.value === '' ? '' : Math.min(30, Math.max(0, parseInt(e.target.value) || 0)))}
+                        onWheel={(e) => e.currentTarget.blur()}
                         placeholder="0"
                         className="w-full h-10 pl-3.5 pr-12 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-bold focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
                       />
@@ -1667,28 +1718,14 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
           {/* Strict Fixed Size Window: 800px x 620px (Dynamic Mobile Keyboard Height) */}
           <div className="w-[800px] max-w-full h-[calc(var(--modal-viewport-height,100dvh)-8px)] max-h-[calc(var(--modal-viewport-height,100dvh)-8px)] sm:h-[620px] sm:max-h-[90vh] bg-white rounded-md sm:rounded-lg shadow-[0_12px_40px_rgba(15,23,42,0.22)] border border-[#E2E8F0] flex flex-col overflow-hidden my-auto animate-in fade-in zoom-in-95">
             
-            {/* 1. Modal Fixed Header (Height: 64px) */}
-            <div className="h-16 shrink-0 bg-[#0F172A] text-white px-6 flex items-center justify-between border-b border-[#1E293B]">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-md bg-white/10 flex items-center justify-center text-white">
-                  <Pencil className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold font-headline tracking-tight leading-tight flex items-center gap-2">
-                    Edit Data & Disiplin Santri
-                  </h3>
-                  <p className="text-xs text-[#94A3B8] leading-none mt-0.5">
-                    {editingStudent.studentName} {editingStudent.kamar ? `• ${editingStudent.kamar}` : ''}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setEditingStudent(null)}
-                className="w-8 h-8 rounded-md flex items-center justify-center text-[#94A3B8] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            {/* 1. Modal Fixed Header (Clean Flat Header, Zero Icon Policy) */}
+            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
+                Edit Data & Disiplin Santri
+              </h3>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                {editingStudent.studentName} {editingStudent.kamar ? `• ${editingStudent.kamar}` : ''}
+              </p>
             </div>
 
             {/* 2. Fixed Modal Tab Bar (Height: 48px) */}
@@ -1696,30 +1733,28 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               <button
                 type="button"
                 onClick={() => setEditActiveTab('general')}
-                className={`h-9 px-4 rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+                className={`h-9 px-4 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                   editActiveTab === 'general'
                     ? 'bg-[#0F172A] text-white shadow-xs'
                     : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0]/50'
                 }`}
               >
-                <Users className="w-3.5 h-3.5" />
                 Data Pokok & Akademik
               </button>
               
               <button
                 type="button"
                 onClick={() => setEditActiveTab('discipline')}
-                className={`h-9 px-4 rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+                className={`h-9 px-4 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                   editActiveTab === 'discipline'
                     ? 'bg-[#0F172A] text-white shadow-xs'
                     : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0]/50'
                 }`}
               >
-                <ShieldAlert className="w-3.5 h-3.5" />
                 Disiplin & Pelanggaran
                 {editPoin > 0 && (
-                  <span className="ml-1 text-[10px] bg-[#EF4444] text-white font-bold px-1.5 py-0.2 rounded-full">
-                    {editPoin} Pts
+                  <span className="ml-1.5 text-[10px] font-mono font-bold text-rose-600">
+                    +{editPoin} Pts
                   </span>
                 )}
               </button>
@@ -1834,6 +1869,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                             step={1}
                             value={editHafalanCount}
                             onChange={(e) => setEditHafalanCount(e.target.value === '' ? '' : Math.min(30, Math.max(0, parseInt(e.target.value) || 0)))}
+                            onWheel={(e) => e.currentTarget.blur()}
                             placeholder="0"
                             className="w-full h-10 pl-3.5 pr-12 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-bold focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
                           />
@@ -1911,6 +1947,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                             min={0}
                             value={editPoin}
                             onChange={(e) => setEditPoin(Math.max(0, parseInt(e.target.value) || 0))}
+                            onWheel={(e) => e.currentTarget.blur()}
                             className="w-20 h-9 px-2.5 bg-white border border-[#CBD5E1] rounded text-center text-sm font-bold text-[#EF4444] focus:border-[#0F172A] focus:outline-none"
                           />
                           <span className="font-bold text-xs text-[#64748B]">Pts</span>
@@ -1958,6 +1995,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                             max={100}
                             value={newVioPoints}
                             onChange={(e) => setNewVioPoints(parseInt(e.target.value) || 0)}
+                            onWheel={(e) => e.currentTarget.blur()}
                             className="w-full h-8 px-2.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
                           />
                         </div>
@@ -2100,31 +2138,32 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
       {/* Delete Student Confirmation Dialog */}
       {studentToDelete && (
         <div data-lenis-prevent className="fixed inset-0 z-[60] flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-md max-h-[92dvh] sm:max-h-[90vh] my-auto overflow-y-auto rounded-lg shadow-[0_12px_40px_rgba(15,23,42,0.25)] border border-[#E2E8F0] p-6 space-y-4 animate-in fade-in zoom-in-95">
-            <div className="w-12 h-12 rounded-full bg-[#FEF2F2] text-[#EF4444] flex items-center justify-center mx-auto">
-              <AlertCircle className="w-6 h-6" />
-            </div>
-            
-            <div className="text-center space-y-1">
+          <div className="bg-white w-full max-w-md max-h-[92dvh] sm:max-h-[90vh] my-auto overflow-hidden rounded-lg shadow-[0_12px_40px_rgba(15,23,42,0.25)] border border-[#E2E8F0] animate-in fade-in zoom-in-95 flex flex-col">
+            {/* Modal Header */}
+            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
               <h3 className="text-base font-bold text-[#0F172A] font-headline">Konfirmasi Hapus Data Santri</h3>
-              <p className="text-xs text-[#64748B]">
-                Apakah Anda yakin ingin menghapus data <strong className="text-[#0F172A]">{studentToDelete.studentName}</strong>? Tindakan ini tidak dapat dibatalkan.
-              </p>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">Tindakan ini tidak dapat dibatalkan</p>
             </div>
 
-            <div className="flex items-center justify-center gap-3 pt-2">
-              <Button type="button" variant="ghost" size="sm" onClick={() => setStudentToDelete(null)}>
-                Batal
-              </Button>
-              <Button 
-                type="button" 
-                variant="destructive" 
-                size="sm" 
-                onClick={handleConfirmDelete} 
-                disabled={isDeleting}
-              >
-                {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : 'Ya, Hapus Santri'}
-              </Button>
+            <div className="p-6 space-y-4 text-xs">
+              <p className="text-[#334155] leading-relaxed">
+                Apakah Anda yakin ingin menghapus data <strong className="text-[#0F172A]">{studentToDelete.studentName}</strong>? Seluruh catatan akademik dan disiplin akan dihapus dari sistem.
+              </p>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <Button type="button" variant="ghost" size="sm" onClick={() => setStudentToDelete(null)}>
+                  Batal
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="destructive" 
+                  size="sm" 
+                  onClick={handleConfirmDelete} 
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Menghapus...' : 'Ya, Hapus Santri'}
+                </Button>
+              </div>
             </div>
           </div>
         </div>

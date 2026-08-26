@@ -28,7 +28,8 @@ import {
 import { gooeyToast } from 'goey-toast';
 import { useLenisModalLock } from '../../lib/lenis';
 import { RollingNumber } from '../modals/NewViolationModal';
-import { CollectiveMahkamahModal } from '../modals/CollectiveMahkamahModal';
+import { getSeverityInfo, sliderFillPercent } from '../../lib/severityUtils';
+import { CollectiveMahkamahView } from './CollectiveMahkamahView';
 
 interface ViolationsViewProps {
   violations: ViolationRecord[];
@@ -38,12 +39,105 @@ interface ViolationsViewProps {
 
 type ViolationFilter = 'all' | 'berat' | 'sedang' | 'ringan' | 'belum_dihukum';
 
+// Running Text / Marquee Looping Component for Anti-Wrapping Table Cells
+const RunningText: React.FC<{
+  text: string;
+  className?: string;
+}> = ({ text, className = '' }) => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const contentRef = React.useRef<HTMLSpanElement>(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const [overflowDistance, setOverflowDistance] = useState(0);
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (containerRef.current && contentRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        const contentWidth = contentRef.current.scrollWidth;
+        if (contentWidth > containerWidth + 2) {
+          setIsOverflowing(true);
+          setOverflowDistance(contentWidth - containerWidth + 16);
+        } else {
+          setIsOverflowing(false);
+          setOverflowDistance(0);
+        }
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [text]);
+
+  const duration = Math.max(4, Math.min(14, overflowDistance / 14));
+
+  return (
+    <div
+      ref={containerRef}
+      className={`relative overflow-hidden whitespace-nowrap min-w-0 max-w-full ${className}`}
+      title={text}
+    >
+      <span
+        ref={contentRef}
+        style={
+          isOverflowing
+            ? ({
+                '--scroll-offset': `-${overflowDistance}px`,
+                animation: `running-ticker ${duration}s ease-in-out infinite alternate`,
+              } as React.CSSProperties)
+            : undefined
+        }
+        className={`inline-block whitespace-nowrap ${isOverflowing ? 'will-change-transform' : ''}`}
+      >
+        {text}
+      </span>
+    </div>
+  );
+};
+
+// Helper untuk memisahkan tanggal menjadi dua baris: Nama Hari dan Tanggal Lengkap
+const formatSplitDate = (dateStr: string): { dayName: string; formattedDate: string } => {
+  if (!dateStr) return { dayName: 'Rabu', formattedDate: '26 Agustus 2026' };
+
+  const dayNames = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const monthNames = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ];
+
+  const monthMap: Record<string, number> = {
+    januari: 0, februari: 1, maret: 2, april: 3, mei: 4, juni: 5,
+    juli: 6, agustus: 7, september: 8, oktober: 9, november: 10, desember: 11
+  };
+
+  let d: Date | null = null;
+  const clean = dateStr.trim();
+  const parts = clean.split(/\s+/);
+  
+  if (parts.length === 3 && monthMap[parts[1].toLowerCase()] !== undefined) {
+    const day = parseInt(parts[0], 10);
+    const month = monthMap[parts[1].toLowerCase()];
+    const year = parseInt(parts[2], 10);
+    d = new Date(year, month, day);
+  } else if (!isNaN(Date.parse(clean))) {
+    d = new Date(clean);
+  }
+
+  if (d && !isNaN(d.getTime())) {
+    const dayName = dayNames[d.getDay()];
+    const formattedDate = `${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+    return { dayName, formattedDate };
+  }
+
+  return { dayName: 'Rabu', formattedDate: dateStr };
+};
+
 export const ViolationsView: React.FC<ViolationsViewProps> = ({
   violations,
   students = [],
   onOpenNewViolationModal,
 }) => {
-  const [isCollectiveModalOpen, setIsCollectiveModalOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<'list' | 'collective-trial'>('list');
   const [filter, setFilter] = useState<ViolationFilter>(() => {
     try {
       return (localStorage.getItem('ostifak_violation_filter') as ViolationFilter) || 'all';
@@ -99,39 +193,6 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
 
   useLenisModalLock(!!editingViolation || !!deletingViolation);
 
-  // Dynamic Severity & Category Mapping (1-12 Ringan, 13-25 Sedang, 26-38 Berat, 39-50 Sangat Berat)
-  const getSeverityInfo = (pts: number) => {
-    if (pts <= 12) {
-      return {
-        label: 'Ringan',
-        severity: 'ringan' as SeverityLevel,
-        colorClass: 'text-emerald-700',
-        accentColor: '#059669',
-      };
-    }
-    if (pts <= 25) {
-      return {
-        label: 'Sedang',
-        severity: 'sedang' as SeverityLevel,
-        colorClass: 'text-amber-700',
-        accentColor: '#D97706',
-      };
-    }
-    if (pts <= 38) {
-      return {
-        label: 'Berat',
-        severity: 'berat' as SeverityLevel,
-        colorClass: 'text-rose-600',
-        accentColor: '#E11D48',
-      };
-    }
-    return {
-      label: 'Sangat Berat',
-      severity: 'sangat_berat' as SeverityLevel,
-      colorClass: 'text-red-700',
-      accentColor: '#DC2626',
-    };
-  };
 
   const editSeverityInfo = getSeverityInfo(editPoints);
 
@@ -165,10 +226,6 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
           setDeletingViolation(null);
           return;
         }
-        if (isCollectiveModalOpen) {
-          setIsCollectiveModalOpen(false);
-          return;
-        }
       }
     };
 
@@ -176,7 +233,6 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
       setActiveMenu(null);
       setEditingViolation(null);
       setDeletingViolation(null);
-      setIsCollectiveModalOpen(false);
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -185,7 +241,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('ostifak-escape-pressed', handleCustomEscape);
     };
-  }, [activeMenu, editingViolation, deletingViolation, isCollectiveModalOpen]);
+  }, [activeMenu, editingViolation, deletingViolation]);
 
   // Filter out permanently & optimistically deleted items
   const visibleViolations = violations.filter(
@@ -195,9 +251,24 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
   // Filter Tabs
   const filterTabs: TabOption<ViolationFilter>[] = [
     { id: 'all', label: 'Semua Kasus' },
-    { id: 'berat', label: 'Sidang Mahkamah (Berat)', count: visibleViolations.filter(v => v.severity === 'berat' || v.severity === 'sangat_berat').length },
-    { id: 'sedang', label: 'Pelanggaran Sedang' },
-    { id: 'ringan', label: 'Pelanggaran Ringan' },
+    { 
+      id: 'berat', 
+      label: 'Sidang Mahkamah (Berat)', 
+      count: visibleViolations.filter(v => {
+        const s = getSeverityInfo(v.points).severity;
+        return s === 'berat' || s === 'sangat_berat';
+      }).length 
+    },
+    { 
+      id: 'sedang', 
+      label: 'Pelanggaran Sedang',
+      count: visibleViolations.filter(v => getSeverityInfo(v.points).severity === 'sedang').length 
+    },
+    { 
+      id: 'ringan', 
+      label: 'Pelanggaran Ringan',
+      count: visibleViolations.filter(v => getSeverityInfo(v.points).severity === 'ringan').length 
+    },
     { id: 'belum_dihukum', label: 'Belum Eksekusi', count: visibleViolations.filter(v => v.status === 'belum_dihukum').length },
   ];
 
@@ -210,9 +281,11 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
 
     if (!matchesSearch) return false;
 
-    if (filter === 'berat') return v.severity === 'berat' || v.severity === 'sangat_berat';
-    if (filter === 'sedang') return v.severity === 'sedang';
-    if (filter === 'ringan') return v.severity === 'ringan';
+    const currentSev = getSeverityInfo(v.points).severity;
+
+    if (filter === 'berat') return currentSev === 'berat' || currentSev === 'sangat_berat';
+    if (filter === 'sedang') return currentSev === 'sedang';
+    if (filter === 'ringan') return currentSev === 'ringan';
     if (filter === 'belum_dihukum') return v.status === 'belum_dihukum';
 
     return true;
@@ -362,13 +435,21 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
     });
   };
 
+  if (currentView === 'collective-trial') {
+    return (
+      <CollectiveMahkamahView
+        students={students}
+        onBack={() => setCurrentView('list')}
+      />
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      {/* Header (Unboxed) */}
+    <div className="space-y-8">
+      {/* Header (Unboxed, Zero Icon Policy) */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
         <div>
-          <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2.5 font-headline tracking-tight">
-            <ShieldAlert className="w-7 h-7 text-[#0F172A]" />
+          <h1 className="text-3xl sm:text-4xl font-black text-[#0F172A] font-headline tracking-tight">
             Kedisiplinan, Poin & Sidang Mahkamah
           </h1>
           <p className="text-xs text-[#64748B] mt-1 font-body">
@@ -380,9 +461,8 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
           <Button
             variant="secondary"
             size="md"
-            onClick={() => setIsCollectiveModalOpen(true)}
-            icon={<Scale className="w-4 h-4 text-slate-800" />}
-            className="bg-white border border-slate-300 text-slate-900 hover:bg-slate-50 shadow-2xs"
+            onClick={() => setCurrentView('collective-trial')}
+            className="bg-white border border-[#E2E8F0] text-[#0F172A] hover:bg-[#F8FAFC]"
           >
             Sidang Mahkamah Kolektif
           </Button>
@@ -391,10 +471,60 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
             variant="destructive"
             size="md"
             onClick={onOpenNewViolationModal}
-            icon={<Plus className="w-4 h-4 text-white" />}
+            className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
           >
-            Input Kasus Pelanggaran
+            + Input Kasus Pelanggaran
           </Button>
+        </div>
+      </div>
+
+      {/* 4 Summary Metrics (Unboxed 1-Row with Dividers) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-[#E2E8F0] py-3.5 border-y border-[#E2E8F0]">
+        <div className="px-3 sm:px-6 first:pl-0">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Total Kasus
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+              {visibleViolations.length}
+            </span>
+          </div>
+        </div>
+
+        <div className="px-3 sm:px-6">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Sidang Mahkamah (Berat)
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#EF4444] tracking-tight font-headline">
+              {visibleViolations.filter(v => {
+                const s = getSeverityInfo(v.points).severity;
+                return s === 'berat' || s === 'sangat_berat';
+              }).length}
+            </span>
+          </div>
+        </div>
+
+        <div className="px-3 sm:px-6">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Pelanggaran Sedang
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-amber-600 tracking-tight font-headline">
+              {visibleViolations.filter(v => getSeverityInfo(v.points).severity === 'sedang').length}
+            </span>
+          </div>
+        </div>
+
+        <div className="px-3 sm:px-6 last:pr-0">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Belum Eksekusi
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+              {visibleViolations.filter(v => v.status === 'belum_dihukum').length}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -418,84 +548,109 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
         </div>
       </div>
 
-      {/* Main Table (Unboxed & Unclipped) */}
-      <div className="overflow-x-auto">
+      {/* Main Table (Unboxed Clean Flat Table) */}
+      <div className="overflow-x-auto w-full">
         <table className="w-full text-left text-xs">
           <thead className="bg-[#F8FAFC] text-[#64748B] font-semibold border-b border-[#E2E8F0] font-headline uppercase tracking-[0.5px]">
             <tr>
-              <th className="p-3.5">Santri & Kamar</th>
-              <th className="p-3.5">Kasus Pelanggaran</th>
-              <th className="p-3.5">Kategori</th>
-              <th className="p-3.5">Poin</th>
-              <th className="p-3.5">Bentuk Takzir / Hukuman</th>
-              <th className="p-3.5 text-center">Status</th>
-              <th className="p-3.5 text-right pr-4">Aksi</th>
+              <th className="p-3.5 w-32 min-w-[120px] max-w-[130px] whitespace-nowrap">TANGGAL</th>
+              <th className="p-3.5 w-44 min-w-[140px] max-w-[180px] whitespace-nowrap">SANTRI & KAMAR</th>
+              <th className="p-3.5 min-w-[180px] max-w-[280px] sm:max-w-[340px] whitespace-nowrap">KASUS PELANGGARAN</th>
+              <th className="p-3.5 w-36 min-w-[120px] max-w-[150px] whitespace-nowrap">KATEGORI</th>
+              <th className="p-3.5 w-24 min-w-[70px] max-w-[80px] whitespace-nowrap">POIN</th>
+              <th className="p-3.5 min-w-[160px] max-w-[240px] whitespace-nowrap">BENTUK TAKZIR / HUKUMAN</th>
+              <th className="p-3.5 w-28 min-w-[90px] max-w-[110px] text-center whitespace-nowrap">STATUS</th>
+              <th className="p-3.5 w-20 min-w-[65px] max-w-[80px] text-right pr-4 whitespace-nowrap">AKSI</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E2E8F0]">
             {filteredViolations.length === 0 ? (
               <tr>
-                <td colSpan={7} className="p-8 text-center text-[#64748B] font-body">
-                  <ShieldAlert className="w-8 h-8 text-[#94A3B8] mx-auto mb-2" />
+                <td colSpan={8} className="p-8 text-center text-[#64748B] font-body">
                   <p className="font-semibold text-xs text-[#0F172A] font-headline">Belum Ada Catatan Pelanggaran</p>
                   <p className="text-[11px] text-[#64748B] mt-0.5 font-body">Klik "Input Kasus Pelanggaran" untuk mencatat pelanggaran santri.</p>
                 </td>
               </tr>
             ) : (
-              filteredViolations.map((v) => (
-                <tr 
-                  key={v.id} 
-                  onContextMenu={(e) => handleRowContextMenu(e, v)}
-                  className={`h-12 transition-colors group select-none cursor-default ${
-                    activeMenu?.violation.id === v.id ? 'bg-slate-100/80' : 'hover:bg-[#F8FAFC]'
-                  }`}
-                >
-                  <td className="p-3.5">
-                    <div className="font-bold text-[#0F172A] font-headline">{v.studentName}</div>
-                    <div className="text-[11px] text-[#64748B]">NIS: {v.nis} • {v.kamar}</div>
-                  </td>
-                  <td className="p-3.5 max-w-xs">
-                    <span className="font-semibold text-[#0F172A]">{v.violation}</span>
-                    <div className="text-[10px] text-[#64748B]">{v.date}</div>
-                  </td>
-                  <td className="p-3.5 text-[#64748B] font-body">{v.category}</td>
-                  <td className="p-3.5 font-bold text-[#EF4444]">+{v.points} Pts</td>
-                  <td className="p-3.5 max-w-xs text-[#0F172A] font-body">
-                    {v.penaltyDescription}
-                  </td>
-                  <td className="p-3.5 text-center">
-                    <div className="inline-flex items-center justify-center">
-                      {v.status === 'selesai' ? (
-                        <CheckCircle2 
-                          className="w-4 h-4 text-[#059669]" 
-                          title="Selesai (Sudah Dieksekusi)" 
-                        />
-                      ) : (
-                        <Clock 
-                          className="w-4 h-4 text-amber-500" 
-                          title="Pending (Belum Selesai / Dalam Proses)" 
-                        />
-                      )}
-                    </div>
-                  </td>
+              filteredViolations.map((v) => {
+                const dateObj = formatSplitDate(v.date);
+                const sevInfo = getSeverityInfo(v.points);
+                return (
+                  <tr 
+                    key={v.id} 
+                    onContextMenu={(e) => handleRowContextMenu(e, v)}
+                    className={`h-14 transition-colors group select-none cursor-default ${
+                      activeMenu?.violation.id === v.id ? 'bg-slate-100/80' : 'hover:bg-[#F8FAFC]'
+                    }`}
+                  >
+                    {/* 1. Kolom Tanggal Dua Baris (Nama Hari & Tanggal Lengkap) */}
+                    <td className="p-3.5 w-32 min-w-[120px] max-w-[130px] whitespace-nowrap align-middle">
+                      <p className="font-bold text-xs text-[#0F172A] font-headline leading-tight whitespace-nowrap">
+                        {dateObj.dayName}
+                      </p>
+                      <p className="text-[11px] text-[#64748B] font-body mt-0.5 leading-tight whitespace-nowrap">
+                        {dateObj.formattedDate}
+                      </p>
+                    </td>
 
-                  {/* Kolom Aksi dengan Icon Button Titik Tiga */}
-                  <td className="p-3.5 text-right pr-4">
-                    <button
-                      type="button"
-                      onClick={(e) => handleOpenDropdown(e, v)}
-                      className={`w-8 h-8 rounded-lg inline-flex items-center justify-center transition-colors ml-auto cursor-pointer active:scale-95 ${
-                        activeMenu?.violation.id === v.id && activeMenu.type === 'dropdown'
-                          ? 'bg-slate-200 text-slate-900'
-                          : 'text-slate-400 hover:text-slate-900 hover:bg-slate-100'
-                      }`}
-                      title="Menu Opsi Kasus"
-                    >
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))
+                    {/* 2. Kolom Santri & Kamar (Anti-wrapping) */}
+                    <td className="p-3.5 w-44 min-w-[140px] max-w-[180px] align-middle overflow-hidden">
+                      <RunningText text={v.studentName} className="font-bold text-[#0F172A] font-headline" />
+                      <RunningText text={`NIS: ${v.nis} • ${v.kamar}`} className="text-[11px] text-[#64748B] mt-0.5" />
+                    </td>
+
+                    {/* 3. Kolom Kasus Pelanggaran (Anti-wrapping) */}
+                    <td className="p-3.5 min-w-[180px] max-w-[280px] sm:max-w-[340px] align-middle overflow-hidden">
+                      <RunningText text={v.violation} className="font-semibold text-[#0F172A]" />
+                      <div className="flex items-center gap-1.5 mt-0.5 whitespace-nowrap">
+                        <span className={`text-[10px] font-bold uppercase tracking-wider ${sevInfo.colorClass}`}>
+                          Tingkat: {sevInfo.label}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* 4. Kolom Kategori */}
+                    <td className="p-3.5 w-36 min-w-[120px] max-w-[150px] align-middle overflow-hidden">
+                      <RunningText text={v.category} className="text-[#64748B] font-body" />
+                    </td>
+
+                    {/* 5. Kolom Poin */}
+                    <td className="p-3.5 w-24 min-w-[70px] max-w-[80px] font-bold text-[#EF4444] whitespace-nowrap align-middle font-mono">
+                      +{v.points} Pts
+                    </td>
+
+                    {/* 6. Kolom Bentuk Takzir */}
+                    <td className="p-3.5 min-w-[160px] max-w-[240px] align-middle overflow-hidden">
+                      <RunningText text={v.penaltyDescription || '-'} className="text-[#0F172A] font-body" />
+                    </td>
+
+                    {/* 7. Kolom Status (Zero Icon Policy: Plain Text) */}
+                    <td className="p-3.5 w-28 min-w-[90px] max-w-[110px] text-center whitespace-nowrap align-middle">
+                      <span className={`font-semibold text-xs ${
+                        v.status === 'selesai' ? 'text-[#059669]' : 'text-amber-600'
+                      }`}>
+                        {v.status === 'selesai' ? 'Selesai' : 'Dalam Proses'}
+                      </span>
+                    </td>
+
+                    {/* 8. Kolom Aksi */}
+                    <td className="p-3.5 w-20 min-w-[65px] max-w-[80px] text-right pr-4 whitespace-nowrap align-middle">
+                      <button
+                        type="button"
+                        onClick={(e) => handleOpenDropdown(e, v)}
+                        className={`w-8 h-8 rounded-lg inline-flex items-center justify-center transition-colors ml-auto cursor-pointer active:scale-95 ${
+                          activeMenu?.violation.id === v.id && activeMenu.type === 'dropdown'
+                            ? 'bg-slate-200 text-slate-900'
+                            : 'text-slate-400 hover:text-slate-900 hover:bg-slate-100'
+                        }`}
+                        title="Menu Opsi Kasus"
+                      >
+                        <MoreHorizontal className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
@@ -570,28 +725,12 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
       {editingViolation && (
         <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
           <div className="bg-white w-full max-w-2xl max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
-            
-            {/* Header Modal */}
-            <div className="bg-[#142A18] text-white px-6 py-4 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/10 text-emerald-300 flex items-center justify-center border border-white/10">
-                  <Pencil className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold font-headline tracking-tight text-white">Edit Berkas Pelanggaran</h3>
-                  <p className="text-xs text-slate-300">
-                    Santri: <span className="font-semibold text-emerald-300">{editingViolation.studentName}</span> (NIS: {editingViolation.nis} • {editingViolation.kamar})
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setEditingViolation(null)}
-                className="w-8 h-8 rounded-md flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-                title="Tutup Form Edit"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            {/* Header Modal (Clean Flat Header, Zero Icon Policy) */}
+            <div className="px-6 sm:px-8 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">Edit Berkas Pelanggaran</h3>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                Santri: <span className="font-semibold text-[#0F172A]">{editingViolation.studentName}</span> (NIS: {editingViolation.nis} • {editingViolation.kamar})
+              </p>
             </div>
 
             {/* Edit Form */}
@@ -608,7 +747,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
                     required
                     value={editViolationText}
                     onChange={(e) => setEditViolationText(e.target.value)}
-                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#142A18] focus:bg-white focus:outline-none"
+                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none"
                   />
                 </div>
 
@@ -619,7 +758,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
                   <select
                     value={editCategory}
                     onChange={(e) => setEditCategory(e.target.value)}
-                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#142A18] focus:bg-white focus:outline-none cursor-pointer"
+                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none cursor-pointer"
                   >
                     <option value="Disiplin & Ibadah">Disiplin & Ibadah</option>
                     <option value="Bahasa & Komunikasi">Bahasa & Komunikasi</option>
@@ -633,63 +772,60 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
               {/* Row 2: Range Slider Bobot Poin & Kategori Plain Text */}
               <div className="p-4 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] space-y-3">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-[#0F172A] font-headline flex items-center gap-1.5">
-                    <Scale className="w-3.5 h-3.5 text-slate-500" />
+                  <label className="text-xs font-semibold text-[#0F172A] font-headline">
                     Tingkat Keparahan Kasus & Bobot Poin
                   </label>
 
                   {/* Dynamic Jackpot Rolling Number & Plain Text Category */}
                   <div className="flex items-center gap-1.5 text-xs font-bold font-headline">
-                    <span className="text-slate-900 flex items-center font-mono">
-                      +<RollingNumber value={editPoints} className="text-sm font-bold text-slate-900 mx-0.5" /> Poin
+                    <span className="text-[#0F172A] flex items-center font-mono">
+                      +<RollingNumber value={editPoints} className="text-sm font-bold text-[#0F172A] mx-0.5" /> Poin
                     </span>
-                    <span className="text-slate-400 font-normal">—</span>
-                    <span className={`${editSeverityInfo.colorClass} font-semibold transition-colors duration-150`}>
-                      {editSeverityInfo.label}
+                    <span className="text-[#64748B]">•</span>
+                    <span className={getSeverityInfo(editPoints).colorClass}>
+                      {getSeverityInfo(editPoints).label}
                     </span>
                   </div>
                 </div>
 
-                {/* Range Slider HTML Input */}
-                <div className="relative py-1">
+                {/* Interactive Smooth Slider */}
+                <div className="relative pt-1">
                   <input
                     type="range"
-                    min="1"
-                    max="50"
-                    step="1"
+                    min={1}
+                    max={50}
+                    step={1}
                     value={editPoints}
                     onChange={(e) => setEditPoints(Number(e.target.value))}
-                    className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#142A18] transition-all focus:outline-none"
+                    className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-[#0F172A]"
                     style={{
-                      background: `linear-gradient(to right, ${editSeverityInfo.accentColor} 0%, ${editSeverityInfo.accentColor} ${((editPoints - 1) / 49) * 100}%, #E2E8F0 ${((editPoints - 1) / 49) * 100}%, #E2E8F0 100%)`
+                      background: `linear-gradient(to right, #0F172A 0%, #0F172A ${sliderFillPercent(editPoints)}%, #E2E8F0 ${sliderFillPercent(editPoints)}%, #E2E8F0 100%)`
                     }}
                   />
-                </div>
-
-                {/* Threshold Milestones */}
-                <div className="flex justify-between items-center text-[10px] text-slate-400 font-medium px-1 select-none">
-                  <span className={editPoints <= 12 ? 'text-emerald-700 font-bold' : ''}>1-12 Ringan</span>
-                  <span className={editPoints >= 13 && editPoints <= 25 ? 'text-amber-700 font-bold' : ''}>13-25 Sedang</span>
-                  <span className={editPoints >= 26 && editPoints <= 38 ? 'text-rose-600 font-bold' : ''}>26-38 Berat</span>
-                  <span className={editPoints >= 39 ? 'text-red-700 font-bold' : ''}>39-50 Sangat Berat</span>
+                  <div className="flex justify-between text-[10px] text-[#64748B] font-body mt-1">
+                    <span>1 (Ringan)</span>
+                    <span>13 (Sedang)</span>
+                    <span>26 (Berat)</span>
+                    <span>39+ (Sangat Berat)</span>
+                  </div>
                 </div>
               </div>
 
               {/* Row 3: Status Eksekusi Hukuman */}
               <div>
                 <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
-                  Status Hukuman
+                  Status Eksekusi Hukuman
                 </label>
-                <div className="grid grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-3 gap-2">
                   {(['belum_dihukum', 'dalam_proses', 'selesai'] as PenaltyStatus[]).map((st) => (
                     <button
                       key={st}
                       type="button"
                       onClick={() => setEditStatus(st)}
-                      className={`p-2.5 rounded-lg border text-center transition-all cursor-pointer ${
+                      className={`h-9 px-3 rounded-md text-xs font-semibold border transition-all cursor-pointer ${
                         editStatus === st
-                          ? 'border-[#142A18] bg-emerald-50/80 text-[#142A18] font-bold shadow-2xs'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                          ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-xs'
+                          : 'bg-white border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A]'
                       }`}
                     >
                       <span className="capitalize">{st.replace('_', ' ')}</span>
@@ -698,17 +834,17 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
                 </div>
               </div>
 
-              {/* Row 4: Bentuk Takzir / Hukuman */}
+              {/* Row 4: Rekomendasi Hukuman / Takzir */}
               <div>
                 <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
-                  Rekomendasi Bentuk Hukuman / Takzir
+                  Rekomendasi Hukuman / Takzir
                 </label>
                 <textarea
                   rows={2}
                   value={editPenaltyDescription}
                   onChange={(e) => setEditPenaltyDescription(e.target.value)}
                   placeholder="Bentuk konsekuensi edukatif..."
-                  className="w-full p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#142A18] focus:bg-white focus:outline-none resize-none"
+                  className="w-full p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none resize-none"
                 />
               </div>
 
@@ -731,21 +867,19 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
       {deletingViolation && (
         <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
           <div className="bg-white w-full max-w-md max-h-[92dvh] sm:max-h-[90vh] rounded-xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto flex flex-col animate-in fade-in zoom-in-95">
-            <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-6">
-              <div className="flex items-start gap-3.5">
-                <div className="w-10 h-10 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
-                  <AlertTriangle className="w-5 h-5" />
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-base font-bold text-slate-900 font-headline">Hapus Catatan Pelanggaran?</h3>
-                  <p className="text-slate-600 leading-relaxed">
-                    Apakah Anda yakin ingin menghapus catatan pelanggaran <strong>"{deletingViolation.violation}"</strong> atas nama <strong>{deletingViolation.studentName}</strong>? Tindakan ini tidak dapat dibatalkan.
-                  </p>
-                </div>
-              </div>
+            {/* Modal Header */}
+            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+              <h3 className="text-base font-bold text-[#0F172A] font-headline">Hapus Catatan Pelanggaran?</h3>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">Konfirmasi pembatalan atau penghapusan berkas kasus</p>
+            </div>
 
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-[11px] text-slate-500 space-y-1">
-                <p>Santri: <strong className="text-slate-800">{deletingViolation.studentName}</strong> ({deletingViolation.kamar})</p>
+            <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-6">
+              <p className="text-[#334155] leading-relaxed">
+                Apakah Anda yakin ingin menghapus catatan pelanggaran <strong>"{deletingViolation.violation}"</strong> atas nama <strong>{deletingViolation.studentName}</strong>? Tindakan ini tidak dapat dibatalkan.
+              </p>
+
+              <div className="p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] text-[11px] text-[#64748B] space-y-1">
+                <p>Santri: <strong className="text-[#0F172A]">{deletingViolation.studentName}</strong> ({deletingViolation.kamar})</p>
                 <p>Bobot Poin: <strong className="text-rose-600">+{deletingViolation.points} Pts</strong></p>
               </div>
 
@@ -772,13 +906,6 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
           </div>
         </div>
       )}
-
-      {/* Sidang Mahkamah Kolektif Modal */}
-      <CollectiveMahkamahModal
-        isOpen={isCollectiveModalOpen}
-        onClose={() => setIsCollectiveModalOpen(false)}
-        students={students}
-      />
 
     </div>
   );

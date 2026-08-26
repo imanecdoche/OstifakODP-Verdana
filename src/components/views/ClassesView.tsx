@@ -165,11 +165,10 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
 
   return (
     <div className="space-y-8 font-body">
-      {/* Header (Unboxed) */}
+      {/* Header (Unboxed, Zero Icon Policy) */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
         <div>
-          <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2.5 font-headline tracking-tight">
-            <GraduationCap className="w-7 h-7 text-[#0F172A]" />
+          <h1 className="text-3xl sm:text-4xl font-black text-[#0F172A] font-headline tracking-tight">
             Sistem & Manajemen Kelas
           </h1>
           <p className="text-xs text-[#64748B] mt-1 font-body">
@@ -185,34 +184,46 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Cari Kelas, Jurusan, Angkatan..."
-              className="w-full h-10 pl-10 pr-4 bg-white border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10 font-body shadow-2xs"
+              className="w-full h-10 pl-10 pr-4 bg-white border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A] font-body"
             />
           </div>
         </div>
       </div>
 
-      {/* 3 Summary Metric Cards (Clean & Pure Numbers) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card variant="default" className="p-5">
-          <p className="text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">Kelas Terdaftar</p>
-          <div className="flex items-baseline gap-1.5 mt-1">
-            <span className="text-2xl font-bold text-[#0F172A] tracking-tight">{totalClasses}</span>
+      {/* 3 Summary Metrics (Unboxed 1-Row with Dividers) */}
+      <div className="grid grid-cols-3 divide-x divide-[#E2E8F0] py-3.5 border-y border-[#E2E8F0]">
+        <div className="px-3 sm:px-6 first:pl-0">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Kelas Terdaftar
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+              {totalClasses}
+            </span>
           </div>
-        </Card>
+        </div>
 
-        <Card variant="default" className="p-5">
-          <p className="text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">Tingkatan Kelas</p>
-          <div className="flex items-baseline gap-1.5 mt-1">
-            <span className="text-2xl font-bold text-[#0F172A] tracking-tight">{uniqueLevels}</span>
+        <div className="px-3 sm:px-6">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Tingkatan Kelas
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+              {uniqueLevels}
+            </span>
           </div>
-        </Card>
+        </div>
 
-        <Card variant="default" className="p-5">
-          <p className="text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">Total Santri</p>
-          <div className="flex items-baseline gap-1.5 mt-1">
-            <span className="text-2xl font-bold text-[#0F172A] tracking-tight">{totalStudents}</span>
+        <div className="px-3 sm:px-6 last:pr-0">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px]">
+            Total Santri
+          </p>
+          <div className="flex items-baseline gap-1.5 mt-0.5">
+            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+              {totalStudents}
+            </span>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Filter Tabs Navigation */}
@@ -282,23 +293,14 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
         <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/40 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
           <div className="bg-[#FFFFFF] w-full max-w-3xl max-h-[92dvh] sm:max-h-[90vh] flex flex-col rounded-lg shadow-[0_8px_32px_rgba(15,23,42,0.15)] border border-[#E2E8F0] overflow-hidden my-auto">
             
-            {/* Modal Header (Dark Emerald Branding) */}
-            <div className="bg-[#142A18] text-white px-6 py-4 flex items-center justify-between shrink-0">
-              <div>
-                <h3 className="text-base font-bold font-headline tracking-tight flex items-center gap-2 text-white">
-                  <GraduationCap className="w-5 h-5 text-white" />
-                  {selectedClassModal.className}
-                </h3>
-                <p className="text-xs text-slate-300">{selectedClassModal.level} • {selectedClassModal.generation} • Jurusan {selectedClassModal.major}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedClassModal(null)}
-                className="w-8 h-8 rounded-md flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-                title="Tutup Modal"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            {/* Modal Header (Clean Flat Header, Zero Icon Policy) */}
+            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
+                {selectedClassModal.className}
+              </h3>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                {selectedClassModal.level} • {selectedClassModal.generation} • Jurusan {selectedClassModal.major}
+              </p>
             </div>
 
             {/* Modal Body - Scrollable */}
@@ -386,8 +388,7 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
                         </div>
 
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <UserCheck className="w-3.5 h-3.5 text-[#059669] shrink-0" />
+                          <div className="min-w-0">
                             <span className="font-bold text-[#0F172A] text-xs truncate">{res.studentName}</span>
                           </div>
                           <span className="text-[10px] font-semibold px-1.5 py-0.5 bg-[#F1F5F9] text-[#475569] rounded shrink-0">
@@ -433,14 +434,15 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
             </ScrollArea>
 
             {/* Modal Fixed Footer */}
-            <div className="bg-[#F8FAFC] px-6 py-3.5 border-t border-slate-200/80 flex items-center justify-end shrink-0">
-              <button
-                type="button"
+            <div className="bg-[#F8FAFC] px-6 py-3.5 border-t border-[#E2E8F0] flex items-center justify-end shrink-0">
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={() => setSelectedClassModal(null)}
-                className="px-5 py-2 bg-[#142A18] text-white rounded-full text-xs font-semibold hover:bg-[#2E5B37] transition-colors cursor-pointer shadow-xs active:scale-[0.98]"
+                className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
               >
                 Tutup Detail
-              </button>
+              </Button>
             </div>
           </div>
         </div>

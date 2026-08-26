@@ -29,6 +29,7 @@ import {
 } from '../types';
 import { OFFICIAL_ACCOUNTS } from '../data/mockData';
 import { broadcastSync, subscribeToSyncMessages } from './realtimeSync';
+import { getSeverityInfo } from './severityUtils';
 
 /**
  * 2. AUTHENTICATION SERVICES
@@ -186,18 +187,19 @@ export function subscribeToPelanggaran(callback: (records: ViolationRecord[]) =>
   const unsubSnapshot = onSnapshot(q, (snapshot) => {
     cachedRemote = snapshot.docs.map((docSnap) => {
       const data = docSnap.data();
+      const pts = Number(data.points !== undefined ? data.points : data.poin) || 0;
       return {
         id: docSnap.id,
-        studentName: data.studentName || 'Santri',
+        studentName: data.studentName || data.name || 'Santri',
         nis: data.nis || '-',
         kamar: data.kamar || '-',
-        violation: data.violation || '-',
-        category: data.category || 'Disiplin',
-        points: data.points || 0,
-        severity: (data.severity as SeverityLevel) || 'ringan',
+        violation: data.violation || data.title || data.kasus || '-',
+        category: data.category || 'Kedisiplinan Santri',
+        points: pts,
+        severity: (data.severity as SeverityLevel) || getSeverityInfo(pts).severity,
         status: (data.status as PenaltyStatus) || 'belum_dihukum',
         date: data.date || new Date().toLocaleDateString('id-ID'),
-        penaltyDescription: data.penaltyDescription || '-',
+        penaltyDescription: data.penaltyDescription || data.penalty || '-',
         reportedBy: data.reportedBy || 'Pelapor',
       };
     });
@@ -366,28 +368,32 @@ export function deriveViolationsFromSantri(students: SantriRecord[]): ViolationR
   const rows: ViolationRecord[] = [];
   
   for (const s of students || []) {
-    for (const v of s.violationsHistory || []) {
-      const pts = Number(v.points) || 0;
-      const id = v.id;
-      const identity = `${(s.studentName || '').trim().toLowerCase()}|${(v.title || '').trim().toLowerCase()}|${v.date}|${pts}`;
+    const list = s.violationsHistory || (s as any).violationHistory || [];
+    for (const v of list) {
+      const pts = Number(v.points !== undefined ? v.points : (v as any).poin) || 0;
+      const title = v.title || (v as any).violation || (v as any).kasus || 'Kasus Pelanggaran';
+      const id = v.id || `vio-${s.id}-${title}-${v.date}`;
+      const identity = `${(s.studentName || '').trim().toLowerCase()}|${title.trim().toLowerCase()}|${v.date}|${pts}`;
 
       if (deletedIds.has(id) || deletedIds.has(identity)) {
         continue;
       }
 
+      const sevInfo = getSeverityInfo(pts);
+
       let row: ViolationRecord = {
-        id: v.id,
+        id,
         studentName: s.studentName,
         nis: s.nis || '-',
         kamar: s.kamar || '-',
-        violation: v.title,
-        category: 'Kedisiplinan Santri',
+        violation: title,
+        category: (v as any).category || 'Kedisiplinan Santri',
         points: pts,
-        severity: pts >= 50 ? 'berat' : pts >= 15 ? 'sedang' : 'ringan',
-        status: 'selesai',
-        date: v.date,
-        penaltyDescription: v.penalty || '-',
-        reportedBy: 'Pengurus OSTIFAK',
+        severity: (v as any).severity ? (v as any).severity : sevInfo.severity,
+        status: (v as any).status || 'selesai',
+        date: v.date || new Date().toLocaleDateString('id-ID'),
+        penaltyDescription: v.penalty || (v as any).penaltyDescription || '-',
+        reportedBy: (v as any).reportedBy || 'Pengurus OSTIFAK',
       };
 
       const updates = updatedMap[id] || updatedMap[identity];
@@ -949,7 +955,7 @@ export async function recordCollectiveMahkamahSession(params: {
         violation: `[Sidang Mahkamah] ${violation}`,
         category: divisions.join(' & '),
         points: points || 0,
-        severity: 'berat',
+        severity: getSeverityInfo(points || 0).severity,
         status: 'selesai',
         date,
         penaltyDescription: penalty,
@@ -1274,3 +1280,156 @@ export function subscribeToClasses(callback: (classes: SchoolClass[]) => void) {
     unsubSync();
   };
 }
+
+// =========================================================================
+// 6. BENDAHARA & KAS ORGANISASI (BPH)
+// =========================================================================
+export interface KasTransaction {
+  id: string;
+  date: string;
+  type: 'masuk' | 'keluar';
+  amount: number;
+  description: string;
+  divisionId: string;
+  divisionName: string;
+  category?: string;
+  isReceivable?: boolean;
+  recordedBy?: string;
+  createdAt?: string;
+}
+
+const STORAGE_KAS_KEY = 'ostifak_kas_transactions_list';
+const EVENT_KAS_CHANGED = 'ostifak-kas-changed';
+
+export const INITIAL_KAS_TRANSACTIONS: KasTransaction[] = [
+  {
+    id: 'kas-1',
+    date: '26 Agustus 2026',
+    type: 'masuk',
+    amount: 15000000,
+    description: 'Penerimaan Alokasi Dana Kas Operasional BPH OSTIFAK TA 2026/2027',
+    divisionId: 'bph',
+    divisionName: 'BPH & Kas Organisasi',
+    recordedBy: 'Sekretaris BPH OSTIFAK',
+  },
+  {
+    id: 'kas-2',
+    date: '25 Agustus 2026',
+    type: 'keluar',
+    amount: 1750000,
+    description: 'Pembelian Perlengkapan Kebersihan & Roan Bulanan Seluruh Asrama',
+    divisionId: 'kebersihan',
+    divisionName: 'Divisi Kebersihan & Asrama',
+    recordedBy: 'Ketua Divisi Kebersihan & Asrama',
+  },
+  {
+    id: 'kas-3',
+    date: '24 Agustus 2026',
+    type: 'masuk',
+    amount: 3200000,
+    description: 'Infaq Kas Bulanan Santri & Wali Santri Tahfizh Al-Quran',
+    divisionId: 'tahfizh',
+    divisionName: 'Divisi Tahfizh & Diniyah',
+    recordedBy: 'Bendahara OSTIFAK',
+  },
+  {
+    id: 'kas-4',
+    date: '22 Agustus 2026',
+    type: 'keluar',
+    amount: 850000,
+    description: 'Pengadaan Obat-obatan & P3K Posko UKS Santri',
+    divisionId: 'kesehatan',
+    divisionName: 'Divisi Kesehatan & UKS',
+    recordedBy: 'Ketua Divisi Kesehatan & UKS',
+  },
+  {
+    id: 'kas-5',
+    date: '20 Agustus 2026',
+    type: 'masuk',
+    amount: 2500000,
+    description: 'Sponsor Pembukaan Pekan Bahasa (Arabic & English Week)',
+    divisionId: 'bahasa',
+    divisionName: 'Divisi Bahasa (Lughah)',
+    recordedBy: 'Ketua Divisi Bahasa (Lughah)',
+  },
+  {
+    id: 'kas-6',
+    date: '18 Agustus 2026',
+    type: 'keluar',
+    amount: 1200000,
+    description: 'Peremajaan Soundsystem & Mikrofon Masjid Utama',
+    divisionId: 'ibadah',
+    divisionName: 'Divisi Ibadah & Masjid',
+    recordedBy: 'Ketua Divisi Ibadah & Masjid',
+  },
+];
+
+export function getLocalKasTransactions(): KasTransaction[] {
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KAS_KEY) : null;
+    return raw ? JSON.parse(raw) : INITIAL_KAS_TRANSACTIONS;
+  } catch {
+    return INITIAL_KAS_TRANSACTIONS;
+  }
+}
+
+export function saveLocalKasTransactions(list: KasTransaction[]) {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(STORAGE_KAS_KEY, JSON.stringify(list));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent(EVENT_KAS_CHANGED, { detail: { list } }));
+    }
+  } catch (err) {
+    console.error('Error saving kas transactions to local storage:', err);
+  }
+}
+
+export function addKasTransaction(transaction: Omit<KasTransaction, 'id'>): KasTransaction {
+  const current = getLocalKasTransactions();
+  const newItem: KasTransaction = {
+    ...transaction,
+    id: `kas-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+    createdAt: new Date().toISOString(),
+  };
+  const updated = [newItem, ...current];
+  saveLocalKasTransactions(updated);
+  broadcastSync({ module: 'kas', action: 'CREATE', payload: newItem });
+  return newItem;
+}
+
+export function deleteKasTransaction(id: string) {
+  const current = getLocalKasTransactions();
+  const updated = current.filter(t => t.id !== id);
+  saveLocalKasTransactions(updated);
+  broadcastSync({ module: 'kas', action: 'DELETE', id });
+}
+
+export function subscribeToKasTransactions(callback: (transactions: KasTransaction[]) => void) {
+  const emit = () => {
+    callback(getLocalKasTransactions());
+  };
+
+  emit();
+
+  const handleLocalChange = () => emit();
+  const unsubSync = subscribeToSyncMessages((msg) => {
+    if (msg.module === 'kas') {
+      emit();
+    }
+  });
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener(EVENT_KAS_CHANGED, handleLocalChange);
+    window.addEventListener('storage', handleLocalChange);
+  }
+
+  return () => {
+    unsubSync();
+    if (typeof window !== 'undefined') {
+      window.removeEventListener(EVENT_KAS_CHANGED, handleLocalChange);
+      window.removeEventListener('storage', handleLocalChange);
+    }
+  };
+}
+

@@ -2,6 +2,7 @@ import React from 'react';
 import { Settings } from 'lucide-react';
 import { DivisionId, ViolationRecord, WorkProgram } from '../../types';
 import { mockDivisions } from '../../data/mockData';
+import { TreasuryView } from './TreasuryView';
 
 interface DivisionDetailViewProps {
   divisionId?: DivisionId | null;
@@ -12,6 +13,10 @@ interface DivisionDetailViewProps {
 }
 
 export const DivisionDetailView: React.FC<DivisionDetailViewProps> = ({ divisionId }) => {
+  if (divisionId === 'bph') {
+    return <TreasuryView />;
+  }
+
   const division = mockDivisions.find((d) => d.id === divisionId);
   const divisionName = division ? division.name : 'Divisi OSTIFAK';
 

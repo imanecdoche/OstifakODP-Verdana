@@ -1,25 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import {
-  ShieldAlert,
-  X,
-  User,
-  AlertTriangle,
-  FileText,
-  Scale,
-  Calendar,
-  Check,
-  Search,
-  ChevronDown,
-  Home,
-  GraduationCap
-} from 'lucide-react';
 import { 
   SeverityLevel, 
   PenaltyStatus, 
   ViolationRecord 
 } from '../../types';
 import { DormitoryRoom, SantriRecord } from '../../lib/firestoreService';
+import { getSeverityInfo, sliderFillPercent } from '../../lib/severityUtils';
 import { Button } from '../ui/Button';
 import { ScrollArea } from '../ui/ScrollArea';
 import { useLenisModalLock } from '../../lib/lenis';
@@ -122,39 +109,6 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
     };
   }, [isOpen, onClose, isStudentOpen]);
 
-  // Dynamic Severity & Category Mapping (1-12 Ringan, 13-25 Sedang, 26-38 Berat, 39-50 Sangat Berat)
-  const getSeverityInfo = (pts: number) => {
-    if (pts <= 12) {
-      return {
-        label: 'Ringan',
-        severity: 'ringan' as SeverityLevel,
-        colorClass: 'text-emerald-700',
-        accentColor: '#059669',
-      };
-    }
-    if (pts <= 25) {
-      return {
-        label: 'Sedang',
-        severity: 'sedang' as SeverityLevel,
-        colorClass: 'text-amber-700',
-        accentColor: '#D97706',
-      };
-    }
-    if (pts <= 38) {
-      return {
-        label: 'Berat',
-        severity: 'berat' as SeverityLevel,
-        colorClass: 'text-rose-600',
-        accentColor: '#E11D48',
-      };
-    }
-    return {
-      label: 'Sangat Berat',
-      severity: 'sangat_berat' as SeverityLevel,
-      colorClass: 'text-red-700',
-      accentColor: '#DC2626',
-    };
-  };
 
   const severityInfo = getSeverityInfo(points);
 
@@ -225,25 +179,10 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
     <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
       <div className="bg-white w-full max-w-2xl md:max-w-3xl rounded-xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto max-h-[92dvh] sm:max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95">
         
-        {/* Header Modal (Dark Emerald Branding #142A18) */}
-        <div className="bg-[#142A18] text-white px-6 sm:px-8 py-4 flex items-center justify-between rounded-t-xl shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 text-emerald-300 flex items-center justify-center border border-white/10">
-              <ShieldAlert className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold font-headline tracking-tight text-white">Catat Pelanggaran Santri</h3>
-              <p className="text-xs text-slate-300">Input berkas sidang & rekam poin kedisiplinan santri</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 rounded-md flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-            title="Tutup Modal"
-          >
-            <X className="w-4 h-4" />
-          </button>
+        {/* Header Modal (Clean Flat Header, Zero Icon Policy) */}
+        <div className="px-6 sm:px-8 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+          <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">Catat Pelanggaran Santri</h3>
+          <p className="text-xs text-[#64748B] font-body mt-0.5">Input berkas sidang & rekam poin kedisiplinan santri</p>
         </div>
 
         {/* Form Body */}
@@ -255,7 +194,6 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
               Nama Lengkap Santri *
             </label>
             <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               <input
                 type="text"
                 required
@@ -276,9 +214,8 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
                   }
                 }}
                 placeholder="Ketik untuk mencari nama santri..."
-                className="w-full h-11 pl-10 pr-10 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#142A18] focus:bg-white focus:outline-none transition-all cursor-pointer shadow-2xs font-medium"
+                className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none transition-all cursor-pointer font-medium"
               />
-              <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             </div>
 
             {/* Custom Floating Dropdown Overlay */}
@@ -325,8 +262,7 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
           {/* Row 2: Kamar Asrama & Kelas Santri (Otomatis & Disabled) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline flex items-center gap-1.5">
-                <Home className="w-3.5 h-3.5 text-slate-400" />
+              <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
                 Kamar Asrama (Otomatis)
               </label>
               <input
@@ -339,8 +275,7 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline flex items-center gap-1.5">
-                <GraduationCap className="w-3.5 h-3.5 text-slate-400" />
+              <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
                 Kelas Santri (Otomatis)
               </label>
               <input
@@ -390,8 +325,7 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
           {/* Row 4: Range Slider Bobot Poin & Kategori Plain Text */}
           <div className="p-4 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-[#0F172A] font-headline flex items-center gap-1.5">
-                <Scale className="w-3.5 h-3.5 text-slate-500" />
+              <label className="text-xs font-semibold text-[#0F172A] font-headline">
                 Tingkat Keparahan Kasus & Bobot Poin
               </label>
 
@@ -418,7 +352,7 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
                 onChange={(e) => setPoints(Number(e.target.value))}
                 className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#142A18] transition-all focus:outline-none"
                 style={{
-                  background: `linear-gradient(to right, ${severityInfo.accentColor} 0%, ${severityInfo.accentColor} ${((points - 1) / 49) * 100}%, #E2E8F0 ${((points - 1) / 49) * 100}%, #E2E8F0 100%)`
+                  background: `linear-gradient(to right, ${severityInfo.accentColor} 0%, ${severityInfo.accentColor} ${sliderFillPercent(points)}%, #E2E8F0 ${sliderFillPercent(points)}%, #E2E8F0 100%)`
                 }}
               />
             </div>

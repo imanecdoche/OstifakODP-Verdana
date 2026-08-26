@@ -21,6 +21,7 @@ import {
 import { UserProfile, DivisionId } from '../../types';
 import { mockDivisions } from '../../data/mockData';
 import { ScrollArea } from '../ui/ScrollArea';
+import { APP_VERSION_INFO } from '../../config/version';
 
 interface SidebarProps {
   currentUser: UserProfile;
@@ -109,16 +110,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
           isOpenMobile ? 'translate-x-0 shadow-[0_8px_32px_rgba(15,23,42,0.15)]' : '-translate-x-full'
         }`}
       >
-        {/* Brand Header */}
-        <div className="relative h-16 px-6 border-b border-[#E2E8F0] flex items-center justify-center gap-2.5">
+        {/* Brand Header: Eksklusif Logo SVG Saja (Tanpa Teks OSDIGI) */}
+        <div className="relative h-16 px-6 border-b border-[#E2E8F0] flex items-center justify-center">
           <img
-            src="/logo.png"
+            src="/logo.svg"
             alt="Logo OSTIFAK"
-            className="w-7 h-7 object-contain shrink-0 drop-shadow-xs select-none"
+            className="w-10 h-10 object-contain drop-shadow-xs select-none"
           />
-          <h1 className="font-black text-[#0F172A] text-2xl lg:text-[26px] leading-none font-['Google_Sans','Product_Sans','Plus_Jakarta_Sans',sans-serif] tracking-tight text-center select-none">
-            OSDIGI
-          </h1>
           <button
             onClick={onCloseMobile}
             className="absolute right-4 top-1/2 -translate-y-1/2 lg:hidden w-8 h-8 rounded-md flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] transition-colors cursor-pointer active:scale-95"
@@ -204,9 +202,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </ScrollArea>
 
-        <div className="p-4 border-t border-[#E2E8F0] bg-[#F8FAFC] text-center">
-          <p className="text-[11px] font-bold text-[#0F172A] font-headline">ODP Pesantren Fajrul Karim</p>
-          <p className="text-[10px] text-[#64748B] mt-0.5">Tahun Ajaran 2026 / 2027</p>
+        {/* Bottom Sidebar: Menu SIAPA AKU & Versi Aplikasi */}
+        <div className="p-3 px-4 border-t border-[#E2E8F0] bg-white flex flex-col items-center justify-center gap-0.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              onSelectView('whoami');
+              onSelectDivision(null);
+              onCloseMobile();
+            }}
+            className={`w-full py-2 px-3 text-center text-xs uppercase tracking-wider font-headline font-bold transition-colors cursor-pointer rounded-md ${
+              activeView === 'whoami' && selectedDivision === null
+                ? 'text-[#0F172A] bg-slate-100 font-extrabold shadow-2xs'
+                : 'text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50'
+            }`}
+          >
+            SIAPA AKU
+          </button>
+          <span className="text-[10px] text-slate-400 font-mono tracking-tight select-none">
+            {APP_VERSION_INFO.version}
+          </span>
         </div>
       </aside>
     </>
