@@ -215,7 +215,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       .slice(0, 5);
   }, [students]);
 
-  // 6. Baris 3 - Top 5 Setoran Terbanyak Bulan Ini
+  // 6. Baris 3 - Top 5 Setoran Terbanyak Bulan Ini (Murni dari Database Hafalan History)
   const topSetoranBulanIni = useMemo(() => {
     if (!students || students.length === 0) return [];
     const currentMonth = new Date().getMonth();
@@ -225,27 +225,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       const history = s.hafalanHistory || [];
       const setoranEntries = history.filter(h => {
         if (h.category === 'Murojaah') return false;
-        if (!h.date) return true;
+        if (!h.date) return false;
         const d = new Date(h.date);
-        return !isNaN(d.getTime()) ? (d.getMonth() === currentMonth && d.getFullYear() === currentYear) : true;
+        return !isNaN(d.getTime()) && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
       });
 
       const totalPages = setoranEntries.reduce((acc, h) => acc + (h.pageCount || 1), 0);
-      const count = setoranEntries.length || history.filter(h => h.category !== 'Murojaah').length;
+      const count = setoranEntries.length;
 
       return {
         student: s,
-        count: count || (parseHafalanNumber(s.hafalan) > 0 ? Math.round(parseHafalanNumber(s.hafalan) * 2) : 0),
-        totalPages: totalPages || (count * 2),
+        count,
+        totalPages,
       };
     });
 
     return list
+      .filter(item => item.count > 0)
       .sort((a, b) => b.count - a.count || b.totalPages - a.totalPages)
       .slice(0, 5);
   }, [students]);
 
-  // 7. Baris 3 - Top 5 Murojaah Terbanyak Bulan Ini
+  // 7. Baris 3 - Top 5 Murojaah Terbanyak Bulan Ini (Murni dari Database Murojaah History)
   const topMurojaahBulanIni = useMemo(() => {
     if (!students || students.length === 0) return [];
     const currentMonth = new Date().getMonth();
@@ -255,22 +256,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       const history = s.hafalanHistory || [];
       const murojaahEntries = history.filter(h => {
         if (h.category !== 'Murojaah') return false;
-        if (!h.date) return true;
+        if (!h.date) return false;
         const d = new Date(h.date);
-        return !isNaN(d.getTime()) ? (d.getMonth() === currentMonth && d.getFullYear() === currentYear) : true;
+        return !isNaN(d.getTime()) && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
       });
 
       const totalPages = murojaahEntries.reduce((acc, h) => acc + (h.pageCount || 1), 0);
-      const count = murojaahEntries.length || history.filter(h => h.category === 'Murojaah').length;
+      const count = murojaahEntries.length;
 
       return {
         student: s,
-        count: count || (s.poinPelanggaran === 0 && parseHafalanNumber(s.hafalan) > 3 ? Math.round(parseHafalanNumber(s.hafalan) * 1.5) : 0),
-        totalPages: totalPages || (count * 4),
+        count,
+        totalPages,
       };
     });
 
     return list
+      .filter(item => item.count > 0)
       .sort((a, b) => b.count - a.count || b.totalPages - a.totalPages)
       .slice(0, 5);
   }, [students]);

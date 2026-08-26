@@ -7,6 +7,12 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Sinkronisasi 100% Real-Time Data Riil Database pada Seluruh Metrik & Peringkat Dashboard (Versi v1.1.0.30b):
+  - 1. SINKRONISASI DATA RIIL DATABASE:
+    * Memverifikasi dan menyempurnakan seluruh agregasi data pada halaman Dashboard (Metric Cards: Total Santri Aktif, Master Asrama & Kamar, Pelanggaran Pekan Ini, Proposal & Program, dan Rata-rata Hafalan; Peringkat: Top 5 Santri Teladan, Top 5 Kamar Terbaik, Para Huffazh 30 Juz, Top 5 Hafalan Terbanyak, Top 5 Setoran Terbanyak Bulan Ini, serta Top 5 Murojaah Terbanyak Bulan Ini).
+    * Menghapus seluruh estimasi formula atau fallback tiruan sehingga seluruh angka, peringkat, dan akumulasi halaman/setoran disinkronkan 100% secara presisi dan real-time dari tabel koleksi Firestore (`santri`, `pelanggaran`, `proposals`, `dormitories`, `rooms`).
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan tata letak clean-flat dengan divider garis vertikal pada barisan metrik, tipografi tebal tanpa ikon dekoratif, dan anti-text-wrapping dengan teks dinamis.
 - **[2026-08-26]**: Rekonstruksi Komponen Detail Santri Menjadi Halaman Penuh (Full Page View) (Versi v1.1.0.29b):
   - 1. UBAH JADI HALAMAN PENUH (FULL PAGE VIEW):
     * Menghapus seluruh kontainer modal pop-up mengapung, backdrop overlay gelap transparan, batas tinggi modal kaku, dan tombol tutup "Tutup Detail".
