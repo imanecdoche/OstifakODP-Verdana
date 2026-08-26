@@ -165,50 +165,19 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
   }, [selectedClassModal, classSantriMap]);
 
   return (
-    <div className="relative w-full overflow-x-hidden font-body">
-      <AnimatePresence mode="wait" initial={false}>
-        {selectedDetailStudent ? (
-          <motion.div
-            key={`classes-student-detail-${selectedDetailStudent.id}`}
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{
-              type: 'tween',
-              ease: [0.16, 1, 0.3, 1],
-              duration: 0.35,
-            }}
-            className="w-full"
-          >
-            <StudentDetailModal
-              student={selectedDetailStudent}
-              classes={classes}
-              onClose={() => setSelectedDetailStudent(null)}
-              onStudentUpdated={(updatedStudent) => {
-                setLocalStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
-                setSelectedDetailStudent(updatedStudent);
-              }}
-            />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="classes-main-view"
-            initial={{ x: 0 }}
-            animate={{ x: 0 }}
-            exit={{ x: 0 }}
-            transition={{ duration: 0 }}
-            className="space-y-8 font-body"
-          >
-            {/* Header (Unboxed, Zero Icon Policy) */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
-              <div>
-                <h1 className="text-3xl sm:text-4xl font-black text-[#0F172A] font-headline tracking-tight">
-                  Sistem & Manajemen Kelas
-                </h1>
-                <p className="text-xs text-[#64748B] mt-1 font-body">
-                  Acuan utama 9 Kelas resmi (Kelas 1 - 3, Kelas 4 - 6 IPA/IPS) untuk data santri, absensi, prestasi kelas, dan kedisiplinan.
-                </p>
-              </div>
+    <div className="relative w-full overflow-x-hidden font-body min-h-screen">
+      {/* 1. Base Layer: Classes View (Always rendered in DOM, preventing any blank screens) */}
+      <div className={`space-y-8 font-body ${selectedDetailStudent ? 'pointer-events-none' : ''}`}>
+        {/* Header (Unboxed, Zero Icon Policy) */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-black text-[#0F172A] font-headline tracking-tight">
+              Sistem & Manajemen Kelas
+            </h1>
+            <p className="text-xs text-[#64748B] mt-1 font-body">
+              Acuan utama 9 Kelas resmi (Kelas 1 - 3, Kelas 4 - 6 IPA/IPS) untuk data santri, absensi, prestasi kelas, dan kedisiplinan.
+            </p>
+          </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:w-72">
@@ -324,6 +293,31 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
           </Card>
         ))}
       </div>
+      </div>
+
+      {/* 2. Slide-Over Layer: Student Detail Page (Rendered simultaneously in DOM over base layer) */}
+      <AnimatePresence>
+        {selectedDetailStudent && (
+          <motion.div
+            key={`classes-student-detail-${selectedDetailStudent.id}`}
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{
+              duration: 0.4,
+              ease: [0.4, 0, 0.2, 1],
+            }}
+            className="absolute top-0 left-0 right-0 z-20 w-full min-h-full bg-[#F8FAFC]"
+          >
+            <StudentDetailModal
+              student={selectedDetailStudent}
+              classes={classes}
+              onClose={() => setSelectedDetailStudent(null)}
+              onStudentUpdated={(updatedStudent) => {
+                setLocalStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
+                setSelectedDetailStudent(updatedStudent);
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>

@@ -1159,52 +1159,19 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
   }, [students, searchTerm, filterClass, minHafalan, maxHafalan, minPP, maxPP, minPoints, maxPoints, sortBy]);
 
   return (
-    <div className="relative w-full overflow-x-hidden font-body">
-      <AnimatePresence mode="wait" initial={false}>
-        {selectedDetailStudent ? (
-          <motion.div
-            key={`student-detail-${selectedDetailStudent.id}`}
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{
-              type: 'tween',
-              ease: [0.16, 1, 0.3, 1],
-              duration: 0.35,
-            }}
-            className="w-full"
-          >
-            <StudentDetailModal
-              student={selectedDetailStudent}
-              dormitories={dormitories}
-              rooms={rooms}
-              classes={classes}
-              onClose={() => setSelectedDetailStudent(null)}
-              onStudentUpdated={(updatedStudent) => {
-                setStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
-                setSelectedDetailStudent(updatedStudent);
-              }}
-            />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="student-directory-main-list"
-            initial={{ x: 0 }}
-            animate={{ x: 0 }}
-            exit={{ x: 0 }}
-            transition={{ duration: 0 }}
-            className="space-y-6"
-          >
-            {/* Header (Unboxed, Zero Icon Policy) */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
-              <div>
-                <h1 className="text-3xl sm:text-4xl font-black text-[#0F172A] font-headline tracking-tight">
-                  Direktori & Profil Santri
-                </h1>
-                <p className="text-xs text-[#64748B] mt-1 font-body">
-                  Sentralisasi data hafalan, presensi shalat berjamaah, kamar, dan riwayat disiplin santri.
-                </p>
-              </div>
+    <div className="relative w-full overflow-x-hidden font-body min-h-screen">
+      {/* 1. Base Layer: Student Directory (Always rendered in DOM, preventing any blank screens) */}
+      <div className={`space-y-6 ${selectedDetailStudent ? 'pointer-events-none' : ''}`}>
+        {/* Header (Unboxed, Zero Icon Policy) */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-black text-[#0F172A] font-headline tracking-tight">
+              Direktori & Profil Santri
+            </h1>
+            <p className="text-xs text-[#64748B] mt-1 font-body">
+              Sentralisasi data hafalan, presensi shalat berjamaah, kamar, dan riwayat disiplin santri.
+            </p>
+          </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:w-72">
@@ -1641,6 +1608,33 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
           ))}
         </div>
       )}
+      </div>
+
+      {/* 2. Slide-Over Layer: Student Detail Page (Rendered simultaneously in DOM over base layer) */}
+      <AnimatePresence>
+        {selectedDetailStudent && (
+          <motion.div
+            key={`student-detail-${selectedDetailStudent.id}`}
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{
+              duration: 0.4,
+              ease: [0.4, 0, 0.2, 1],
+            }}
+            className="absolute top-0 left-0 right-0 z-20 w-full min-h-full bg-[#F8FAFC]"
+          >
+            <StudentDetailModal
+              student={selectedDetailStudent}
+              dormitories={dormitories}
+              rooms={rooms}
+              classes={classes}
+              onClose={() => setSelectedDetailStudent(null)}
+              onStudentUpdated={(updatedStudent) => {
+                setStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
+                setSelectedDetailStudent(updatedStudent);
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>

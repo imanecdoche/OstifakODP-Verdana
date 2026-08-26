@@ -7,6 +7,14 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Optimalisasi Transisi Slide Bebas Blank Screen dengan Render Simultan Dua Layer & Easing 400ms (Versi v1.1.0.41b):
+  - 1. PENYESUAIAN DURASI & EASING ANIMASI ALAMI:
+    * Mengatur durasi pergeseran (*slide*) menjadi 400ms (0.4s) dengan kurva *smooth easing* `cubic-bezier(0.4, 0, 0.2, 1)` agar transisi terasa sangat halus, natural, dan tidak terburu-buru.
+  - 2. SIMULTANEOUS DUAL-LAYER RENDERING (ZERO BLANK SCREEN):
+    * Merekonstruksi sistem transisi di `StudentsView.tsx`, `DormitoryView.tsx`, dan `ClassesView.tsx` menjadi arsitektur dua layer yang dirender bersamaan di dalam DOM.
+    * Layer direktori dasar selalu aktif terpasang di latar belakang, sementara layer detail santri meluncur di atasnya (`absolute inset-x-0 top-0 z-20 min-h-full bg-[#F8FAFC]`), sehingga saat bergeser masuk maupun keluar tidak ada jeda layar kosong (*blank screen*) walau sepersekian detik.
+  - 3. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Header dan sidebar tetap statis, tanpa efek *fading/opacity* sama sekali, dan mempertahankan scroll position direktori secara presisi.
 - **[2026-08-26]**: Animasi Transisi Halaman Penuh Slide Masuk & Keluar Detail Santri Tanpa Fading (Versi v1.1.0.40b):
   - 1. ANIMASI MASUK (SLIDE FROM RIGHT, TANPA FADING):
     * Saat kartu santri diklik untuk membuka halaman detail, halaman detail santri meluncur masuk dari luar batas kanan layar (`initial={{ x: '100%' }}` menuju `animate={{ x: 0 }}`) ke dalam area konten utama dengan kurva Apple fluid ease-out (`[0.16, 1, 0.3, 1]`, duration 0.35s) secara tegas dan solid tanpa ada fading/opacity transparan.
