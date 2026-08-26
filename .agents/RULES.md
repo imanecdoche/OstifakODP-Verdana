@@ -7,6 +7,14 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Animasi Transisi Halaman Penuh Slide Masuk & Keluar Detail Santri Tanpa Fading (Versi v1.1.0.40b):
+  - 1. ANIMASI MASUK (SLIDE FROM RIGHT, TANPA FADING):
+    * Saat kartu santri diklik untuk membuka halaman detail, halaman detail santri meluncur masuk dari luar batas kanan layar (`initial={{ x: '100%' }}` menuju `animate={{ x: 0 }}`) ke dalam area konten utama dengan kurva Apple fluid ease-out (`[0.16, 1, 0.3, 1]`, duration 0.35s) secara tegas dan solid tanpa ada fading/opacity transparan.
+    * Header utama di atas dan Sidebar di sebelah kiri tetap diam pada posisinya (hanya area konten `<main>` di sebelah kanan sidebar dan di bawah header yang mengalami pergeseran).
+  - 2. ANIMASI KELUAR (SLIDE TO RIGHT, TANPA FADING):
+    * Saat tombol kembali diklik, halaman detail santri bergeser keluar menuju ke arah kanan (`exit={{ x: '100%' }}`) dengan mulus dan tegas tanpa fading/opacity sebelum kembali ke direktori santri.
+  - 3. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Diimplementasikan konsisten di `StudentsView.tsx`, `DormitoryView.tsx`, dan `ClassesView.tsx`, mempertahankan kebersihan clean-flat tanpa kontainer bertumpuk.
 - **[2026-08-26]**: Eliminasi Backdrop Blur & Animasi Diagonal Arrow Shutter pada Tombol Bulat Kartu Santri (Versi v1.1.0.39b):
   - 1. PENGHAPUSAN TOTAL OVERLAY HITAM BLUR:
     * Menghapus total lapisan backdrop hitam blur (`bg-slate-950/60 backdrop-blur-[2px]`) dari seluruh kartu santri di `StudentsView.tsx`, `DormitoryView.tsx`, dan `ClassesView.tsx` agar permukaan kartu tetap bersih dan dapat terbaca langsung saat kursor diarahkan ke kartu.

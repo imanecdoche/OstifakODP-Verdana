@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   GraduationCap, 
   Search, 
@@ -163,32 +164,51 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
     return classSantriMap.get(normalized) || [];
   }, [selectedClassModal, classSantriMap]);
 
-  if (selectedDetailStudent) {
-    return (
-      <StudentDetailModal
-        student={selectedDetailStudent}
-        classes={classes}
-        onClose={() => setSelectedDetailStudent(null)}
-        onStudentUpdated={(updatedStudent) => {
-          setLocalStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
-          setSelectedDetailStudent(updatedStudent);
-        }}
-      />
-    );
-  }
-
   return (
-    <div className="space-y-8 font-body">
-      {/* Header (Unboxed, Zero Icon Policy) */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-black text-[#0F172A] font-headline tracking-tight">
-            Sistem & Manajemen Kelas
-          </h1>
-          <p className="text-xs text-[#64748B] mt-1 font-body">
-            Acuan utama 9 Kelas resmi (Kelas 1 - 3, Kelas 4 - 6 IPA/IPS) untuk data santri, absensi, prestasi kelas, dan kedisiplinan.
-          </p>
-        </div>
+    <div className="relative w-full overflow-x-hidden font-body">
+      <AnimatePresence mode="wait" initial={false}>
+        {selectedDetailStudent ? (
+          <motion.div
+            key={`classes-student-detail-${selectedDetailStudent.id}`}
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{
+              type: 'tween',
+              ease: [0.16, 1, 0.3, 1],
+              duration: 0.35,
+            }}
+            className="w-full"
+          >
+            <StudentDetailModal
+              student={selectedDetailStudent}
+              classes={classes}
+              onClose={() => setSelectedDetailStudent(null)}
+              onStudentUpdated={(updatedStudent) => {
+                setLocalStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
+                setSelectedDetailStudent(updatedStudent);
+              }}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="classes-main-view"
+            initial={{ x: 0 }}
+            animate={{ x: 0 }}
+            exit={{ x: 0 }}
+            transition={{ duration: 0 }}
+            className="space-y-8 font-body"
+          >
+            {/* Header (Unboxed, Zero Icon Policy) */}
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
+              <div>
+                <h1 className="text-3xl sm:text-4xl font-black text-[#0F172A] font-headline tracking-tight">
+                  Sistem & Manajemen Kelas
+                </h1>
+                <p className="text-xs text-[#64748B] mt-1 font-body">
+                  Acuan utama 9 Kelas resmi (Kelas 1 - 3, Kelas 4 - 6 IPA/IPS) untuk data santri, absensi, prestasi kelas, dan kedisiplinan.
+                </p>
+              </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:w-72">
@@ -304,6 +324,9 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
           </Card>
         ))}
       </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Class Detail Modal Dialog */}
       {selectedClassModal && !selectedDetailStudent && (

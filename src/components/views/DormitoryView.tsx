@@ -200,33 +200,52 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
     return roomSantriMap.get(normalized) || [];
   }, [selectedRoomModal, roomSantriMap]);
 
-  if (selectedDetailStudent) {
-    return (
-      <StudentDetailModal
-        student={selectedDetailStudent}
-        dormitories={dormitories}
-        rooms={rooms}
-        onClose={() => setSelectedDetailStudent(null)}
-        onStudentUpdated={(updatedStudent) => {
-          setLocalStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
-          setSelectedDetailStudent(updatedStudent);
-        }}
-      />
-    );
-  }
-
   return (
-    <div className="space-y-8">
-      {/* Header (Unboxed, Zero Icon Policy) */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-black text-[#0F172A] font-headline tracking-tight">
-            Sistem & Manajemen Per-asramaan
-          </h1>
-          <p className="text-xs text-[#64748B] mt-1 font-body">
-            Acuan utama 8 Asrama dan 24 Kamar santri untuk data kedisiplinan, prestasi (kebersihan, kerapihan, keindahan), dan profil santri.
-          </p>
-        </div>
+    <div className="relative w-full overflow-x-hidden font-body">
+      <AnimatePresence mode="wait" initial={false}>
+        {selectedDetailStudent ? (
+          <motion.div
+            key={`dormitory-student-detail-${selectedDetailStudent.id}`}
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{
+              type: 'tween',
+              ease: [0.16, 1, 0.3, 1],
+              duration: 0.35,
+            }}
+            className="w-full"
+          >
+            <StudentDetailModal
+              student={selectedDetailStudent}
+              dormitories={dormitories}
+              rooms={rooms}
+              onClose={() => setSelectedDetailStudent(null)}
+              onStudentUpdated={(updatedStudent) => {
+                setLocalStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
+                setSelectedDetailStudent(updatedStudent);
+              }}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="dormitory-main-view"
+            initial={{ x: 0 }}
+            animate={{ x: 0 }}
+            exit={{ x: 0 }}
+            transition={{ duration: 0 }}
+            className="space-y-8"
+          >
+            {/* Header (Unboxed, Zero Icon Policy) */}
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
+              <div>
+                <h1 className="text-3xl sm:text-4xl font-black text-[#0F172A] font-headline tracking-tight">
+                  Sistem & Manajemen Per-asramaan
+                </h1>
+                <p className="text-xs text-[#64748B] mt-1 font-body">
+                  Acuan utama 8 Asrama dan 24 Kamar santri untuk data kedisiplinan, prestasi (kebersihan, kerapihan, keindahan), dan profil santri.
+                </p>
+              </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:w-72">
@@ -437,6 +456,9 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
               />
               <span>Sembunyikan Kamar Penuh</span>
             </label>
+          </motion.div>
+        )}
+      </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>

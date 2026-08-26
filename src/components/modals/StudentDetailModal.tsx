@@ -1051,7 +1051,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   return (
     <>
       {/* 1. HALAMAN UTAMA DETAIL SANTRI (FULL PAGE VIEW) */}
-      <div className="space-y-6 font-body pb-16 animate-in fade-in duration-200">
+      <div className="space-y-6 font-body pb-16">
         
         {/* Page Header (Clean Flat with Inline Icon-Only Back Button) */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#E2E8F0]">
