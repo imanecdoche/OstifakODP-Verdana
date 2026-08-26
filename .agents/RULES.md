@@ -7,6 +7,16 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Rekonstruksi Halaman Login Utama & Halaman Pilih Akun (Versi v1.1.0.51b):
+  - 1. REKONSTRUKSI HALAMAN LOGIN UTAMA:
+    * **Tombol Pilih Akun**: Dipindahkan ke bagian bawah halaman sebagai *secondary button* berupa teks bersih tanpa kotak pembungkus (*box*).
+    * **Form Input Kosong**: Nilai field input username/email dan password secara default kosong saat halaman pertama kali dimuat.
+  - 2. REKONSTRUKSI HALAMAN PILIH AKUN:
+    * **Tanpa Kontainer & Pemisah Divider**: Menghapus seluruh kontainer kotak/box pembungkus kartu akun; menyusun akun-akun secara lapang hanya dengan garis pemisah tipis (*divider* `divide-y divide-white/10`).
+    * **Pembersihan Elemen**: Menghapus seluruh badge/tag, label role pojok kanan bawah ("MUDIR", "PEMBINA", dll.), serta menghapus teks developer dan versi aplikasi di pojok kanan atas.
+    * **Informasi Kartu Minimalis**: Setiap entri akun hanya menampilkan **nama akun** dan **email saja**, disertai tanda centang (*checkmark*) pada akun yang aktif dipilih.
+  - 3. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan estetika minimalis clean-flat yang bersih, responsif di seluler, dan bebas elemen visual berlebih.
 - **[2026-08-27]**: Pembaruan Format Satuan Nilai Metrik "N Juz, N Lbr, N Hal" pada Top Lists Dashboard (Versi v1.1.0.50b):
   - 1. PEMBARUAN FORMAT NILAI METRIK:
     * Mengganti label keterangan lama ("N Halaman Tercatat", "Mutabaah Aktif", "N Halaman Mutqin") pada 5 kartu matriks (Top 5 Hafalan Terbanyak, Top 5 Murojaah Terbanyak Bulan Ini, Top 5 Setoran Terbanyak Bulan Ini, Top 5 Ziyadah Terbanyak Bulan Kemarin, dan Top 5 Muroja'ah Terbanyak Bulan Kemarin) dengan format satuan baku: **"N Juz, N Lbr, N Hal"**.

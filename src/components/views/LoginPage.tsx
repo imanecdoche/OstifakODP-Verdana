@@ -5,22 +5,22 @@ import {
   Loader2, 
   AlertCircle, 
   CheckCircle2, 
-  X,
-  Check
+  X, 
+  Check 
 } from 'lucide-react';
 import { OFFICIAL_ACCOUNTS, OfficialAccountConfig } from '../../data/mockData';
 import { loginWithEmailAndPassword } from '../../lib/firestoreService';
 import { UserProfile } from '../../types';
 import { GradientWaves } from '../ui/GradientWaves';
-import { APP_VERSION_INFO } from '../../config/version';
 
 interface LoginPageProps {
   onLoginSuccess: (user: UserProfile) => void;
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
-  const [username, setUsername] = useState('mulhatalinuh');
-  const [password, setPassword] = useState('ostifak1234');
+  // 1. Form Input Kosong Secara Default Saat Dimuat
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -38,6 +38,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
   const performLogin = async (usr: string, pwd: string) => {
     const fullEmail = getFullEmail(usr);
+    if (!fullEmail) {
+      setErrorMessage('Silakan masukkan email atau pilih akun.');
+      return;
+    }
+
     setLoading(true);
     setErrorMessage('');
     setSuccessMessage('');
@@ -79,16 +84,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   return (
     <div className="fixed inset-0 w-full h-full min-h-[100dvh] bg-[#050D07] flex flex-col justify-center overflow-y-auto overscroll-contain font-body text-white">
       
-      {/* Top-Right App Metadata & Developer Info (Clean & Breathable) */}
-      <div className="absolute top-6 right-6 z-20 text-right pointer-events-none select-none">
-        <p className="text-xs font-mono font-medium text-white/40 tracking-wider">
-          {APP_VERSION_INFO.version}
-        </p>
-        <p className="text-xs text-white/40 tracking-wider mt-0.5">
-          {APP_VERSION_INFO.author.name}
-        </p>
-      </div>
-
       {/* 1. Full Viewport Interactive Animated Gradient Waves Backdrop */}
       <div className="absolute inset-0 w-full h-full pointer-events-none -z-10 bg-[#050D07]">
         <GradientWaves
@@ -151,7 +146,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           {/* Clean Minimalist Form */}
           <form onSubmit={handleLogin} className="w-full space-y-6">
             
-            {/* Input Email dengan Suffix Permanen @ostifak.edu */}
+            {/* Input Email dengan Suffix Permanen @ostifak.edu (Kosong Secara Default) */}
             <div className="relative flex items-center border-b border-white/30 focus-within:border-white transition-colors">
               <input
                 type="text"
@@ -169,7 +164,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               </span>
             </div>
 
-            {/* Input Password (Underline, with Toggle Eye Icon on Right) */}
+            {/* Input Password (Underline, with Toggle Eye Icon on Right, Kosong Secara Default) */}
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -193,13 +188,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               </button>
             </div>
 
-            {/* Action Buttons: Solid White Box with Black Text */}
-            <div className="flex flex-row items-center gap-3 pt-4">
-              {/* Tombol MASUK */}
+            {/* Tombol Utama: Solid White Box MASUK */}
+            <div className="pt-2">
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 h-11 bg-white hover:bg-white/90 active:bg-white/80 text-black font-medium rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-[0.98] disabled:opacity-50"
+                className="w-full h-11 bg-white hover:bg-white/90 active:bg-white/80 text-black font-medium rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-[0.98] disabled:opacity-50"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin text-black" />
@@ -207,24 +201,27 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   'MASUK'
                 )}
               </button>
-
-              {/* Tombol PILIH AKUN */}
-              <button
-                type="button"
-                onClick={() => setIsAccountPickerOpen(true)}
-                className="flex-1 h-11 bg-white hover:bg-white/90 active:bg-white/80 text-black font-medium rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-[0.98]"
-              >
-                PILIH AKUN
-              </button>
             </div>
           </form>
+
+          {/* Tombol Pilih Akun: Secondary Button Berupa Teks Bersih Tanpa Box di Bagian Bawah */}
+          <div className="mt-8 text-center">
+            <button
+              type="button"
+              onClick={() => setIsAccountPickerOpen(true)}
+              className="text-xs text-white/60 hover:text-white transition-colors cursor-pointer tracking-wider uppercase font-medium active:scale-95 py-2 px-4 hover:underline"
+            >
+              Pilih Akun
+            </button>
+          </div>
+
         </div>
       ) : (
-        /* Interaksi Fullscreen "Pilih Akun" (Langsung di atas Waves Canvas) */
+        /* Interaksi Fullscreen "Pilih Akun" (Tanpa Kontainer Box & Menggunakan Pemisah Divider Tipis) */
         <div className="relative z-10 w-full h-full min-h-screen flex flex-col p-4 sm:p-8 animate-in fade-in duration-300">
           
           {/* Top Bar: Tombol Tutup (X) di kiri, Judul di tengah, Tombol MASUK di kanan */}
-          <div className="w-full max-w-5xl mx-auto flex items-center justify-between py-4 mb-4 sm:mb-6">
+          <div className="w-full max-w-4xl mx-auto flex items-center justify-between py-4 mb-4 sm:mb-6 border-b border-white/10 pb-4">
             <button
               type="button"
               onClick={() => setIsAccountPickerOpen(false)}
@@ -259,22 +256,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
           {/* Alerts in Fullscreen Mode */}
           {errorMessage && (
-            <div className="w-full max-w-5xl mx-auto mb-4 p-3 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-200 text-xs flex items-center gap-2.5 backdrop-blur-md">
+            <div className="w-full max-w-4xl mx-auto mb-4 p-3 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-200 text-xs flex items-center gap-2.5 backdrop-blur-md">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
               <span>{errorMessage}</span>
             </div>
           )}
 
           {successMessage && (
-            <div className="w-full max-w-5xl mx-auto mb-4 p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-200 text-xs flex items-center gap-2.5 backdrop-blur-md">
+            <div className="w-full max-w-4xl mx-auto mb-4 p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-200 text-xs flex items-center gap-2.5 backdrop-blur-md">
               <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
               <span>{successMessage}</span>
             </div>
           )}
 
-          {/* Fullscreen Grid List Akun (Clean, Tanpa Card/Modal Pembungkus) */}
-          <div className="w-full max-w-5xl mx-auto flex-1 overflow-y-auto pb-12">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {/* Fullscreen List Akun Bersih Tanpa Box Container (Hanya Nama Akun, Email, Checkmark, & Divider Tipis) */}
+          <div className="w-full max-w-4xl mx-auto flex-1 overflow-y-auto pb-12">
+            <div className="divide-y divide-white/10 border-y border-white/10">
               {OFFICIAL_ACCOUNTS.map((acc) => {
                 const currentFull = getFullEmail(username).toLowerCase();
                 const isSelected = currentFull === acc.email.toLowerCase();
@@ -283,25 +280,23 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     key={acc.email}
                     type="button"
                     onClick={() => handleSelectAccount(acc)}
-                    className={`p-4 text-left rounded-xl border transition-all cursor-pointer block active:scale-[0.98] ${
-                      isSelected
-                        ? 'bg-white/20 border-white text-white shadow-lg'
-                        : 'bg-white/5 hover:bg-white/10 border-white/15 text-white/90 hover:border-white/30'
+                    className={`w-full py-4 px-3 sm:px-4 text-left transition-colors cursor-pointer flex items-center justify-between gap-4 hover:bg-white/[0.04] active:bg-white/[0.08] ${
+                      isSelected ? 'bg-white/[0.07]' : ''
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <p className="text-sm font-bold truncate font-headline">{acc.name}</p>
-                      {isSelected && <Check className="w-4 h-4 text-emerald-400 shrink-0" />}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-white font-headline truncate">
+                        {acc.name}
+                      </p>
+                      <p className="text-xs text-white/50 font-body truncate mt-0.5">
+                        {acc.email}
+                      </p>
                     </div>
-                    <p className="text-xs text-white/60 truncate mb-3">{acc.email}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="inline-block text-[11px] text-emerald-300 font-medium px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20">
-                        {acc.roleTitle}
-                      </span>
-                      <span className="text-[10px] text-white/40 uppercase tracking-wider font-semibold">
-                        {acc.role}
-                      </span>
-                    </div>
+                    {isSelected && (
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0">
+                        <Check className="w-4 h-4 text-emerald-400 stroke-[2.5]" />
+                      </div>
+                    )}
                   </button>
                 );
               })}
