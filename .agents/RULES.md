@@ -7,6 +7,20 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-26]**: Kosongkan Data Biografi Halusinasi pada Santri Baru & Push Commit:
+  - TANPA DATA DUMMY / HALUSINASI:
+    * Saat form tambah santri baru diinisialisasi atau disubmit, field data biografi opsional (nomor telepon wali, alamat lengkap, nama wali, domisili, tanggal lahir, dll.) TIDAK boleh diisi data dummy, rekaan, atau halusinasi default.
+    * Seluruh field opsional tersebut dibiarkan kosong (*empty string `""` / `undefined`*) jika tidak diisi pengguna secara riil.
+  - COMMIT & PUSH KE GITHUB:
+    * Lakukan staging, commit dengan pesan `fix: remove placeholder hallucinations for new student bio and update module states`, lalu push ke branch `main` repositori remote.
+- **[2026-08-26]**: Halaman Maintenance untuk Seluruh Menu Divisi OSTIFAK:
+  - TAMPILAN MINIMALIS & CENTERED:
+    * Seluruh route/halaman pada bagian menu "Divisi Ostifak" menampilkan halaman placeholder maintenance bersih di tengah layar (*centered flex*).
+    * Elemen utama hanya 2 tanpa card box berlebih:
+      1. Ikon Roda Gigi (*Gear* / `Settings`) berukuran sedang/besar dengan animasi putar halus (*spin animation*).
+      2. Teks keterangan elegan yang menyatakan bahwa modul/divisi tersebut sedang dalam pengembangan (contoh: "Modul Divisi Sedang Dalam Pengembangan").
+  - SERAGAM UNTUK SEMUA 9 DIVISI:
+    * Berlaku seragam untuk seluruh menu divisi (Keamanan, Ibadah, Tahfidz, Bahasa, Kebersihan, Kesehatan, BPH & Kas, Saran Digital, dsb.).
 - **[2026-08-26]**: Real-time Multi-device Sync untuk Seluruh Modul (Firestore Cloud & Real-time Listeners):
   - SINKRONISASI REAL-TIME CLOUD:
     * Hubungkan seluruh modul data (Santri, Pelanggaran, Proposal Program Kerja, Asrama/Kamar, Kelas, dan Rekam Sesi Login) ke Cloud Firestore real-time listeners (`onSnapshot`) dan `BroadcastChannel` instan.

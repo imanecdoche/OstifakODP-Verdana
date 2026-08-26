@@ -846,8 +846,14 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
         statusIbadah: '100% Berjamaah',
         birthDate: birthDate.trim(),
         domicile: domicile.trim(),
+        guardianName: '',
+        guardianPhone: '',
+        address: '',
         isTahsinPassed,
         violationsHistory: addViolationsHistory,
+        hafalanHistory: [],
+        achievementsHistory: [],
+        permissionsHistory: [],
       });
       setName('');
       setNis('');

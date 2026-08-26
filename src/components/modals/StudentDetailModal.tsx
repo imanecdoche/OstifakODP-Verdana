@@ -347,27 +347,22 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     return digits;
   };
 
-  // Pre-fill all fields with real student data & dynamic master data fallbacks
+  // Pre-fill fields with real student data without dummy hallucinations
   const handleStartEditBio = () => {
     if (!currentStudent) return;
-    const studentFirstName = (currentStudent.studentName || 'Santri').split(' ')[0];
-    const nisFallback = currentStudent.id ? `NIS-2026-${String(currentStudent.id).slice(-3).padStart(3, '0')}` : 'NIS-2026-001';
-    const domicileFallback = currentStudent.domicile || 'Bandung, Jawa Barat';
-    const addressFallback = currentStudent.address || `Jl. Raya Pesantren No. 12, ${domicileFallback}`;
-
     const activeKamar = currentStudent.kamar?.trim() || availableKamarOptions[0] || (liveRooms[0]?.roomName ?? 'Qatar 1');
     const activeKelas = currentStudent.kelas?.trim() || availableKelasOptions[0] || (liveClasses[0]?.className ?? 'Kelas 1');
 
     setEditStudentName(currentStudent.studentName || '');
-    setEditNis(currentStudent.nis || nisFallback);
+    setEditNis(currentStudent.nis || '');
     setEditKamar(activeKamar);
     setEditKelas(activeKelas);
-    setEditBirthDate(currentStudent.birthDate || '14 Mei 2008');
-    setEditGuardianName(currentStudent.guardianName || `Bpk. ${studentFirstName} (Wali)`);
-    setEditGuardianPhoneDigits(cleanPhoneInputDigits(currentStudent.guardianPhone || '0821-1150-0190'));
-    setEditDomicile(domicileFallback);
-    setEditAddress(addressFallback);
-    setEditStatusIbadah(currentStudent.statusIbadah || 'Rajin Jamaah');
+    setEditBirthDate(currentStudent.birthDate || '');
+    setEditGuardianName(currentStudent.guardianName || '');
+    setEditGuardianPhoneDigits(cleanPhoneInputDigits(currentStudent.guardianPhone || ''));
+    setEditDomicile(currentStudent.domicile || '');
+    setEditAddress(currentStudent.address || '');
+    setEditStatusIbadah(currentStudent.statusIbadah || '100% Berjamaah');
     setIsEditingBio(true);
   };
 
@@ -1133,20 +1128,20 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                           <div className="flex justify-between items-center pt-2">
                             <span className="text-slate-500 font-medium">Nomor Induk Santri (NIS)</span>
                             <span className="font-semibold text-slate-900">
-                              {currentStudent.nis || (currentStudent.id ? `NIS-2026-${String(currentStudent.id).slice(-3).padStart(3, '0')}` : 'NIS-2026-001')}
+                              {currentStudent.nis || '-'}
                             </span>
                           </div>
                           <div className="flex justify-between items-center pt-2">
                             <span className="text-slate-500 font-medium">Kamar Asrama</span>
-                            <span className="font-semibold text-[#059669]">{currentStudent.kamar || 'Qatar 1'}</span>
+                            <span className="font-semibold text-[#059669]">{currentStudent.kamar || '-'}</span>
                           </div>
                           <div className="flex justify-between items-center pt-2">
                             <span className="text-slate-500 font-medium">Kelas / Tingkat</span>
-                            <span className="font-semibold text-slate-900">{currentStudent.kelas || '10A'}</span>
+                            <span className="font-semibold text-slate-900">{currentStudent.kelas || '-'}</span>
                           </div>
                           <div className="flex justify-between items-center pt-2">
                             <span className="text-slate-500 font-medium">Tanggal Lahir</span>
-                            <span className="font-semibold text-slate-900">{currentStudent.birthDate || '14 Mei 2008'}</span>
+                            <span className="font-semibold text-slate-900">{currentStudent.birthDate || '-'}</span>
                           </div>
                           <div className="flex justify-between items-center pt-2">
                             <span className="text-slate-500 font-medium">Status Keaktifan</span>
@@ -1232,29 +1227,35 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                           <div className="flex justify-between items-center pt-2">
                             <span className="text-slate-500 font-medium">Nama Wali / Orang Tua</span>
                             <span className="font-semibold text-slate-900">
-                              {currentStudent.guardianName || `Bpk. ${(currentStudent.studentName || 'Santri').split(' ')[0]} (Wali)`}
+                              {currentStudent.guardianName || '-'}
                             </span>
                           </div>
                           <div className="flex justify-between items-center pt-2">
                             <span className="text-slate-500 font-medium">Nomor Telepon / WhatsApp</span>
                             <span className="font-semibold text-slate-900 flex items-center gap-1.5 font-mono">
-                              <Phone className="w-3.5 h-3.5 text-[#059669]" />
-                              {formatIndonesianPhone(currentStudent.guardianPhone || '0821-1150-0190')}
+                              {currentStudent.guardianPhone ? (
+                                <>
+                                  <Phone className="w-3.5 h-3.5 text-[#059669]" />
+                                  {formatIndonesianPhone(currentStudent.guardianPhone)}
+                                </>
+                              ) : (
+                                '-'
+                              )}
                             </span>
                           </div>
                           <div className="flex justify-between items-center pt-2">
                             <span className="text-slate-500 font-medium">Kota Domisili</span>
-                            <span className="font-semibold text-slate-900">{currentStudent.domicile || 'Bandung, Jawa Barat'}</span>
+                            <span className="font-semibold text-slate-900">{currentStudent.domicile || '-'}</span>
                           </div>
                           <div className="flex justify-between items-start pt-2">
                             <span className="text-slate-500 font-medium">Alamat Rumah</span>
                             <span className="font-medium text-slate-800 text-right max-w-[220px] leading-relaxed">
-                              {currentStudent.address || (currentStudent.domicile ? `Jl. Raya Pesantren No. 12, ${currentStudent.domicile}` : 'Jl. Raya Pesantren No. 12, Bandung, Jawa Barat')}
+                              {currentStudent.address || '-'}
                             </span>
                           </div>
                           <div className="flex justify-between items-center pt-2">
                             <span className="text-slate-500 font-medium">Status Presensi Ibadah</span>
-                            <span className="font-semibold text-[#0F172A]">{currentStudent.statusIbadah || 'Rajin Jamaah'}</span>
+                            <span className="font-semibold text-[#0F172A]">{currentStudent.statusIbadah || '100% Berjamaah'}</span>
                           </div>
                         </div>
                       ) : (
