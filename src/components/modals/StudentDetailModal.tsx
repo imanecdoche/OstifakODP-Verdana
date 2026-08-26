@@ -1851,12 +1851,18 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     <div className="p-4 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-headline">CAPAIAN HAFALAN</p>
-                      <p className="text-xl font-bold text-slate-900 mt-1 font-headline">{capaianHafalanStats.formatted}</p>
+                      <p className="text-xl font-bold text-slate-900 mt-1 font-headline tracking-tight flex items-baseline gap-2 flex-wrap">
+                        <span>{capaianHafalanStats.juz} <span className="text-xs font-normal text-slate-400 font-body">Juz</span></span>
+                        <span>{capaianHafalanStats.lembar} <span className="text-xs font-normal text-slate-400 font-body">Lbr.</span></span>
+                        <span>{capaianHafalanStats.halaman} <span className="text-xs font-normal text-slate-400 font-body">Hal.</span></span>
+                      </p>
                     </div>
                     <div className="p-4 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-headline">CAPAIAN MUROJAAH</p>
-                      <p className="text-xl font-bold text-slate-900 mt-1 font-headline">
-                        {murojaahLifetimeStats.juz} Juz | {murojaahLifetimeStats.lembar.toFixed(1)} Lbr
+                      <p className="text-xl font-bold text-slate-900 mt-1 font-headline tracking-tight flex items-baseline gap-1.5 flex-wrap">
+                        <span>{murojaahLifetimeStats.juz} <span className="text-xs font-normal text-slate-400 font-body">Juz</span></span>
+                        <span className="text-slate-300 font-normal">|</span>
+                        <span>{murojaahLifetimeStats.lembar.toFixed(1)} <span className="text-xs font-normal text-slate-400 font-body">Lbr.</span></span>
                       </p>
                     </div>
                     <div className="p-4 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
@@ -1883,7 +1889,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Ziyadah Pekan Ini</span>
                       </div>
                       <p className="text-base font-bold text-[#0F172A] mt-1 font-headline">
-                        {hafalanStats.ziyadahWeekPages} <span className="text-xs font-semibold text-slate-500 font-body">Hal</span>
+                        {hafalanStats.ziyadahWeekPages} <span className="text-xs font-normal text-slate-400 font-body">Hal</span>
                       </p>
                       <p className="text-[10px] text-emerald-700 font-medium mt-0.5 flex items-center gap-1">
                         <span>{hafalanStats.ziyadahWeekCount}x Setoran</span>
@@ -1906,7 +1912,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Ziyadah Bulan Ini</span>
                       </div>
                       <p className="text-base font-bold text-[#0F172A] mt-1 font-headline">
-                        {hafalanStats.ziyadahMonthPages} <span className="text-xs font-semibold text-slate-500 font-body">Hal</span>
+                        {hafalanStats.ziyadahMonthPages} <span className="text-xs font-normal text-slate-400 font-body">Hal</span>
                       </p>
                       <p className="text-[10px] text-emerald-700 font-medium mt-0.5 flex items-center gap-1">
                         <span>{hafalanStats.ziyadahMonthCount}x Setoran</span>
@@ -1929,7 +1935,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Murojaah Pekan Ini</span>
                       </div>
                       <p className="text-base font-bold text-[#0F172A] mt-1 font-headline">
-                        {hafalanStats.murojaahWeekPages} <span className="text-xs font-semibold text-slate-500 font-body">Hal</span>
+                        {hafalanStats.murojaahWeekPages} <span className="text-xs font-normal text-slate-400 font-body">Hal</span>
                       </p>
                       <p className="text-[10px] text-blue-700 font-medium mt-0.5 flex items-center gap-1">
                         <span>{hafalanStats.murojaahWeekCount}x Setoran</span>
@@ -1952,7 +1958,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Murojaah Bulan Ini</span>
                       </div>
                       <p className="text-base font-bold text-[#0F172A] mt-1 font-headline">
-                        {hafalanStats.murojaahMonthPages} <span className="text-xs font-semibold text-slate-500 font-body">Hal</span>
+                        {hafalanStats.murojaahMonthPages} <span className="text-xs font-normal text-slate-400 font-body">Hal</span>
                       </p>
                       <p className="text-[10px] text-blue-700 font-medium mt-0.5 flex items-center gap-1">
                         <span>{hafalanStats.murojaahMonthCount}x Setoran</span>

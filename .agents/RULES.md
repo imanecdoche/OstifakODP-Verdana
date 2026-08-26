@@ -7,6 +7,12 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Penyesuaian Tipografi Satuan Juz, Lbr., Hal. Menjadi Lebih Kecil & Lebih Transparan (Versi v1.1.0.48b):
+  - 1. REFINEMENT TIPOGRAFI SATUAN:
+    * Mengubah gaya teks satuan (`Juz`, `Lbr.`, `Hal.`) pada kartu metrik **Capaian Hafalan** dan **Capaian Murojaah** (serta kartu ringkasan setoran) menjadi lebih kecil dan bernuansa transparan / subtle (`text-xs font-normal text-slate-400 font-body`).
+    * Angka metrik tetap tebal, kontras tinggi, dan tegas (`text-xl font-bold text-slate-900 font-headline`), menciptakan hierarki visual yang seimbang, nyaman dipandang, dan elegan.
+  - 2. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan kebersihan visual minimalis, whitespace proporsional, dan tata letak responsif.
 - **[2026-08-27]**: Pembaruan Logika Perhitungan Capaian Hafalan Otomatis & Rekonstruksi Kartu Metrik "N Juz N Lbr. N Hal." (Versi v1.1.0.47b):
   - 1. PEMBARUAN LOGIKA PENGHITUNGAN CAPAIAN HAFALAN:
     * Setiap catatan setoran dengan kategori **Ziyadah** (Hafalan Baru) dihitung dan dimasukkan secara otomatis ke dalam total **Capaian Hafalan** santri (baik saat menambah setoran baru, mengedit, maupun menghapus setoran).
