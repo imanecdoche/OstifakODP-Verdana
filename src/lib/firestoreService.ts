@@ -568,6 +568,9 @@ export interface StudentHafalanEntry {
   pageFrom?: number;
   pageTo?: number;
   pageCount?: number;
+  ayatFrom?: number;
+  ayatTo?: number;
+  ayatCount?: number;
   kelancaran?: string;
   ustadz?: string;
   notes?: string;

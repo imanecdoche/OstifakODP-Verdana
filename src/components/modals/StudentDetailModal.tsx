@@ -24,7 +24,9 @@ import {
   AlertTriangle,
   ArrowUpRight,
   ArrowLeft,
-  Pencil
+  Pencil,
+  Trash2,
+  MoreHorizontal
 } from 'lucide-react';
 import {
   SantriRecord,
@@ -42,11 +44,97 @@ import {
   subscribeToDormitories,
   subscribeToClasses
 } from '../../lib/firestoreService';
-import { QURAN_SURAHS, QuranSurah, calculateQuranPages } from '../../data/quranSurahs';
+import {
+  QURAN_SURAHS,
+  QuranSurah,
+  calculateQuranPages,
+  calculateJuzRange,
+  getJuzFromPage
+} from '../../data/quranSurahs';
 import { gooeyToast } from 'goey-toast';
 import { ScrollArea } from '../ui/ScrollArea';
 import { Button } from '../ui/Button';
 import { useLenisModalLock } from '../../lib/lenis';
+
+export interface SetoranSplitAnalysis {
+  murojaahRange: { from: number; to: number } | null;
+  ziyadahRange: { from: number; to: number } | null;
+  mode: 'murojaah_only' | 'ziyadah_only' | 'mixed';
+}
+
+/**
+ * Checks submitted verse range against santri's Ziyadah history to determine if
+ * it should be Murojaah, Ziyadah (Hafalan Baru), or Mixed (Split).
+ */
+export function analyzeSetoranVerses(
+  history: StudentHafalanEntry[],
+  surahNumber: number,
+  fromAyat: number,
+  toAyat: number
+): SetoranSplitAnalysis {
+  const surah = QURAN_SURAHS.find((s) => s.number === surahNumber);
+  const surahName = surah?.name || '';
+
+  const recordedZiyadahVerses = new Set<number>();
+  (history || []).forEach((h) => {
+    const isSameSurah =
+      h.surah &&
+      (h.surah.toLowerCase().includes(surahName.toLowerCase()) ||
+        (surah && h.surah.includes(surah.name)));
+    const isZiyadah = !h.category || h.category === 'Hafalan Baru';
+
+    if (isSameSurah && isZiyadah) {
+      let fromA = h.ayatFrom;
+      let toA = h.ayatTo;
+      if (!fromA || !toA) {
+        const match = h.surah.match(/(?:Ayat|ayat)\s*(\d+)\s*(?:[-–]\s*(\d+))?/i);
+        if (match) {
+          fromA = parseInt(match[1], 10);
+          toA = match[2] ? parseInt(match[2], 10) : fromA;
+        }
+      }
+      if (fromA && toA) {
+        for (let a = fromA; a <= toA; a++) {
+          recordedZiyadahVerses.add(a);
+        }
+      }
+    }
+  });
+
+  const from = Math.min(fromAyat, toAyat);
+  const to = Math.max(fromAyat, toAyat);
+
+  const murojaahVerses: number[] = [];
+  const ziyadahVerses: number[] = [];
+
+  for (let a = from; a <= to; a++) {
+    if (recordedZiyadahVerses.has(a)) {
+      murojaahVerses.push(a);
+    } else {
+      ziyadahVerses.push(a);
+    }
+  }
+
+  if (murojaahVerses.length > 0 && ziyadahVerses.length > 0) {
+    return {
+      murojaahRange: { from: Math.min(...murojaahVerses), to: Math.max(...murojaahVerses) },
+      ziyadahRange: { from: Math.min(...ziyadahVerses), to: Math.max(...ziyadahVerses) },
+      mode: 'mixed',
+    };
+  } else if (murojaahVerses.length > 0) {
+    return {
+      murojaahRange: { from: Math.min(...murojaahVerses), to: Math.max(...murojaahVerses) },
+      ziyadahRange: null,
+      mode: 'murojaah_only',
+    };
+  } else {
+    return {
+      murojaahRange: null,
+      ziyadahRange: { from, to },
+      mode: 'ziyadah_only',
+    };
+  }
+}
 
 export interface StudentDetailModalProps {
   student: SantriRecord | null;
@@ -237,6 +325,15 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   const [setoranKelancaranIndex, setSetoranKelancaranIndex] = useState<number>(2);
   const [setoranNotes, setSetoranNotes] = useState('');
   const [setoranUstadz, setSetoranUstadz] = useState('Ustadz Pembimbing');
+  const [editingSetoranId, setEditingSetoranId] = useState<string | null>(null);
+
+  // Setoran Context Menu & Delete Confirmation States
+  const [setoranContextMenu, setSetoranContextMenu] = useState<{
+    record: StudentHafalanEntry;
+    x: number;
+    y: number;
+  } | null>(null);
+  const [setoranToDelete, setSetoranToDelete] = useState<StudentHafalanEntry | null>(null);
 
   // Bio Tab Unified Inline Edit States
   const [isEditingBio, setIsEditingBio] = useState(false);
@@ -506,11 +603,22 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     );
   }, [surahQuery]);
 
+  const currentSetoranAnalysis = useMemo(() => {
+    if (!selectedSurah) return null;
+    const fromA = parseInt(String(setoranAyatFrom), 10) || 1;
+    const toA = parseInt(String(setoranAyatTo), 10) || fromA;
+    return analyzeSetoranVerses(
+      currentStudent?.hafalanHistory || [],
+      selectedSurah.number,
+      fromA,
+      toA
+    );
+  }, [currentStudent?.hafalanHistory, selectedSurah, setoranAyatFrom, setoranAyatTo]);
+
   const handleSelectSurah = (surah: QuranSurah) => {
     setSelectedSurah(surah);
     setSurahQuery('');
     setIsSurahDropdownOpen(false);
-    setSetoranJuz(String(surah.juz));
     
     const fromA = 1;
     const toA = Math.min(20, surah.totalAyat);
@@ -520,6 +628,20 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     const { fromPage, toPage } = calculateQuranPages(surah.number, fromA, toA);
     setSetoranPageFrom(fromPage);
     setSetoranPageTo(toPage);
+    setSetoranJuz(calculateJuzRange(fromPage, toPage));
+
+    // Auto-detect category based on santri history
+    const is30 = currentStudent?.hafalan?.includes('30') || parseInt(currentStudent?.hafalan || '0', 10) >= 30;
+    if (is30) {
+      setSetoranCategory('Murojaah');
+    } else {
+      const analysis = analyzeSetoranVerses(currentStudent?.hafalanHistory || [], surah.number, fromA, toA);
+      if (analysis.mode === 'murojaah_only') {
+        setSetoranCategory('Murojaah');
+      } else if (analysis.mode === 'ziyadah_only') {
+        setSetoranCategory('Hafalan Baru');
+      }
+    }
   };
 
   const handleAyatFromChange = (val: string) => {
@@ -532,6 +654,20 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       const { fromPage, toPage } = calculateQuranPages(selectedSurah.number, clampedFrom, clampedTo);
       setSetoranPageFrom(fromPage);
       setSetoranPageTo(toPage);
+      setSetoranJuz(calculateJuzRange(fromPage, toPage));
+
+      // Auto-detect category
+      const is30 = currentStudent?.hafalan?.includes('30') || parseInt(currentStudent?.hafalan || '0', 10) >= 30;
+      if (is30) {
+        setSetoranCategory('Murojaah');
+      } else {
+        const analysis = analyzeSetoranVerses(currentStudent?.hafalanHistory || [], selectedSurah.number, clampedFrom, clampedTo);
+        if (analysis.mode === 'murojaah_only') {
+          setSetoranCategory('Murojaah');
+        } else if (analysis.mode === 'ziyadah_only') {
+          setSetoranCategory('Hafalan Baru');
+        }
+      }
     }
   };
 
@@ -544,6 +680,20 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       const { fromPage, toPage } = calculateQuranPages(selectedSurah.number, currFrom, clampedTo);
       setSetoranPageFrom(fromPage);
       setSetoranPageTo(toPage);
+      setSetoranJuz(calculateJuzRange(fromPage, toPage));
+
+      // Auto-detect category
+      const is30 = currentStudent?.hafalan?.includes('30') || parseInt(currentStudent?.hafalan || '0', 10) >= 30;
+      if (is30) {
+        setSetoranCategory('Murojaah');
+      } else {
+        const analysis = analyzeSetoranVerses(currentStudent?.hafalanHistory || [], selectedSurah.number, currFrom, clampedTo);
+        if (analysis.mode === 'murojaah_only') {
+          setSetoranCategory('Murojaah');
+        } else if (analysis.mode === 'ziyadah_only') {
+          setSetoranCategory('Hafalan Baru');
+        }
+      }
     }
   };
 
@@ -743,6 +893,24 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     };
   }, [currentStudent?.hafalanHistory]);
 
+  const murojaahLifetimeStats = useMemo(() => {
+    const history = currentStudent?.hafalanHistory || [];
+    let totalMurojaahPages = 0;
+    history.forEach((h) => {
+      if (h.category === 'Murojaah') {
+        const p = h.pageCount || (h.pageTo && h.pageFrom ? Math.max(1, h.pageTo - h.pageFrom + 1) : 1);
+        totalMurojaahPages += p;
+      }
+    });
+    const totalJuz = Math.floor(totalMurojaahPages / 20);
+    const totalLembar = Math.round((totalMurojaahPages / 2) * 10) / 10;
+    return {
+      pages: totalMurojaahPages,
+      juz: totalJuz,
+      lembar: totalLembar,
+    };
+  }, [currentStudent?.hafalanHistory]);
+
   const hafalanChartData = useMemo(() => {
     const history = currentStudent?.hafalanHistory || [];
     const now = new Date();
@@ -867,27 +1035,106 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
   const handleOpenSetoranModal = () => {
     if (!currentStudent) return;
-    const is30 = currentStudent.hafalan?.includes('30') || parseInt(currentStudent.hafalan || '0', 10) >= 30;
-    if (is30) {
-      setSetoranCategory('Murojaah');
-    } else {
-      setSetoranCategory('Hafalan Baru');
-    }
-
+    setEditingSetoranId(null);
     const initialSurah = QURAN_SURAHS[1];
     setSelectedSurah(initialSurah);
     setSurahQuery('');
     setIsSurahDropdownOpen(false);
-    setSetoranJuz('1');
     setSetoranAyatFrom(1);
     setSetoranAyatTo(20);
     const { fromPage, toPage } = calculateQuranPages(initialSurah.number, 1, 20);
     setSetoranPageFrom(fromPage);
     setSetoranPageTo(toPage);
+    setSetoranJuz(calculateJuzRange(fromPage, toPage));
     setSetoranKelancaranIndex(2);
     setSetoranNotes('');
     setSetoranUstadz('Ustadz Pembimbing');
+
+    const is30 = currentStudent.hafalan?.includes('30') || parseInt(currentStudent.hafalan || '0', 10) >= 30;
+    if (is30) {
+      setSetoranCategory('Murojaah');
+    } else {
+      const analysis = analyzeSetoranVerses(currentStudent.hafalanHistory || [], initialSurah.number, 1, 20);
+      if (analysis.mode === 'murojaah_only') {
+        setSetoranCategory('Murojaah');
+      } else {
+        setSetoranCategory('Hafalan Baru');
+      }
+    }
     setIsSetoranModalOpen(true);
+  };
+
+  const handleSetoranContextMenu = (e: React.MouseEvent, record: StudentHafalanEntry) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const clickX = e.clientX;
+    const clickY = e.clientY;
+    const menuWidth = 170;
+    const menuHeight = 110;
+    const x = Math.min(window.innerWidth - menuWidth - 10, Math.max(10, clickX));
+    const y = Math.min(window.innerHeight - menuHeight - 10, Math.max(10, clickY));
+    setSetoranContextMenu({ record, x, y });
+  };
+
+  const handleOpenEditSetoran = (record: StudentHafalanEntry) => {
+    setSetoranContextMenu(null);
+    setEditingSetoranId(record.id);
+
+    let matchedSurah = QURAN_SURAHS.find((s) => record.surah.toLowerCase().includes(s.name.toLowerCase()));
+    if (!matchedSurah) matchedSurah = QURAN_SURAHS[0];
+    setSelectedSurah(matchedSurah);
+    setSurahQuery(matchedSurah.name);
+
+    let fromA = record.ayatFrom || 1;
+    let toA = record.ayatTo || 20;
+    if (!record.ayatFrom || !record.ayatTo) {
+      const match = record.surah.match(/(?:Ayat|ayat)\s*(\d+)\s*(?:[-–]\s*(\d+))?/i);
+      if (match) {
+        fromA = parseInt(match[1], 10);
+        toA = match[2] ? parseInt(match[2], 10) : fromA;
+      }
+    }
+    setSetoranAyatFrom(fromA);
+    setSetoranAyatTo(toA);
+    const fromP = record.pageFrom || matchedSurah.startPage;
+    const toP = record.pageTo || matchedSurah.endPage;
+    setSetoranPageFrom(fromP);
+    setSetoranPageTo(toP);
+    setSetoranJuz(calculateJuzRange(fromP, toP));
+    setSetoranCategory(record.category || 'Hafalan Baru');
+
+    const kelIdx = ['Perlu diulang', 'Lumayan', 'Lancar', 'Sangat Lancar'].indexOf(record.kelancaran || '');
+    setSetoranKelancaranIndex(kelIdx >= 0 ? kelIdx : 2);
+    setSetoranUstadz(record.ustadz || 'Ustadz Pembimbing');
+    setSetoranNotes(record.notes || '');
+
+    setIsSetoranModalOpen(true);
+  };
+
+  const handleOpenDeleteSetoran = (record: StudentHafalanEntry) => {
+    setSetoranContextMenu(null);
+    setSetoranToDelete(record);
+  };
+
+  const handleConfirmDeleteSetoran = async () => {
+    if (!setoranToDelete || !currentStudent) return;
+    const updatedHistory = (currentStudent.hafalanHistory || []).filter((h) => h.id !== setoranToDelete.id);
+    const updatedStudent: SantriRecord = {
+      ...currentStudent,
+      hafalanHistory: updatedHistory,
+    };
+    setCurrentStudent(updatedStudent);
+    if (onStudentUpdated) onStudentUpdated(updatedStudent);
+    setSetoranToDelete(null);
+    gooeyToast.success('Catatan setoran berhasil dihapus!');
+
+    try {
+      await updateSantriRecord(currentStudent.id, {
+        hafalanHistory: updatedHistory,
+      });
+    } catch (err) {
+      console.error('Failed to sync deleted setoran to Firestore:', err);
+    }
   };
 
   const handleSaveSetoran = async () => {
@@ -914,25 +1161,129 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     const kelancaranShort = ['Perlu diulang', 'Lumayan', 'Lancar', 'Sangat Lancar'][setoranKelancaranIndex] || 'Lancar';
     const predikat = kelancaranLabels[setoranKelancaranIndex] || 'Jayyid Jiddan (B)';
 
-    const surahDisplay = `QS. ${selectedSurah.name} (Ayat ${fromA}-${toA})`;
+    // Edit Existing Entry
+    if (editingSetoranId) {
+      const surahDisplay = `QS. ${selectedSurah.name} (Ayat ${fromA}-${toA})`;
+      const juzDisplay = `Juz ${calculateJuzRange(fromP, toP)}`;
+      const updatedEntry: StudentHafalanEntry = {
+        id: editingSetoranId,
+        surah: surahDisplay,
+        juz: juzDisplay,
+        date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+        timestamp: Date.now(),
+        predikat: predikat,
+        category: setoranCategory,
+        pageFrom: fromP,
+        pageTo: toP,
+        pageCount: pageCount,
+        ayatFrom: fromA,
+        ayatTo: toA,
+        ayatCount: Math.max(1, toA - fromA + 1),
+        kelancaran: kelancaranShort,
+        ustadz: setoranUstadz.trim() || 'Ustadz Pembimbing',
+        notes: setoranNotes.trim(),
+      };
 
-    const newHafalanEntry: StudentHafalanEntry = {
-      id: `haf_${Date.now()}`,
-      surah: surahDisplay,
-      juz: `Juz ${setoranJuz}`,
-      date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
-      timestamp: Date.now(),
-      predikat: predikat,
-      category: setoranCategory,
-      pageFrom: fromP,
-      pageTo: toP,
-      pageCount: pageCount,
-      kelancaran: kelancaranShort,
-      ustadz: setoranUstadz.trim() || 'Ustadz Pembimbing',
-      notes: setoranNotes.trim(),
-    };
+      const updatedHistory = (currentStudent.hafalanHistory || []).map((h) =>
+        h.id === editingSetoranId ? updatedEntry : h
+      );
+      const updatedStudent: SantriRecord = {
+        ...currentStudent,
+        hafalanHistory: updatedHistory,
+      };
+      setCurrentStudent(updatedStudent);
+      if (onStudentUpdated) onStudentUpdated(updatedStudent);
+      setIsSetoranModalOpen(false);
+      setEditingSetoranId(null);
+      gooeyToast.success(`Catatan setoran ${currentStudent.studentName} berhasil diperbarui!`);
 
-    const updatedHafalanList = [newHafalanEntry, ...(currentStudent.hafalanHistory || [])];
+      try {
+        await updateSantriRecord(currentStudent.id, { hafalanHistory: updatedHistory });
+      } catch (err) {
+        console.error('Failed to sync edited setoran to Firestore:', err);
+      } finally {
+        setIsSubmittingSetoran(false);
+      }
+      return;
+    }
+
+    // New Entry: Auto Mixed Split (Ziyadah + Murojaah) or Single Entry
+    const is30 = currentStudent.hafalan?.includes('30') || parseInt(currentStudent.hafalan || '0', 10) >= 30;
+    const split = !is30 ? analyzeSetoranVerses(currentStudent.hafalanHistory || [], selectedSurah.number, fromA, toA) : null;
+
+    let newEntries: StudentHafalanEntry[] = [];
+
+    if (split && split.mode === 'mixed' && split.murojaahRange && split.ziyadahRange) {
+      // Split into 2 entries: Ziyadah and Murojaah
+      const mPages = calculateQuranPages(selectedSurah.number, split.murojaahRange.from, split.murojaahRange.to);
+      const mJuz = calculateJuzRange(mPages.fromPage, mPages.toPage);
+      const zPages = calculateQuranPages(selectedSurah.number, split.ziyadahRange.from, split.ziyadahRange.to);
+      const zJuz = calculateJuzRange(zPages.fromPage, zPages.toPage);
+
+      const entryMurojaah: StudentHafalanEntry = {
+        id: `haf_m_${Date.now()}`,
+        surah: `QS. ${selectedSurah.name} (Ayat ${split.murojaahRange.from}-${split.murojaahRange.to})`,
+        juz: `Juz ${mJuz}`,
+        date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+        timestamp: Date.now(),
+        predikat: predikat,
+        category: 'Murojaah',
+        pageFrom: mPages.fromPage,
+        pageTo: mPages.toPage,
+        pageCount: Math.max(1, mPages.toPage - mPages.fromPage + 1),
+        ayatFrom: split.murojaahRange.from,
+        ayatTo: split.murojaahRange.to,
+        ayatCount: Math.max(1, split.murojaahRange.to - split.murojaahRange.from + 1),
+        kelancaran: kelancaranShort,
+        ustadz: setoranUstadz.trim() || 'Ustadz Pembimbing',
+        notes: setoranNotes.trim(),
+      };
+
+      const entryZiyadah: StudentHafalanEntry = {
+        id: `haf_z_${Date.now() + 1}`,
+        surah: `QS. ${selectedSurah.name} (Ayat ${split.ziyadahRange.from}-${split.ziyadahRange.to})`,
+        juz: `Juz ${zJuz}`,
+        date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+        timestamp: Date.now() + 1,
+        predikat: predikat,
+        category: 'Hafalan Baru',
+        pageFrom: zPages.fromPage,
+        pageTo: zPages.toPage,
+        pageCount: Math.max(1, zPages.toPage - zPages.fromPage + 1),
+        ayatFrom: split.ziyadahRange.from,
+        ayatTo: split.ziyadahRange.to,
+        ayatCount: Math.max(1, split.ziyadahRange.to - split.ziyadahRange.from + 1),
+        kelancaran: kelancaranShort,
+        ustadz: setoranUstadz.trim() || 'Ustadz Pembimbing',
+        notes: setoranNotes.trim(),
+      };
+
+      newEntries = [entryZiyadah, entryMurojaah];
+    } else {
+      const finalCategory = (split && split.mode === 'murojaah_only') ? 'Murojaah' : setoranCategory;
+      const surahDisplay = `QS. ${selectedSurah.name} (Ayat ${fromA}-${toA})`;
+      const singleEntry: StudentHafalanEntry = {
+        id: `haf_${Date.now()}`,
+        surah: surahDisplay,
+        juz: `Juz ${calculateJuzRange(fromP, toP)}`,
+        date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+        timestamp: Date.now(),
+        predikat: predikat,
+        category: finalCategory,
+        pageFrom: fromP,
+        pageTo: toP,
+        pageCount: pageCount,
+        ayatFrom: fromA,
+        ayatTo: toA,
+        ayatCount: Math.max(1, toA - fromA + 1),
+        kelancaran: kelancaranShort,
+        ustadz: setoranUstadz.trim() || 'Ustadz Pembimbing',
+        notes: setoranNotes.trim(),
+      };
+      newEntries = [singleEntry];
+    }
+
+    const updatedHafalanList = [...newEntries, ...(currentStudent.hafalanHistory || [])];
     const updatedStudent: SantriRecord = {
       ...currentStudent,
       hafalanHistory: updatedHafalanList,
@@ -941,7 +1292,12 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     setCurrentStudent(updatedStudent);
     if (onStudentUpdated) onStudentUpdated(updatedStudent);
     setIsSetoranModalOpen(false);
-    gooeyToast.success(`Berhasil! Setoran ${setoranCategory.toLowerCase()} ${currentStudent.studentName} berhasil dicatat!`);
+
+    if (newEntries.length > 1) {
+      gooeyToast.success(`Berhasil! Setoran campuran (Ziyadah & Murojaah) ${currentStudent.studentName} dicatat sebagai 2 aktivitas!`);
+    } else {
+      gooeyToast.success(`Berhasil! Setoran ${newEntries[0].category?.toLowerCase() || 'mutabaah'} ${currentStudent.studentName} berhasil dicatat!`);
+    }
 
     try {
       await updateSantriRecord(currentStudent.id, {
@@ -1445,15 +1801,21 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               {/* TAB 2: HAFALAN */}
               {detailActiveTab === 'hafalan' && (
                 <div className="space-y-5 animate-in fade-in duration-150">
-                  {/* Top Summary Cards (1 Row, 2 Cards) */}
-                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                  {/* Top Summary Cards (1 Row, 3 Cards Clean-Flat) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     <div className="p-4 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
-                      <p className="text-[10px] font-semibold text-slate-500 uppercase">Capaian Hafalan</p>
-                      <p className="text-xl font-bold text-slate-900 mt-1">{currentStudent.hafalan}</p>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-headline">CAPAIAN HAFALAN</p>
+                      <p className="text-xl font-bold text-slate-900 mt-1 font-headline">{currentStudent.hafalan || '0 Juz'}</p>
                     </div>
                     <div className="p-4 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
-                      <p className="text-[10px] font-semibold text-slate-500 uppercase">Status Uji Tahsin</p>
-                      <p className={`text-base font-bold mt-1 ${currentStudent.isTahsinPassed ? 'text-emerald-600' : 'text-amber-600'}`}>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-headline">CAPAIAN MUROJAAH</p>
+                      <p className="text-xl font-bold text-slate-900 mt-1 font-headline">
+                        {murojaahLifetimeStats.juz} Juz | {murojaahLifetimeStats.lembar.toFixed(1)} Lbr
+                      </p>
+                    </div>
+                    <div className="p-4 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-headline">STATUS UJI TAHSIN</p>
+                      <p className={`text-xl font-bold mt-1 font-headline ${currentStudent.isTahsinPassed ? 'text-emerald-600' : 'text-amber-600'}`}>
                         {currentStudent.isTahsinPassed ? 'Lulus' : 'Bimbingan'}
                       </p>
                     </div>
@@ -1560,51 +1922,70 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                       <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">
                         RIWAYAT SETORAN & MUTABA'AH TAHFIZH
                       </h4>
-                      <button
-                        type="button"
-                        onClick={handleOpenSetoranModal}
-                        className="w-7 h-7 rounded-md bg-[#142A18] text-white hover:bg-[#2E5B37] transition-colors cursor-pointer flex items-center justify-center shadow-2xs active:scale-[0.98]"
-                        title="Catat Setoran Baru"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
+                      <div className="relative group/tahsin">
+                        <button
+                          type="button"
+                          disabled={!currentStudent.isTahsinPassed}
+                          onClick={handleOpenSetoranModal}
+                          className={`w-7 h-7 rounded-md transition-colors flex items-center justify-center shadow-2xs ${
+                            currentStudent.isTahsinPassed
+                              ? 'bg-[#142A18] text-white hover:bg-[#2E5B37] cursor-pointer active:scale-[0.98]'
+                              : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                          }`}
+                          aria-label="Catat Setoran Baru"
+                          title={!currentStudent.isTahsinPassed ? 'Santri ini belum lulus tahsin' : 'Catat Setoran Baru'}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                        {!currentStudent.isTahsinPassed && (
+                          <div className="absolute right-0 top-full mt-1.5 hidden group-hover/tahsin:flex z-30 px-2.5 py-1 bg-[#0F172A] text-white text-[11px] font-medium rounded shadow-lg whitespace-nowrap pointer-events-none">
+                            Santri ini belum lulus tahsin
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {(currentStudent.hafalanHistory && currentStudent.hafalanHistory.length > 0) ? (
                       <div className="space-y-2.5">
                         {currentStudent.hafalanHistory.map((h) => (
-                          <div key={h.id} className="p-3.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs flex items-start justify-between gap-3">
-                            <div className="space-y-1.5 min-w-0 flex-1">
+                          <div
+                            key={h.id}
+                            onContextMenu={(e) => handleSetoranContextMenu(e, h)}
+                            className="p-3.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs flex items-start justify-between gap-3 select-none hover:border-slate-300 transition-colors"
+                          >
+                            <div className="space-y-1 min-w-0 flex-1">
                               {/* Baris 1: Nama Surah (Satu Row) */}
                               <h5 className="font-bold text-xs sm:text-sm text-slate-900 truncate font-headline">
                                 {h.surah}
                               </h5>
 
-                              {/* Baris 2: Kapsul Jenis Setoran, Halaman, dan Kelancaran dalam 1 Row */}
-                              <div className="flex flex-wrap items-center gap-1.5">
+                              {/* Baris 2: Gaya Plain Text Bold (Bebas Kapsul) */}
+                              <div className="flex flex-wrap items-center gap-1.5 text-xs">
                                 {h.category && (
-                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                    h.category === 'Hafalan Baru' 
-                                      ? 'bg-emerald-100 text-emerald-800' 
-                                      : 'bg-blue-100 text-blue-800'
-                                  }`}>
+                                  <span className={`font-bold ${h.category === 'Hafalan Baru' ? 'text-emerald-700' : 'text-blue-700'}`}>
                                     {h.category}
                                   </span>
                                 )}
                                 {h.pageFrom && h.pageTo && (
-                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                                    Hal. {h.pageFrom}-{h.pageTo} ({h.pageCount || (h.pageTo - h.pageFrom + 1)} Hal)
-                                  </span>
+                                  <>
+                                    <span className="text-slate-300">•</span>
+                                    <span className="font-bold text-slate-700">
+                                      Hal. {h.pageFrom}-{h.pageTo} ({h.pageCount || (h.pageTo - h.pageFrom + 1)} Hal.)
+                                    </span>
+                                  </>
                                 )}
                                 {(h.kelancaran || h.predikat) && (
-                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/60">
-                                    {h.kelancaran || h.predikat}
-                                  </span>
+                                  <>
+                                    <span className="text-slate-300">•</span>
+                                    <span className="font-bold text-slate-700">
+                                      {h.kelancaran || h.predikat}
+                                    </span>
+                                  </>
                                 )}
                               </div>
 
-                              {/* Baris 3: Cukup Juz N dan Langsung Nama Musyrif */}
-                              <p className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                              {/* Baris 3: Info Rentang Juz Riil & Musyrif */}
+                              <p className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
                                 <span>{h.juz?.toLowerCase().startsWith('juz') ? h.juz : `Juz ${h.juz || '1'}`}</span>
                                 <span className="text-slate-300">|</span>
                                 <strong className="text-slate-700 font-medium">{h.ustadz || 'Ustadz Pembimbing'}</strong>
@@ -1617,11 +1998,27 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                               )}
                             </div>
 
-                            {/* Kanan Kontainer: Tanggal DD MMMM YY */}
-                            <div className="text-right shrink-0">
+                            {/* Kanan Kontainer: Tanggal & Aksi */}
+                            <div className="flex flex-col items-end gap-2 shrink-0">
                               <span className="text-xs font-semibold text-slate-600 whitespace-nowrap">
                                 {formatDateDDMMMMYY(h.date, h.timestamp)}
                               </span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const rect = e.currentTarget.getBoundingClientRect();
+                                  const menuWidth = 170;
+                                  const menuHeight = 110;
+                                  const x = Math.min(window.innerWidth - menuWidth - 10, Math.max(10, rect.right - menuWidth));
+                                  const y = Math.min(window.innerHeight - menuHeight - 10, rect.bottom + 4);
+                                  setSetoranContextMenu({ record: h, x, y });
+                                }}
+                                className="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
+                                title="Menu Opsi Setoran"
+                              >
+                                <MoreHorizontal className="w-4 h-4" />
+                              </button>
                             </div>
                           </div>
                         ))}
@@ -1631,7 +2028,9 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         <BookOpen className="w-6 h-6 text-slate-400 mx-auto" />
                         <p className="font-semibold text-slate-800">Belum Ada Riwayat Setoran</p>
                         <p className="text-[11px] text-slate-400">
-                          Gunakan tombol <strong>+</strong> di atas untuk mencatat setoran harian santri.
+                          {currentStudent.isTahsinPassed
+                            ? 'Gunakan tombol + di atas untuk mencatat setoran harian santri.'
+                            : 'Santri belum lulus tahsin sehingga belum dapat mencatat setoran hafalan.'}
                         </p>
                       </div>
                     )}
@@ -2118,7 +2517,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
             {/* Header Modal */}
             <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
               <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
-                Catat Setoran Mutaba'ah Tahfizh
+                {editingSetoranId ? "Edit Setoran Mutaba'ah Tahfizh" : "Catat Setoran Mutaba'ah Tahfizh"}
               </h3>
               <p className="text-xs text-[#64748B] mt-0.5 font-body">
                 Santri: {currentStudent.studentName} • {currentStudent.kamar} • {currentStudent.kelas}
@@ -2133,16 +2532,23 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
             >
               {/* 1. Kategori Setoran */}
               <div className="space-y-2">
-                <label className="block font-semibold text-[#0F172A] font-headline">
-                  Kategori Mutaba'ah
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="block font-semibold text-[#0F172A] font-headline">
+                    Kategori Mutaba'ah
+                  </label>
+                  {currentSetoranAnalysis?.mode === 'mixed' && (
+                    <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                      Otomatis Campuran (Ziyadah + Murojaah)
+                    </span>
+                  )}
+                </div>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     disabled={currentStudent.hafalan?.includes('30') || parseInt(currentStudent.hafalan || '0', 10) >= 30}
                     onClick={() => setSetoranCategory('Hafalan Baru')}
                     className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                      setoranCategory === 'Hafalan Baru'
+                      (setoranCategory === 'Hafalan Baru' || currentSetoranAnalysis?.mode === 'mixed')
                         ? 'bg-emerald-50/70 border-[#142A18] ring-1 ring-[#142A18]'
                         : 'bg-white border-slate-200 hover:bg-slate-50'
                     } ${(currentStudent.hafalan?.includes('30') || parseInt(currentStudent.hafalan || '0', 10) >= 30) ? 'opacity-40 cursor-not-allowed' : ''}`}
@@ -2150,19 +2556,23 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-xs text-[#0F172A]">Hafalan Baru (Ziyadah)</span>
                       <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                        setoranCategory === 'Hafalan Baru' ? 'border-[#142A18] bg-[#142A18]' : 'border-slate-300'
+                        (setoranCategory === 'Hafalan Baru' || currentSetoranAnalysis?.mode === 'mixed') ? 'border-[#142A18] bg-[#142A18]' : 'border-slate-300'
                       }`}>
-                        {setoranCategory === 'Hafalan Baru' && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        {(setoranCategory === 'Hafalan Baru' || currentSetoranAnalysis?.mode === 'mixed') && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1">Menambah ayat atau surat baru dalam kurikulum.</p>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      {currentSetoranAnalysis?.mode === 'mixed' && currentSetoranAnalysis.ziyadahRange
+                        ? `Ayat ${currentSetoranAnalysis.ziyadahRange.from}-${currentSetoranAnalysis.ziyadahRange.to} (Hafalan Baru)`
+                        : 'Menambah ayat atau surat baru dalam kurikulum.'}
+                    </p>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setSetoranCategory('Murojaah')}
                     className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                      setoranCategory === 'Murojaah'
+                      (setoranCategory === 'Murojaah' || currentSetoranAnalysis?.mode === 'mixed')
                         ? 'bg-blue-50/70 border-blue-600 ring-1 ring-blue-600'
                         : 'bg-white border-slate-200 hover:bg-slate-50'
                     }`}
@@ -2170,25 +2580,29 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-xs text-[#0F172A]">Murojaah (Pengulangan)</span>
                       <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                        setoranCategory === 'Murojaah' ? 'border-blue-600 bg-blue-600' : 'border-slate-300'
+                        (setoranCategory === 'Murojaah' || currentSetoranAnalysis?.mode === 'mixed') ? 'border-blue-600 bg-blue-600' : 'border-slate-300'
                       }`}>
-                        {setoranCategory === 'Murojaah' && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        {(setoranCategory === 'Murojaah' || currentSetoranAnalysis?.mode === 'mixed') && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1">Mengulang hafalan yang telah disetorkan sebelumnya.</p>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      {currentSetoranAnalysis?.mode === 'mixed' && currentSetoranAnalysis.murojaahRange
+                        ? `Ayat ${currentSetoranAnalysis.murojaahRange.from}-${currentSetoranAnalysis.murojaahRange.to} (Pengulangan)`
+                        : 'Mengulang hafalan yang telah disetorkan sebelumnya.'}
+                    </p>
                   </button>
                 </div>
               </div>
 
-              {/* 2. Searchable Combobox 114 Surah */}
-              <div className="space-y-1.5 relative" ref={surahComboRef}>
+              {/* 2. Searchable Combobox Nama Surah (Divider) */}
+              <div className="space-y-1.5 relative pt-4 border-t border-[#E2E8F0]" ref={surahComboRef}>
                 <div className="flex items-center justify-between">
                   <label className="font-semibold text-[#0F172A] font-headline">
-                    Surah Al-Qur'an (114 Surah)
+                    Nama Surah
                   </label>
                   {selectedSurah && (
-                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                      Juz {selectedSurah.juz} • {selectedSurah.totalAyat} Ayat • {selectedSurah.arabicName}
+                    <span className="text-[11px] font-bold text-slate-700">
+                      Juz {setoranJuz} • {selectedSurah.totalAyat} Ayat • {selectedSurah.arabicName}
                     </span>
                   )}
                 </div>
@@ -2267,122 +2681,130 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 </div>
               </div>
 
-              {/* 3. Range Ayat Dinamis & Auto-Fill Halaman Standar Kemenag */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-[#F8FAFC] rounded-xl border border-slate-200/80">
-                <div className="space-y-2">
-                  <label className="block font-semibold text-[#0F172A] font-headline">
-                    Rentang Ayat (Maks: {selectedSurah?.totalAyat || 1})
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <span className="text-[11px] text-slate-500 block mb-1">Dari Ayat</span>
-                      <input
-                        type="number"
-                        min={1}
-                        max={selectedSurah?.totalAyat || 286}
-                        value={setoranAyatFrom}
-                        onChange={(e) => handleAyatFromChange(e.target.value)}
-                        onWheel={(e) => {
-                          e.preventDefault();
-                          const delta = e.deltaY;
-                          const num = parseInt(String(setoranAyatFrom), 10) || 1;
-                          const max = selectedSurah?.totalAyat || 286;
-                          const next = delta < 0 ? Math.min(max, num + 1) : Math.max(1, num - 1);
-                          handleAyatFromChange(String(next));
-                        }}
-                        className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
-                      />
-                    </div>
-                    <div>
-                      <span className="text-[11px] text-slate-500 block mb-1">Sampai Ayat</span>
-                      <input
-                        type="number"
-                        min={parseInt(String(setoranAyatFrom), 10) || 1}
-                        max={selectedSurah?.totalAyat || 286}
-                        value={setoranAyatTo}
-                        onChange={(e) => handleAyatToChange(e.target.value)}
-                        onWheel={(e) => {
-                          e.preventDefault();
-                          const delta = e.deltaY;
-                          const num = parseInt(String(setoranAyatTo), 10) || 1;
-                          const min = parseInt(String(setoranAyatFrom), 10) || 1;
-                          const max = selectedSurah?.totalAyat || 286;
-                          const next = delta < 0 ? Math.min(max, num + 1) : Math.max(min, num - 1);
-                          handleAyatToChange(String(next));
-                        }}
-                        className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
+              {/* 3. Rentang Ayat & Nomor Halaman (Unboxed, with Thin Divider) */}
+              <div className="pt-4 border-t border-[#E2E8F0] space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
                     <label className="block font-semibold text-[#0F172A] font-headline">
-                      Nomor Halaman (Mushaf Standar)
+                      Rentang Ayat (Maks: {selectedSurah?.totalAyat || 1})
                     </label>
-                    {setoranPageFrom && setoranPageTo && (
-                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.2 rounded-full">
-                        Total: {Math.max(1, (parseInt(String(setoranPageTo), 10) || 1) - (parseInt(String(setoranPageFrom), 10) || 1) + 1)} Halaman
-                      </span>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <span className="text-[11px] text-slate-500 block mb-1">Dari Halaman</span>
-                      <input
-                        type="number"
-                        min={1}
-                        max={604}
-                        value={setoranPageFrom}
-                        onChange={(e) => setSetoranPageFrom(e.target.value)}
-                        onWheel={(e) => {
-                          e.preventDefault();
-                          const delta = e.deltaY;
-                          const num = parseInt(String(setoranPageFrom), 10) || 1;
-                          const next = delta < 0 ? Math.min(604, num + 1) : Math.max(1, num - 1);
-                          setSetoranPageFrom(next);
-                        }}
-                        className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
-                      />
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <span className="text-[11px] text-slate-500 block mb-1">Dari Ayat</span>
+                        <input
+                          type="number"
+                          min={1}
+                          max={selectedSurah?.totalAyat || 286}
+                          value={setoranAyatFrom}
+                          onChange={(e) => handleAyatFromChange(e.target.value)}
+                          onWheel={(e) => {
+                            e.preventDefault();
+                            const delta = e.deltaY;
+                            const num = parseInt(String(setoranAyatFrom), 10) || 1;
+                            const max = selectedSurah?.totalAyat || 286;
+                            const next = delta < 0 ? Math.min(max, num + 1) : Math.max(1, num - 1);
+                            handleAyatFromChange(String(next));
+                          }}
+                          className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
+                        />
+                      </div>
+                      <div>
+                        <span className="text-[11px] text-slate-500 block mb-1">Sampai Ayat</span>
+                        <input
+                          type="number"
+                          min={parseInt(String(setoranAyatFrom), 10) || 1}
+                          max={selectedSurah?.totalAyat || 286}
+                          value={setoranAyatTo}
+                          onChange={(e) => handleAyatToChange(e.target.value)}
+                          onWheel={(e) => {
+                            e.preventDefault();
+                            const delta = e.deltaY;
+                            const num = parseInt(String(setoranAyatTo), 10) || 1;
+                            const min = parseInt(String(setoranAyatFrom), 10) || 1;
+                            const max = selectedSurah?.totalAyat || 286;
+                            const next = delta < 0 ? Math.min(max, num + 1) : Math.max(min, num - 1);
+                            handleAyatToChange(String(next));
+                          }}
+                          className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-[11px] text-slate-500 block mb-1">Sampai Halaman</span>
-                      <input
-                        type="number"
-                        min={1}
-                        max={604}
-                        value={setoranPageTo}
-                        onChange={(e) => setSetoranPageTo(e.target.value)}
-                        onWheel={(e) => {
-                          e.preventDefault();
-                          const delta = e.deltaY;
-                          const num = parseInt(String(setoranPageTo), 10) || 1;
-                          const next = delta < 0 ? Math.min(604, num + 1) : Math.max(1, num - 1);
-                          setSetoranPageTo(next);
-                        }}
-                        className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
-                      />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="block font-semibold text-[#0F172A] font-headline">
+                        Nomor Halaman
+                      </label>
+                      {setoranPageFrom && setoranPageTo && (
+                        <span className="text-xs font-semibold text-slate-600">
+                          {Math.max(1, (parseInt(String(setoranPageTo), 10) || 1) - (parseInt(String(setoranPageFrom), 10) || 1) + 1)} Hal.
+                        </span>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <span className="text-[11px] text-slate-500 block mb-1">Dari Halaman</span>
+                        <input
+                          type="number"
+                          min={1}
+                          max={604}
+                          value={setoranPageFrom}
+                          onChange={(e) => {
+                            setSetoranPageFrom(e.target.value);
+                            const pFrom = parseInt(e.target.value, 10) || 1;
+                            const pTo = parseInt(String(setoranPageTo), 10) || pFrom;
+                            setSetoranJuz(calculateJuzRange(pFrom, pTo));
+                          }}
+                          onWheel={(e) => {
+                            e.preventDefault();
+                            const delta = e.deltaY;
+                            const num = parseInt(String(setoranPageFrom), 10) || 1;
+                            const next = delta < 0 ? Math.min(604, num + 1) : Math.max(1, num - 1);
+                            setSetoranPageFrom(next);
+                            const pTo = parseInt(String(setoranPageTo), 10) || next;
+                            setSetoranJuz(calculateJuzRange(next, pTo));
+                          }}
+                          className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
+                        />
+                      </div>
+                      <div>
+                        <span className="text-[11px] text-slate-500 block mb-1">Sampai Halaman</span>
+                        <input
+                          type="number"
+                          min={1}
+                          max={604}
+                          value={setoranPageTo}
+                          onChange={(e) => {
+                            setSetoranPageTo(e.target.value);
+                            const pFrom = parseInt(String(setoranPageFrom), 10) || 1;
+                            const pTo = parseInt(e.target.value, 10) || pFrom;
+                            setSetoranJuz(calculateJuzRange(pFrom, pTo));
+                          }}
+                          onWheel={(e) => {
+                            e.preventDefault();
+                            const delta = e.deltaY;
+                            const num = parseInt(String(setoranPageTo), 10) || 1;
+                            const next = delta < 0 ? Math.min(604, num + 1) : Math.max(1, num - 1);
+                            setSetoranPageTo(next);
+                            const pFrom = parseInt(String(setoranPageFrom), 10) || 1;
+                            setSetoranJuz(calculateJuzRange(pFrom, next));
+                          }}
+                          className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* 4. Slider Kelancaran */}
-              <div className="space-y-2 p-4 bg-[#F8FAFC] rounded-xl border border-slate-200/80">
+              {/* 4. Tingkat Kelancaran & Mutaba'ah (Unboxed, with Thin Divider, No Capsule) */}
+              <div className="pt-4 border-t border-[#E2E8F0] space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="font-semibold text-[#0F172A] font-headline">
                     Tingkat Kelancaran & Mutaba'ah
                   </label>
-                  <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
-                    setoranKelancaranIndex === 0
-                      ? 'bg-rose-100 text-rose-700'
-                      : setoranKelancaranIndex === 1
-                      ? 'bg-amber-100 text-amber-700'
-                      : setoranKelancaranIndex === 2
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-emerald-800 text-white'
-                  }`}>
+                  <span className="text-xs font-bold text-slate-800">
                     {['Perlu diulang', 'Lumayan', 'Lancar', 'Sangat Lancar (Mumtaz)'][setoranKelancaranIndex]}
                   </span>
                 </div>
@@ -2398,15 +2820,15 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 />
 
                 <div className="flex justify-between text-[10px] text-slate-500 font-medium px-1">
-                  <span className={setoranKelancaranIndex === 0 ? 'font-bold text-rose-600' : ''}>Perlu diulang</span>
-                  <span className={setoranKelancaranIndex === 1 ? 'font-bold text-amber-600' : ''}>Lumayan</span>
-                  <span className={setoranKelancaranIndex === 2 ? 'font-bold text-emerald-600' : ''}>Lancar</span>
-                  <span className={setoranKelancaranIndex === 3 ? 'font-bold text-[#142A18]' : ''}>Sangat Lancar</span>
+                  <span className={setoranKelancaranIndex === 0 ? 'font-bold text-slate-900' : ''}>Perlu diulang</span>
+                  <span className={setoranKelancaranIndex === 1 ? 'font-bold text-slate-900' : ''}>Lumayan</span>
+                  <span className={setoranKelancaranIndex === 2 ? 'font-bold text-slate-900' : ''}>Lancar</span>
+                  <span className={setoranKelancaranIndex === 3 ? 'font-bold text-slate-900' : ''}>Sangat Lancar</span>
                 </div>
               </div>
 
-              {/* 5. Ustadz & Catatan */}
-              <div className="space-y-3">
+              {/* 5. Ustadz & Catatan (Unboxed, with Thin Divider) */}
+              <div className="pt-4 border-t border-[#E2E8F0] space-y-3">
                 <div>
                   <label className="block font-semibold text-[#0F172A] mb-1 font-headline">
                     Ustadz Penguji / Pembimbing
@@ -2440,7 +2862,10 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 variant="ghost"
                 size="sm"
                 type="button"
-                onClick={() => setIsSetoranModalOpen(false)}
+                onClick={() => {
+                  setIsSetoranModalOpen(false);
+                  setEditingSetoranId(null);
+                }}
               >
                 Batal
               </Button>
@@ -2449,9 +2874,14 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 size="sm"
                 type="button"
                 onClick={handleSaveSetoran}
+                disabled={isSubmittingSetoran}
                 className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
               >
-                Simpan Setoran
+                {isSubmittingSetoran
+                  ? 'Menyimpan...'
+                  : editingSetoranId
+                  ? 'Simpan Perubahan'
+                  : 'Simpan Setoran'}
               </Button>
             </div>
 
@@ -2886,6 +3316,90 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           </div>
         </div>
       )}
+
+      {/* 7. FLOATING CONTEXT MENU FOR SETORAN RECORDS */}
+      {setoranContextMenu && (
+        <>
+          <div
+            className="fixed inset-0 z-50 bg-transparent pointer-events-auto cursor-default"
+            onClick={() => setSetoranContextMenu(null)}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              setSetoranContextMenu(null);
+            }}
+          />
+
+          <div
+            style={{ top: `${setoranContextMenu.y}px`, left: `${setoranContextMenu.x}px` }}
+            onClick={(e) => e.stopPropagation()}
+            className="fixed z-50 min-w-[170px] bg-white border border-slate-200 rounded-xl shadow-2xl p-1.5 space-y-0.5 text-xs text-left animate-in fade-in zoom-in-95 font-body pointer-events-auto select-none"
+          >
+            <div className="px-2.5 py-1.5 border-b border-slate-100 mb-1">
+              <p className="font-bold text-[11px] text-slate-800 truncate font-headline">
+                {setoranContextMenu.record.surah}
+              </p>
+              <p className="text-[10px] text-slate-400 truncate">
+                {setoranContextMenu.record.date} • {setoranContextMenu.record.category || 'Hafalan'}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => handleOpenEditSetoran(setoranContextMenu.record)}
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 text-slate-800 hover:bg-slate-50 rounded-md transition-colors cursor-pointer font-medium"
+            >
+              <Pencil className="w-3.5 h-3.5 text-black" />
+              <span>Edit Setoran</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleOpenDeleteSetoran(setoranContextMenu.record)}
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer font-semibold"
+            >
+              <Trash2 className="w-3.5 h-3.5 text-black" />
+              <span>Hapus Setoran</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* 8. CONFIRMATION DIALOG FOR DELETE SETORAN */}
+      {setoranToDelete && (
+        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto overscroll-contain font-body">
+          <div className="bg-white w-full max-w-md rounded-xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-[#E2E8F0] overflow-hidden my-auto p-6 space-y-4 animate-in fade-in zoom-in-95">
+            <div className="space-y-1.5">
+              <h3 className="text-base font-bold text-[#0F172A] font-headline">
+                Hapus Rekam Setoran Mutaba'ah?
+              </h3>
+              <p className="text-xs text-[#64748B] font-body leading-relaxed">
+                Apakah Anda yakin ingin menghapus catatan setoran <strong>{setoranToDelete.surah}</strong> ({setoranToDelete.date})? Tindakan ini tidak dapat dibatalkan.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#E2E8F0]">
+              <Button
+                variant="ghost"
+                size="sm"
+                type="button"
+                onClick={() => setSetoranToDelete(null)}
+              >
+                Batal
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                type="button"
+                onClick={handleConfirmDeleteSetoran}
+                className="bg-rose-600 text-white hover:bg-rose-700 font-semibold"
+              >
+                Hapus Setoran
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
+

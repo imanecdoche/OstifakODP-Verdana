@@ -153,3 +153,25 @@ export function calculateQuranPages(
 
   return { fromPage, toPage };
 }
+
+/**
+ * Returns the exact Quran Juz (1-30) for a given standard Mushaf page.
+ */
+export function getJuzFromPage(page: number): number {
+  if (page <= 1) return 1;
+  if (page >= 582) return 30;
+  return Math.min(30, Math.max(1, Math.floor((page - 2) / 20) + 1));
+}
+
+/**
+ * Returns formatted Juz string. If cross-juz (e.g. 1 and 2), returns '1-2'. If same, returns '1'.
+ */
+export function calculateJuzRange(fromPage: number, toPage: number): string {
+  const startJuz = getJuzFromPage(fromPage);
+  const endJuz = getJuzFromPage(toPage);
+  if (startJuz === endJuz) {
+    return `${startJuz}`;
+  }
+  return `${startJuz}-${endJuz}`;
+}
+

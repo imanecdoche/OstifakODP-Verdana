@@ -7,6 +7,24 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Pembaruan Sistem Pencatatan Hafalan, Mutaba'ah, Otomatisasi Setoran & Rekonstruksi UI Segmen Hafalan Santri (Versi v1.1.0.46b):
+  - 1. PEMBARUAN LOGIKA PENCATATAN & OTOMATISASI SETORAN:
+    * **Murojaah Otomatis**: Jika santri menyetorkan ayat yang sebelumnya sudah pernah disetorkan sebagai Ziyadah (Hafalan Baru), sistem secara otomatis mengategorikannya sebagai Murojaah.
+    * **Setoran Campuran (Ziyadah + Murojaah)**: Jika santri menyetorkan ayat yang sebagian sudah pernah disetor dan berlanjut ke ayat baru yang belum pernah disetor, opsi jenis setoran otomatis terpilih keduanya pada form dan sistem otomatis memecahnya menjadi 2 entri/aktivitas setoran terpisah (satu Murojaah dan satu Ziyadah).
+    * **Validasi Kelulusan Tahsin**: Jika santri belum lulus uji tahsin (`!isTahsinPassed`), tombol tambah catatan mutaba'ah dinonaktifkan (`disabled`) dan menampilkan tooltip "Santri ini belum lulus tahsin".
+    * **Rentang Juz Lintas Juz**: Jika ayat yang disetorkan mencakup 2 juz berbeda, menampilkan informasi rentang juz riil dengan format "Juz N-N" (contoh: "Juz 1-2").
+  - 2. REKONSTRUKSI METRIC CARDS DI TAB HAFALAN:
+    * Menambahkan kartu metrik baru di baris atas dengan judul **"CAPAIAN MUROJAAH"** (akumulasi total yang dimurojaahkan sepanjang waktu sejak masuk pondok). Hanya menampilkan title dan nilai dengan format `N Juz | N.n Lbr` tanpa elemen dekoratif lainnya.
+  - 3. FITUR EDIT & HAPUS REKAM SETORAN (CONTEXTUAL MENU & DIALOG):
+    * Menambahkan fitur Edit dan Hapus pada kartu record setoran: klik kanan (`onContextMenu`) pada kartu record memunculkan menu opsi kontekstual mengambang (*floating*) tepat di ujung kursor pointer tanpa terpotong batas overflow parent.
+    * Menggunakan ikon pensil monokrom tunggal hitam untuk opsi **EDIT** dan ikon tempat sampah monokrom tunggal hitam untuk opsi **HAPUS**, serta menyertakan dialog konfirmasi sebelum mengeksekusi penghapusan setoran.
+  - 4. PENYESUAIAN STYLING & CLEAN-FLAT UI:
+    * **Kapsul Rekor**: Mengubah gaya kapsul di bawah nama surat pada kartu record setoran menjadi teks biasa dengan gaya tebal (*plain text bold*).
+    * **Modul Form Catatan Mutabaah**: Mengeluarkan seluruh elemen form *(Rentang Ayat, Nomor Halaman, Tingkat Kelancaran & Mutaba'ah)* dari kontainer pembungkusnya (*nested-container*) dan menggantinya dengan pembatas garis tipis (*divider*).
+    * Mengubah label form **'Nomor Halaman (Mushaf Standar)'** menjadi **'Nomor Halaman'**, serta mengganti info total halaman menjadi teks polos (contoh: `N Hal.`) tanpa dibungkus kapsul.
+    * Pada bagian tingkat kelancaran, menghapus elemen kapsul warna kelancaran.
+    * Mengubah label form **'Surah Al-Qur'an (114 Surah)'** menjadi **'Nama Surah'**.
+    * Mempertahankan prinsip desain minimalis *clean-flat* aplikasi secara keseluruhan.
 - **[2026-08-27]**: Header Selalu Tampil Statis Fixed Saat Halaman Detail Santri Terbuka di Mobile (Versi v1.1.0.45b):
   - 1. PERMANEN FIXED TOPBAR HEADER:
     * Mengubah positioning `Header.tsx` menjadi `fixed top-0 inset-x-0 lg:left-[260px] z-40 h-16` dan memberikan offset `mt-16` pada elemen `<main>` di `App.tsx`.
