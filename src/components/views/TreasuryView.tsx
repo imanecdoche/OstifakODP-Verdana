@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   KasTransaction, 
   subscribeToKasTransactions, 
@@ -524,146 +525,171 @@ export const TreasuryView: React.FC<TreasuryViewProps> = () => {
       </div>
 
       {/* 5. Modal Form Pencatatan Transaksi Baru (Clean Anti-Gravity UI) */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[#0F172A]/40 backdrop-blur-xs overflow-y-auto font-body">
-          <div className="bg-[#FFFFFF] border-t sm:border border-[#E2E8F0] rounded-t-2xl sm:rounded-lg max-w-lg w-full p-6 space-y-6 shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-xl max-h-[90dvh] sm:max-h-[90vh] flex flex-col overflow-y-auto animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden -mt-2 mb-1 flex justify-center shrink-0">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setIsModalOpen(false)}
+              className="fixed inset-0 bg-[#0F172A]/40 backdrop-blur-xs cursor-default"
+            />
 
-            {/* Header Modal Bersih Tanpa Tombol Tutup */}
-            <div className="border-b border-[#E2E8F0] pb-4 shrink-0">
-              <h3 className="text-lg font-bold text-[#0F172A] font-headline tracking-tight">
-                Pencatatan Transaksi Kas Baru
-              </h3>
-              <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                Masukkan detail arus kas masuk atau pengeluaran operasional organisasi
-              </p>
-            </div>
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-[#FFFFFF] border-t sm:border border-[#E2E8F0] rounded-t-2xl sm:rounded-lg max-w-lg w-full p-6 space-y-6 shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-xl max-h-[88dvh] sm:max-h-[90vh] flex flex-col overflow-y-auto z-10"
+            >
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden -mt-2 mb-1 flex justify-center shrink-0">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
+              </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5 text-xs font-body flex-1 min-h-0">
-              
-              {/* 1. Toggle Button Jenis Transaksi (MASUK vs KELUAR) */}
-              <div>
-                <label className="block font-semibold text-[#0F172A] mb-1.5 font-headline uppercase tracking-[0.5px]">
-                  Jenis Transaksi
-                </label>
-                <div className="grid grid-cols-2 gap-2 p-1 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md">
+              {/* Header Modal Bersih Tanpa Tombol Tutup */}
+              <div className="border-b border-[#E2E8F0] pb-4 shrink-0">
+                <h3 className="text-lg font-bold text-[#0F172A] font-headline tracking-tight">
+                  Pencatatan Transaksi Kas Baru
+                </h3>
+                <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                  Masukkan detail arus kas masuk atau pengeluaran operasional organisasi
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-5 text-xs font-body flex-1 min-h-0">
+                
+                {/* 1. Toggle Button Jenis Transaksi (MASUK vs KELUAR) */}
+                <div>
+                  <label className="block font-semibold text-[#0F172A] mb-1.5 font-headline uppercase tracking-[0.5px]">
+                    Jenis Transaksi
+                  </label>
+                  <div className="grid grid-cols-2 gap-2 p-1 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md">
+                    <button
+                      type="button"
+                      onClick={() => setTransactionType('masuk')}
+                      className={`h-9 text-xs font-bold rounded transition-all cursor-pointer select-none ${
+                        transactionType === 'masuk'
+                          ? 'bg-[#0F172A] text-white shadow-xs'
+                          : 'text-[#64748B] hover:text-[#0F172A]'
+                      }`}
+                    >
+                      MASUK
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTransactionType('keluar')}
+                      className={`h-9 text-xs font-bold rounded transition-all cursor-pointer select-none ${
+                        transactionType === 'keluar'
+                          ? 'bg-[#0F172A] text-white shadow-xs'
+                          : 'text-[#64748B] hover:text-[#0F172A]'
+                      }`}
+                    >
+                      KELUAR
+                    </button>
+                  </div>
+                </div>
+
+                {/* 2. Tanggal Transaksi */}
+                <div>
+                  <label className="block font-semibold text-[#0F172A] mb-1.5 font-headline">
+                    Tanggal Transaksi
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full h-10 px-3.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A]"
+                  />
+                </div>
+
+                {/* 3. Jumlah Nominal (Rupiah) */}
+                <div>
+                  <label className="block font-semibold text-[#0F172A] mb-1.5 font-headline">
+                    Nominal Transaksi (Rp)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    step="1"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="Contoh: 150000"
+                    className="w-full h-10 px-3.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A] font-mono"
+                  />
+                </div>
+
+                {/* 4. Pilihan Kategori */}
+                <div>
+                  <label className="block font-semibold text-[#0F172A] mb-1.5 font-headline">
+                    Kategori Anggaran
+                  </label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full h-10 px-3.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A]"
+                  >
+                    <option value="Iuran Kas">Iuran Kas</option>
+                    <option value="Dana Santri">Dana Santri</option>
+                    <option value="Infaq / Donasi">Infaq / Donasi</option>
+                    <option value="Konsumsi">Konsumsi</option>
+                    <option value="Perlengkapan">Perlengkapan</option>
+                    <option value="ATK & Administrasi">ATK & Administrasi</option>
+                    <option value="Kebersihan">Kebersihan</option>
+                    <option value="Lainnya">Lainnya</option>
+                  </select>
+                </div>
+
+                {/* 5. Deskripsi & Keterangan */}
+                <div>
+                  <label className="block font-semibold text-[#0F172A] mb-1.5 font-headline">
+                    Keterangan & Keperluan
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full p-3 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A] resize-none"
+                    placeholder="Jelaskan sumber penerimaan dana atau rincian pengeluaran operasional..."
+                  />
+                </div>
+
+                {/* 6. Action Buttons with Mobile Safe Bottom Padding */}
+                <div className="flex items-center justify-end gap-3 pt-4 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
                   <button
                     type="button"
-                    onClick={() => setTransactionType('masuk')}
-                    className={`h-9 text-xs font-bold rounded transition-all cursor-pointer select-none ${
-                      transactionType === 'masuk'
-                        ? 'bg-[#0F172A] text-white shadow-xs'
-                        : 'text-[#64748B] hover:text-[#0F172A]'
-                    }`}
+                    onClick={() => setIsModalOpen(false)}
+                    className="h-9 px-4 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
                   >
-                    MASUK
+                    Batal
                   </button>
                   <button
-                    type="button"
-                    onClick={() => setTransactionType('keluar')}
-                    className={`h-9 text-xs font-bold rounded transition-all cursor-pointer select-none ${
-                      transactionType === 'keluar'
-                        ? 'bg-[#0F172A] text-white shadow-xs'
-                        : 'text-[#64748B] hover:text-[#0F172A]'
-                    }`}
+                    type="submit"
+                    className="h-9 px-5 bg-[#0F172A] text-white text-xs font-semibold rounded-md hover:bg-[#1E293B] active:scale-[0.98] transition-all cursor-pointer"
                   >
-                    KELUAR
+                    Simpan Transaksi
                   </button>
                 </div>
-              </div>
 
-              {/* 2. Tanggal Transaksi */}
-              <div>
-                <label className="block font-semibold text-[#0F172A] mb-1.5 font-headline">
-                  Tanggal Transaksi
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full h-10 px-3.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A]"
-                />
-              </div>
+              </form>
 
-              {/* 3. Jumlah Nominal (Rupiah) */}
-              <div>
-                <label className="block font-semibold text-[#0F172A] mb-1.5 font-headline">
-                  Nominal Transaksi (Rp)
-                </label>
-                <input
-                  type="number"
-                  required
-                  min="1"
-                  step="1"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Contoh: 150000"
-                  className="w-full h-10 px-3.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A] font-mono"
-                />
-              </div>
-
-              {/* 4. Pilihan Kategori */}
-              <div>
-                <label className="block font-semibold text-[#0F172A] mb-1.5 font-headline">
-                  Kategori Anggaran
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full h-10 px-3.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A]"
-                >
-                  <option value="Iuran Kas">Iuran Kas</option>
-                  <option value="Dana Santri">Dana Santri</option>
-                  <option value="Infaq / Donasi">Infaq / Donasi</option>
-                  <option value="Konsumsi">Konsumsi</option>
-                  <option value="Perlengkapan">Perlengkapan</option>
-                  <option value="ATK & Administrasi">ATK & Administrasi</option>
-                  <option value="Kebersihan">Kebersihan</option>
-                  <option value="Lainnya">Lainnya</option>
-                </select>
-              </div>
-
-              {/* 5. Deskripsi & Keterangan */}
-              <div>
-                <label className="block font-semibold text-[#0F172A] mb-1.5 font-headline">
-                  Keterangan & Keperluan
-                </label>
-                <textarea
-                  required
-                  rows={3}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full p-3 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A] resize-none"
-                  placeholder="Jelaskan sumber penerimaan dana atau rincian pengeluaran operasional..."
-                />
-              </div>
-
-              {/* 6. Action Buttons with Mobile Safe Bottom Padding */}
-              <div className="flex items-center justify-end gap-3 pt-4 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="h-9 px-4 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className="h-9 px-5 bg-[#0F172A] text-white text-xs font-semibold rounded-md hover:bg-[#1E293B] active:scale-[0.98] transition-all cursor-pointer"
-                >
-                  Simpan Transaksi
-                </button>
-              </div>
-
-            </form>
-
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
     </div>
   );

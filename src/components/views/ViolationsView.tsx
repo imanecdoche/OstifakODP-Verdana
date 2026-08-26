@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldAlert, 
   Plus, 
@@ -763,197 +764,247 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
       )}
 
       {/* MODAL: EDIT KASUS PELANGGARAN */}
-      {editingViolation && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-2xl max-h-[90dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
+      <AnimatePresence>
+        {editingViolation && (
+          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setEditingViolation(null)}
+              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+            />
 
-            {/* Header Modal (Clean Flat Header, Zero Icon Policy) */}
-            <div className="px-6 sm:px-8 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">Edit Berkas Pelanggaran</h3>
-              <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                Santri: <span className="font-semibold text-[#0F172A]">{editingViolation.studentName}</span> (NIS: {editingViolation.nis} • {editingViolation.kamar})
-              </p>
-            </div>
-
-            {/* Edit Form */}
-            <form onSubmit={handleSaveEdit} className="p-6 sm:p-8 space-y-4 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-8">
-              
-              {/* Row 1: Tindakan & Kategori */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
-                    Tindakan Pelanggaran *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={editViolationText}
-                    onChange={(e) => setEditViolationText(e.target.value)}
-                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
-                    Kategori Pelanggaran *
-                  </label>
-                  <select
-                    value={editCategory}
-                    onChange={(e) => setEditCategory(e.target.value)}
-                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none"
-                  >
-                    <option value="Kedisiplinan">Kedisiplinan</option>
-                    <option value="Ibadah">Ibadah</option>
-                    <option value="Bahasa">Bahasa</option>
-                    <option value="Kebersihan">Kebersihan</option>
-                    <option value="Kerapian">Kerapian</option>
-                    <option value="Adab & Akhlak">Adab & Akhlak</option>
-                    <option value="Lainnya">Lainnya</option>
-                  </select>
-                </div>
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-white w-full max-w-2xl max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
+            >
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
               </div>
 
-              {/* Row 2: Tingkat & Status */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
-                    Tingkat Pelanggaran *
-                  </label>
-                  <select
-                    value={editSeverity}
-                    onChange={(e) => setEditSeverity(e.target.value as any)}
-                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none"
-                  >
-                    <option value="ringan">Ringan (1-12 Poin)</option>
-                    <option value="sedang">Sedang (13-25 Poin)</option>
-                    <option value="berat">Berat (26-38 Poin)</option>
-                    <option value="sangat_berat">Sangat Berat (39-50 Poin)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
-                    Status Sidang / Penyelesaian *
-                  </label>
-                  <select
-                    value={editStatus}
-                    onChange={(e) => setEditStatus(e.target.value as any)}
-                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none font-medium"
-                  >
-                    <option value="pending">Belum Selesai (Pending)</option>
-                    <option value="selesai">Selesai (Sudah Takzir)</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Row 3: Bobot Poin Slider */}
-              <div className="p-4 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-[#0F172A] font-headline">
-                    Bobot Poin Pelanggaran (PK)
-                  </label>
-                  <span className="px-2.5 py-1 bg-white border border-[#E2E8F0] rounded font-bold font-mono text-sm text-[#0F172A] inline-flex items-center gap-1">
-                    <span>+{editPoints}</span>
-                    <PKIcon className="w-3.5 h-3.5" />
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="1"
-                  max="50"
-                  value={editPoints}
-                  onChange={(e) => setEditPoints(Number(e.target.value))}
-                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#0F172A]"
-                />
-              </div>
-
-              {/* Row 4: Rekomendasi Takzir */}
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
-                  Rekomendasi Hukuman / Takzir
-                </label>
-                <textarea
-                  rows={2}
-                  value={editPenaltyDescription}
-                  onChange={(e) => setEditPenaltyDescription(e.target.value)}
-                  placeholder="Bentuk konsekuensi edukatif..."
-                  className="w-full p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none resize-none"
-                />
-              </div>
-
-              {/* Modal Footer with Mobile Safe Bottom Padding */}
-              <div className="flex items-center justify-end gap-3 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
-                <Button type="button" variant="ghost" size="sm" onClick={() => setEditingViolation(null)}>
-                  Batal
-                </Button>
-                <Button type="submit" variant="primary" size="sm" disabled={isSavingEdit}>
-                  {isSavingEdit ? 'Menyimpan...' : 'Simpan Perubahan'}
-                </Button>
-              </div>
-            </form>
-
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: KONFIRMASI HAPUS PELANGGARAN */}
-      {deletingViolation && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-md max-h-[90dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
-
-            {/* Modal Header */}
-            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-              <h3 className="text-base font-bold text-[#0F172A] font-headline">Hapus Catatan Pelanggaran?</h3>
-              <p className="text-xs text-[#64748B] mt-0.5 font-body">Konfirmasi pembatalan atau penghapusan berkas kasus</p>
-            </div>
-
-            <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-6">
-              <p className="text-[#334155] leading-relaxed">
-                Apakah Anda yakin ingin menghapus catatan pelanggaran <strong>"{deletingViolation.violation}"</strong> atas nama <strong>{deletingViolation.studentName}</strong>? Tindakan ini tidak dapat dibatalkan.
-              </p>
-
-              <div className="p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] text-[11px] text-[#64748B] space-y-1">
-                <p>Santri: <strong className="text-[#0F172A]">{deletingViolation.studentName}</strong> ({deletingViolation.kamar})</p>
-                <p className="flex items-center gap-1">
-                  <span>Bobot Poin:</span>
-                  <strong className="text-rose-600 inline-flex items-center gap-1">
-                    <span>{deletingViolation.points}</span>
-                    <PKIcon className="w-3.5 h-3.5" />
-                  </strong>
+              {/* Header Modal (Clean Flat Header, Zero Icon Policy) */}
+              <div className="px-6 sm:px-8 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+                <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">Edit Berkas Pelanggaran</h3>
+                <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                  Santri: <span className="font-semibold text-[#0F172A]">{editingViolation.studentName}</span> (NIS: {editingViolation.nis} • {editingViolation.kamar})
                 </p>
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-2 pb-8 sm:pb-0">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setDeletingViolation(null)}
-                >
-                  Batal
-                </Button>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleConfirmDelete}
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : 'Ya, Hapus Catatan'}
-                </Button>
-              </div>
-            </div>
+              {/* Edit Form */}
+              <form onSubmit={handleSaveEdit} className="p-6 sm:p-8 space-y-4 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-8">
+                
+                {/* Row 1: Tindakan & Kategori */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
+                      Tindakan Pelanggaran *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editViolationText}
+                      onChange={(e) => setEditViolationText(e.target.value)}
+                      className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
+                      Kategori Pelanggaran *
+                    </label>
+                    <select
+                      value={editCategory}
+                      onChange={(e) => setEditCategory(e.target.value)}
+                      className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none"
+                    >
+                      <option value="Kedisiplinan">Kedisiplinan</option>
+                      <option value="Ibadah">Ibadah</option>
+                      <option value="Bahasa">Bahasa</option>
+                      <option value="Kebersihan">Kebersihan</option>
+                      <option value="Kerapian">Kerapian</option>
+                      <option value="Adab & Akhlak">Adab & Akhlak</option>
+                      <option value="Lainnya">Lainnya</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Row 2: Tingkat & Status */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
+                      Tingkat Pelanggaran *
+                    </label>
+                    <select
+                      value={editSeverity}
+                      onChange={(e) => setEditSeverity(e.target.value as any)}
+                      className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none"
+                    >
+                      <option value="ringan">Ringan (1-12 Poin)</option>
+                      <option value="sedang">Sedang (13-25 Poin)</option>
+                      <option value="berat">Berat (26-38 Poin)</option>
+                      <option value="sangat_berat">Sangat Berat (39-50 Poin)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
+                      Status Sidang / Penyelesaian *
+                    </label>
+                    <select
+                      value={editStatus}
+                      onChange={(e) => setEditStatus(e.target.value as any)}
+                      className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none font-medium"
+                    >
+                      <option value="pending">Belum Selesai (Pending)</option>
+                      <option value="selesai">Selesai (Sudah Takzir)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Row 3: Bobot Poin Slider */}
+                <div className="p-4 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-[#0F172A] font-headline">
+                      Bobot Poin Pelanggaran (PK)
+                    </label>
+                    <span className="px-2.5 py-1 bg-white border border-[#E2E8F0] rounded font-bold font-mono text-sm text-[#0F172A] inline-flex items-center gap-1">
+                      <span>+{editPoints}</span>
+                      <PKIcon className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="1"
+                    max="50"
+                    value={editPoints}
+                    onChange={(e) => setEditPoints(Number(e.target.value))}
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#0F172A]"
+                  />
+                </div>
+
+                {/* Row 4: Rekomendasi Takzir */}
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
+                    Rekomendasi Hukuman / Takzir
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={editPenaltyDescription}
+                    onChange={(e) => setEditPenaltyDescription(e.target.value)}
+                    placeholder="Bentuk konsekuensi edukatif..."
+                    className="w-full p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none resize-none"
+                  />
+                </div>
+
+                {/* Modal Footer with Mobile Safe Bottom Padding */}
+                <div className="flex items-center justify-end gap-3 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setEditingViolation(null)}>
+                    Batal
+                  </Button>
+                  <Button type="submit" variant="primary" size="sm" disabled={isSavingEdit}>
+                    {isSavingEdit ? 'Menyimpan...' : 'Simpan Perubahan'}
+                  </Button>
+                </div>
+              </form>
+
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
+
+      {/* MODAL: KONFIRMASI HAPUS PELANGGARAN */}
+      <AnimatePresence>
+        {deletingViolation && (
+          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setDeletingViolation(null)}
+              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+            />
+
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-white w-full max-w-md max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
+            >
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
+              </div>
+
+              {/* Modal Header */}
+              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+                <h3 className="text-base font-bold text-[#0F172A] font-headline">Hapus Catatan Pelanggaran?</h3>
+                <p className="text-xs text-[#64748B] mt-0.5 font-body">Konfirmasi pembatalan atau penghapusan berkas kasus</p>
+              </div>
+
+              <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-6">
+                <p className="text-[#334155] leading-relaxed">
+                  Apakah Anda yakin ingin menghapus catatan pelanggaran <strong>"{deletingViolation.violation}"</strong> atas nama <strong>{deletingViolation.studentName}</strong>? Tindakan ini tidak dapat dibatalkan.
+                </p>
+
+                <div className="p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] text-[11px] text-[#64748B] space-y-1">
+                  <p>Santri: <strong className="text-[#0F172A]">{deletingViolation.studentName}</strong> ({deletingViolation.kamar})</p>
+                  <p className="flex items-center gap-1">
+                    <span>Bobot Poin:</span>
+                    <strong className="text-rose-600 inline-flex items-center gap-1">
+                      <span>{deletingViolation.points}</span>
+                      <PKIcon className="w-3.5 h-3.5" />
+                    </strong>
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-end gap-2.5 pt-2 pb-8 sm:pb-0">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setDeletingViolation(null)}
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleConfirmDelete}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : 'Ya, Hapus Catatan'}
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

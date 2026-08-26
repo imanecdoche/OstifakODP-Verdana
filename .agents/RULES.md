@@ -7,6 +7,19 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Animasi Spring Masuk & Keluar, Batasan Tinggi Maksimum Tanpa Offset, dan Dismiss Backdrop pada Seluruh Sheet Panel (Versi v1.1.0.71b):
+  - 1. ANIMASI MASUK & KELUAR TIPE SPRING (SPRING PHYSICS):
+    * Seluruh komponen sheet panel, modal, dan dialog overlay di seluruh aplikasi (`Modal.tsx`, `NewViolationModal.tsx`, `LoginModal.tsx`, `AchievementsView.tsx`, `ViolationsView.tsx`, `StudentsView.tsx`, `ClassesView.tsx`, `DormitoryView.tsx`, `DirectivesView.tsx`, `TreasuryView.tsx`, dan `StudentDetailModal.tsx`) wajib dibungkus dengan `<AnimatePresence>` dari `framer-motion`.
+    * Panel konten menggunakan elemen `<motion.div>` dengan konfigurasi fisika spring terstandarisasi untuk transisi masuk (`animate`) dan transisi keluar (`exit`):
+      `transition={{ type: 'spring', damping: 30, stiffness: 320, mass: 0.8 }}`.
+  - 2. BATASAN TINGGI MAKSIMUM & PENCEGAHAN OFFSET VIEWPORT:
+    * Panel ditetapkan dengan batas tinggi maksimum `max-h-[88dvh] sm:max-h-[90vh]` dan `overflow-hidden` pada kontainer induk, dengan area gulir internal yang ditangani oleh `<ScrollArea>` atau `overflow-y-auto`.
+    * Memastikan animasi spring tidak pernah keluar dari batas layar (offset) atau menyebabkan layout loncat.
+  - 3. PENUTUPAN KETIKA BACKDROP DIKLIK (CLICK BACKDROP TO DISMISS):
+    * Komponen latar belakang `<motion.div>` backdrop menerima `onClick={onClose}` / `onClick={() => setOpen(false)}` sehingga pengetukan di luar area panel sheet otomatis menutup panel secara intuitif.
+    * Panel konten utama diproteksi dengan `onClick={(e) => e.stopPropagation()}` agar pengetukan di dalam formulir atau konten tidak memicu penutupan tidak sengaja.
+  - 4. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Menghasilkan interaksi sentuh yang sangat halus, taktil, responsif, dan konsisten di seluruh platform desktop dan perangkat seluler.
 - **[2026-08-27]**: Transformasi Seluruh Komponen Popup/Overlay Menjadi Bottom Sheet Panel pada Mode Mobile (Versi v1.1.0.70b):
   - 1. BOTTOM SHEET PANEL RESPONSIF MOBILE:
     * Mengonfigurasi seluruh modal/popup/dialog overlay (`Modal.tsx`, `NewViolationModal.tsx`, `LoginModal.tsx`, `AchievementsView.tsx`, `ViolationsView.tsx`, `StudentsView.tsx`, `ClassesView.tsx`, `DormitoryView.tsx`, `DirectivesView.tsx`, `TreasuryView.tsx`, dan `StudentDetailModal.tsx`) agar pada tampilan mobile (`<640px` / ponsel) otomatis berubah menjadi *bottom sheet panel*.

@@ -1662,23 +1662,47 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
       {/* ========================================================================= */}
       {/* FIXED-DIMENSION ADD STUDENT POPUP MODAL (Dynamic Mobile Keyboard Height)  */}
       {/* ========================================================================= */}
-      {isAdding && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="w-[800px] max-w-full h-[calc(var(--modal-viewport-height,100dvh)-8px)] max-h-[calc(var(--modal-viewport-height,100dvh)-8px)] sm:h-[620px] sm:max-h-[90vh] bg-white rounded-t-2xl sm:rounded-lg shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_12px_40px_rgba(15,23,42,0.22)] border-t sm:border border-[#E2E8F0] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
-            
-            {/* 1. Modal Fixed Header (Clean Flat Header, Zero Icon Policy) */}
-            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
-                Tambah Profil Santri Baru
-              </h3>
-              <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                Lengkapi biodata santri, alokasi kelas, kamar, dan target hafalan
-              </p>
-            </div>
+      <AnimatePresence>
+        {isAdding && (
+          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setIsAdding(false)}
+              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+            />
+
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-[800px] max-w-full max-h-[88dvh] sm:max-h-[90vh] bg-white rounded-t-2xl sm:rounded-lg shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_12px_40px_rgba(15,23,42,0.22)] border-t sm:border border-[#E2E8F0] flex flex-col overflow-hidden z-10"
+            >
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
+              </div>
+              
+              {/* 1. Modal Fixed Header (Clean Flat Header, Zero Icon Policy) */}
+              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+                <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
+                  Tambah Profil Santri Baru
+                </h3>
+                <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                  Lengkapi biodata santri, alokasi kelas, kamar, dan target hafalan
+                </p>
+              </div>
 
             {/* 2. Modal Scrollable Content Body (Fixed Area) */}
             <ScrollArea
@@ -1842,11 +1866,11 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               </form>
             </ScrollArea>
 
-            {/* 3. Modal Fixed Footer (Height: 64px on Desktop, safe bottom padding on Mobile) */}
-            <div className="h-auto sm:h-16 shrink-0 bg-[#F8FAFC] border-t border-[#E2E8F0] px-6 py-3.5 pb-8 sm:pb-3.5 flex items-center justify-between">
-              <span className="text-[11px] text-[#64748B]">
-                Data Pokok & Akademik
-              </span>
+            {/* 3. Modal Fixed Footer with Mobile Safe Bottom Padding (Height: 64px) */}
+            <div className="h-16 shrink-0 bg-[#F8FAFC] border-t border-[#E2E8F0] px-6 pb-8 sm:pb-0 flex items-center justify-between">
+              <p className="text-[11px] text-[#64748B]">
+                * Kolom bertanda bintang wajib diisi
+              </p>
               
               <div className="flex items-center gap-3">
                 <Button 
@@ -1873,120 +1897,144 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               </div>
             </div>
 
-          </div>
+          </motion.div>
         </div>
       )}
+    </AnimatePresence>
 
 
       {/* FIXED-DIMENSION STUDENT EDIT MODAL (Strict Width & Height, 2 Tabs Layout) */}
       {/* ========================================================================= */}
-      {editingStudent && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          {/* Strict Fixed Size Window: 800px x 620px on Desktop, Bottom Sheet on Mobile */}
-          <div className="w-[800px] max-w-full h-[calc(var(--modal-viewport-height,100dvh)-8px)] max-h-[calc(var(--modal-viewport-height,100dvh)-8px)] sm:h-[620px] sm:max-h-[90vh] bg-white rounded-t-2xl sm:rounded-lg shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_12px_40px_rgba(15,23,42,0.22)] border-t sm:border border-[#E2E8F0] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
-            
-            {/* 1. Modal Fixed Header (Clean Flat Header, Zero Icon Policy) */}
-            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
-                Edit Data & Disiplin Santri
-              </h3>
-              <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                {editingStudent.studentName} {editingStudent.kamar ? `• ${editingStudent.kamar}` : ''}
-              </p>
-            </div>
+      <AnimatePresence>
+        {editingStudent && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setEditingStudent(null)}
+              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+            />
 
-            {/* 2. Fixed Modal Tab Bar (Height: 48px) */}
-            <div className="h-12 shrink-0 bg-[#F8FAFC] border-b border-[#E2E8F0] px-6 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setEditActiveTab('general')}
-                className={`h-9 px-4 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                  editActiveTab === 'general'
-                    ? 'bg-[#0F172A] text-white shadow-xs'
-                    : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0]/50'
-                }`}
-              >
-                Data Pokok & Akademik
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => setEditActiveTab('discipline')}
-                className={`h-9 px-4 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                  editActiveTab === 'discipline'
-                    ? 'bg-[#0F172A] text-white shadow-xs'
-                    : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0]/50'
-                }`}
-              >
-                Disiplin & Pelanggaran
-                {editPoin > 0 && (
-                  <span className="ml-1.5 text-[10px] font-mono font-bold text-rose-600 inline-flex items-center gap-0.5">
-                    <span>+{editPoin}</span>
-                    <PKIcon className="w-2.5 h-2.5" />
-                  </span>
-                )}
-              </button>
-            </div>
-
-            {/* 3. Modal Scrollable Content Body (Fixed Area) */}
-            <ScrollArea
-              className="flex-1 min-h-0"
-              viewportClassName="p-6 text-xs font-body"
-              topOffset="top-4"
-              bottomOffset="bottom-4"
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-[800px] max-w-full max-h-[88dvh] sm:h-[620px] sm:max-h-[90vh] bg-white rounded-t-2xl sm:rounded-lg shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_12px_40px_rgba(15,23,42,0.22)] border-t sm:border border-[#E2E8F0] flex flex-col overflow-hidden z-10"
             >
-              <form id="edit-student-form" onSubmit={handleSaveEdit} className="space-y-6">
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
+              </div>
+              
+              {/* 1. Modal Fixed Header (Clean Flat Header, Zero Icon Policy) */}
+              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+                <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
+                  Edit Data & Disiplin Santri
+                </h3>
+                <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                  {editingStudent.studentName} {editingStudent.kamar ? `• ${editingStudent.kamar}` : ''}
+                </p>
+              </div>
+
+              {/* 2. Fixed Modal Tab Bar (Height: 48px) */}
+              <div className="h-12 shrink-0 bg-[#F8FAFC] border-b border-[#E2E8F0] px-6 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditActiveTab('general')}
+                  className={`h-9 px-4 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                    editActiveTab === 'general'
+                      ? 'bg-[#0F172A] text-white shadow-xs'
+                      : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0]/50'
+                  }`}
+                >
+                  Data Pokok & Akademik
+                </button>
                 
-                {/* ------------------------------------------------------------- */}
-                {/* TAB 1: DATA POKOK & AKADEMIK                                  */}
-                {/* ------------------------------------------------------------- */}
-                {editActiveTab === 'general' && (
-                  <div className="space-y-5 animate-in fade-in duration-150">
-                    
-                    {/* Row 1: Nama Lengkap */}
-                    <div>
-                      <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
-                        Nama Lengkap Santri *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        placeholder="Contoh: Abdullah Faiz"
-                        className="w-full h-10 px-3.5 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-medium focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
-                      />
-                    </div>
+                <button
+                  type="button"
+                  onClick={() => setEditActiveTab('discipline')}
+                  className={`h-9 px-4 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                    editActiveTab === 'discipline'
+                      ? 'bg-[#0F172A] text-white shadow-xs'
+                      : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0]/50'
+                  }`}
+                >
+                  Disiplin & Pelanggaran
+                  {editPoin > 0 && (
+                    <span className="ml-1.5 text-[10px] font-mono font-bold text-rose-600 inline-flex items-center gap-0.5">
+                      <span>+{editPoin}</span>
+                      <PKIcon className="w-2.5 h-2.5" />
+                    </span>
+                  )}
+                </button>
+              </div>
 
-                    {/* Row 2: Tanggal Lahir & Domisili */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* 3. Modal Scrollable Content Body (Fixed Area) */}
+              <ScrollArea
+                className="flex-1 min-h-0"
+                viewportClassName="p-6 text-xs font-body"
+                topOffset="top-4"
+                bottomOffset="bottom-4"
+              >
+                <form id="edit-student-form" onSubmit={handleSaveEdit} className="space-y-6">
+                  
+                  {/* ------------------------------------------------------------- */}
+                  {/* TAB 1: DATA POKOK & AKADEMIK                                  */}
+                  {/* ------------------------------------------------------------- */}
+                  {editActiveTab === 'general' && (
+                    <div className="space-y-5 animate-in fade-in duration-150">
+                      
+                      {/* Row 1: Nama Lengkap */}
                       <div>
                         <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
-                          Tanggal Lahir
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="date"
-                            value={editBirthDate}
-                            onChange={(e) => setEditBirthDate(e.target.value)}
-                            className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
-                          Domisili / Asal Kota
+                          Nama Lengkap Santri *
                         </label>
                         <input
                           type="text"
-                          value={editDomicile}
-                          onChange={(e) => setEditDomicile(e.target.value)}
-                          placeholder="Contoh: Surabaya, Jawa Timur"
+                          required
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          placeholder="Contoh: Abdullah Faiz"
+                          className="w-full h-10 px-3.5 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] font-medium focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
+                        />
+                      </div>
+
+                      {/* Row 2: Tanggal Lahir & Domisili */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
+                            Tanggal Lahir
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="date"
+                              value={editBirthDate}
+                              onChange={(e) => setEditBirthDate(e.target.value)}
+                              className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block font-semibold mb-1 text-[#0F172A] font-headline">
+                            Domisili / Asal Kota
+                          </label>
+                          <input
+                            type="text"
+                            value={editDomicile}
+                            onChange={(e) => setEditDomicile(e.target.value)}
+                            placeholder="Contoh: Surabaya, Jawa Timur"
                           className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] focus:outline-none"
                         />
                       </div>
@@ -2284,8 +2332,8 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               </form>
             </ScrollArea>
 
-            {/* 4. Modal Fixed Footer (Height: 64px) */}
-            <div className="h-16 shrink-0 bg-[#F8FAFC] border-t border-[#E2E8F0] px-6 flex items-center justify-between">
+            {/* 4. Modal Fixed Footer with Mobile Safe Bottom Padding (Height: 64px) */}
+            <div className="h-16 shrink-0 bg-[#F8FAFC] border-t border-[#E2E8F0] px-6 pb-8 sm:pb-0 flex items-center justify-between">
               <button
                 type="button"
                 onClick={() => setStudentToDelete(editingStudent)}
@@ -2319,48 +2367,74 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               </div>
             </div>
 
-          </div>
+          </motion.div>
         </div>
       )}
+    </AnimatePresence>
 
       {/* Delete Student Confirmation Dialog */}
-      {studentToDelete && (
-        <div data-lenis-prevent className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-md max-h-[90dvh] sm:max-h-[90vh] overflow-hidden rounded-t-2xl sm:rounded-lg shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_12px_40px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95 flex flex-col">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
+      <AnimatePresence>
+        {studentToDelete && (
+          <div data-lenis-prevent className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setStudentToDelete(null)}
+              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+            />
 
-            {/* Modal Header */}
-            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-              <h3 className="text-base font-bold text-[#0F172A] font-headline">Konfirmasi Hapus Data Santri</h3>
-              <p className="text-xs text-[#64748B] mt-0.5 font-body">Tindakan ini tidak dapat dibatalkan</p>
-            </div>
-
-            <div className="p-6 space-y-4 text-xs">
-              <p className="text-[#334155] leading-relaxed">
-                Apakah Anda yakin ingin menghapus data <strong className="text-[#0F172A]">{studentToDelete.studentName}</strong>? Seluruh catatan akademik dan disiplin akan dihapus dari sistem.
-              </p>
-
-              <div className="flex items-center justify-end gap-3 pt-2 pb-8 sm:pb-0">
-                <Button type="button" variant="ghost" size="sm" onClick={() => setStudentToDelete(null)}>
-                  Batal
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="destructive" 
-                  size="sm" 
-                  onClick={handleConfirmDelete} 
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? 'Menghapus...' : 'Ya, Hapus Santri'}
-                </Button>
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-white w-full max-w-md max-h-[88dvh] sm:max-h-[90vh] overflow-hidden rounded-t-2xl sm:rounded-lg shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_12px_40px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] flex flex-col z-10"
+            >
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
               </div>
-            </div>
+
+              {/* Modal Header */}
+              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+                <h3 className="text-base font-bold text-[#0F172A] font-headline">Konfirmasi Hapus Data Santri</h3>
+                <p className="text-xs text-[#64748B] mt-0.5 font-body">Tindakan ini tidak dapat dibatalkan</p>
+              </div>
+
+              <div className="p-6 space-y-4 text-xs">
+                <p className="text-[#334155] leading-relaxed">
+                  Apakah Anda yakin ingin menghapus data <strong className="text-[#0F172A]">{studentToDelete.studentName}</strong>? Seluruh catatan akademik dan disiplin akan dihapus dari sistem.
+                </p>
+
+                <div className="flex items-center justify-end gap-3 pt-2 pb-8 sm:pb-0">
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setStudentToDelete(null)}>
+                    Batal
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="destructive" 
+                    size="sm" 
+                    onClick={handleConfirmDelete} 
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? 'Menghapus...' : 'Ya, Hapus Santri'}
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 };

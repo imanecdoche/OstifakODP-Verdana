@@ -501,146 +501,171 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
       </AnimatePresence>
 
       {/* Room Detail Modal Dialog */}
-      {selectedRoomModal && !selectedDetailStudent && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/40 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-[#FFFFFF] w-full max-w-3xl max-h-[90dvh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-lg shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_8px_32px_rgba(15,23,42,0.15)] border-t sm:border border-[#E2E8F0] overflow-hidden animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
-            
-            {/* Modal Header (Clean Flat Header, Zero Icon Policy) */}
-            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
-                Kamar {selectedRoomModal.roomName}
-              </h3>
-              <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                {selectedRoomModal.dormitoryName} • Kapasitas Maksimal {selectedRoomModal.capacity} Santri
-              </p>
-            </div>
+      <AnimatePresence>
+        {selectedRoomModal && !selectedDetailStudent && (
+          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setSelectedRoomModal(null)}
+              className="fixed inset-0 bg-[#0F172A]/40 backdrop-blur-xs cursor-default"
+            />
 
-            {/* Modal Body - Scrollable */}
-            <ScrollArea
-              className="flex-1 min-h-0"
-              viewportClassName="p-4 sm:p-6 space-y-6 text-xs pb-12 sm:pb-6"
-              topOffset="top-4"
-              bottomOffset="bottom-4"
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-[#FFFFFF] w-full max-w-3xl max-h-[88dvh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-lg shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_8px_32px_rgba(15,23,42,0.15)] border-t sm:border border-[#E2E8F0] overflow-hidden z-10"
             >
-              {/* Matriks Penilaian Kamar */}
-              <div>
-                <h4 className="font-semibold text-[#0F172A] uppercase tracking-[0.5px] font-headline mb-3 text-xs">
-                  MATRIKS PENILAIAN KAMAR
-                </h4>
-                <div className="grid grid-cols-3 gap-4 p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md">
-                  <div>
-                    <p className="text-[#64748B] font-medium uppercase text-[10px]">Kebersihan</p>
-                    <p className="text-base font-bold text-[#0F172A] mt-0.5">
-                      {selectedRoomModal.cleanlinessScore > 0 ? `${selectedRoomModal.cleanlinessScore} / 100` : 'Belum dinilai'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[#64748B] font-medium uppercase text-[10px]">Kerapihan</p>
-                    <p className="text-base font-bold text-[#0F172A] mt-0.5">
-                      {selectedRoomModal.neatnessScore > 0 ? `${selectedRoomModal.neatnessScore} / 100` : 'Belum dinilai'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[#64748B] font-medium uppercase text-[10px]">Ketertiban</p>
-                    <p className="text-base font-bold text-[#0F172A] mt-0.5">
-                      {selectedRoomModal.orderlinessScore > 0 ? `${selectedRoomModal.orderlinessScore} / 100` : 'Belum dinilai'}
-                    </p>
-                  </div>
-                </div>
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
+              </div>
+              
+              {/* Modal Header (Clean Flat Header, Zero Icon Policy) */}
+              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+                <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
+                  Kamar {selectedRoomModal.roomName}
+                </h3>
+                <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                  {selectedRoomModal.dormitoryName} • Kapasitas Maksimal {selectedRoomModal.capacity} Santri
+                </p>
               </div>
 
-              {/* Anggota Penghuni Kamar */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-[#0F172A] uppercase tracking-[0.5px] font-headline text-xs">
-                    DAFTAR SANTRI PENGHUNI ({modalRoomSantri.length} / {selectedRoomModal.capacity})
+              {/* Modal Body - Scrollable */}
+              <ScrollArea
+                className="flex-1 min-h-0"
+                viewportClassName="p-4 sm:p-6 space-y-6 text-xs pb-12 sm:pb-6"
+                topOffset="top-4"
+                bottomOffset="bottom-4"
+              >
+                {/* Matriks Penilaian Kamar */}
+                <div>
+                  <h4 className="font-semibold text-[#0F172A] uppercase tracking-[0.5px] font-headline mb-3 text-xs">
+                    MATRIKS PENILAIAN KAMAR
                   </h4>
-                </div>
-                {modalRoomSantri.length === 0 ? (
-                  <div className="p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md text-[#64748B] text-center">
-                    Belum ada santri yang didaftarkan ke kamar ini.
+                  <div className="grid grid-cols-3 gap-4 p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md">
+                    <div>
+                      <p className="text-[#64748B] font-medium uppercase text-[10px]">Kebersihan</p>
+                      <p className="text-base font-bold text-[#0F172A] mt-0.5">
+                        {selectedRoomModal.cleanlinessScore > 0 ? `${selectedRoomModal.cleanlinessScore} / 100` : 'Belum dinilai'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[#64748B] font-medium uppercase text-[10px]">Kerapihan</p>
+                      <p className="text-base font-bold text-[#0F172A] mt-0.5">
+                        {selectedRoomModal.neatnessScore > 0 ? `${selectedRoomModal.neatnessScore} / 100` : 'Belum dinilai'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[#64748B] font-medium uppercase text-[10px]">Ketertiban</p>
+                      <p className="text-base font-bold text-[#0F172A] mt-0.5">
+                        {selectedRoomModal.orderlinessScore > 0 ? `${selectedRoomModal.orderlinessScore} / 100` : 'Belum dinilai'}
+                      </p>
+                    </div>
                   </div>
-                ) : (
-                  <ScrollArea
-                    className="max-h-60"
-                    viewportClassName="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pr-1"
-                    topOffset="top-1"
-                    bottomOffset="bottom-1"
-                  >
-                    {modalRoomSantri.map((res) => (
-                      <div
-                        key={res.id}
-                        onClick={() => setSelectedDetailStudent(res)}
-                        className="bg-white rounded-xl border border-slate-200/80 hover:border-[#059669] hover:bg-slate-50/80 shadow-2xs transition-all relative overflow-hidden group cursor-pointer flex flex-col justify-between p-3"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="min-w-0 pr-2">
-                            <span className="font-bold text-[#0F172A] text-xs truncate block group-hover:text-[#059669] transition-colors">{res.studentName}</span>
-                            <span className="text-[10px] text-[#64748B]">{res.kelas}</span>
-                          </div>
-                          <div className="w-6 h-6 rounded-full overflow-hidden bg-[#F8FAFC] border border-[#E2E8F0] group-hover:bg-[#059669] group-hover:border-[#059669] text-[#475569] group-hover:text-white flex items-center justify-center transition-all duration-300 shrink-0">
-                            <div className="relative w-3.5 h-3.5 overflow-hidden flex items-center justify-center">
-                              <ArrowUpRight className="w-3.5 h-3.5 text-inherit transition-transform duration-300 ease-out transform group-hover:translate-x-3.5 group-hover:-translate-y-3.5 shrink-0" />
-                              <ArrowUpRight className="w-3.5 h-3.5 text-inherit absolute inset-0 transition-transform duration-300 ease-out transform -translate-x-3.5 translate-y-3.5 group-hover:translate-x-0 group-hover:translate-y-0 shrink-0" />
+                </div>
+
+                {/* Anggota Penghuni Kamar */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-[#0F172A] uppercase tracking-[0.5px] font-headline text-xs">
+                      DAFTAR SANTRI PENGHUNI ({modalRoomSantri.length} / {selectedRoomModal.capacity})
+                    </h4>
+                  </div>
+                  {modalRoomSantri.length === 0 ? (
+                    <div className="p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md text-[#64748B] text-center">
+                      Belum ada santri yang didaftarkan ke kamar ini.
+                    </div>
+                  ) : (
+                    <ScrollArea
+                      className="max-h-60"
+                      viewportClassName="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pr-1"
+                      topOffset="top-1"
+                      bottomOffset="bottom-1"
+                    >
+                      {modalRoomSantri.map((res) => (
+                        <div
+                          key={res.id}
+                          onClick={() => setSelectedDetailStudent(res)}
+                          className="bg-white rounded-xl border border-slate-200/80 hover:border-[#059669] hover:bg-slate-50/80 shadow-2xs transition-all relative overflow-hidden group cursor-pointer flex flex-col justify-between p-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="min-w-0 pr-2">
+                              <span className="font-bold text-[#0F172A] text-xs truncate block group-hover:text-[#059669] transition-colors">{res.studentName}</span>
+                              <span className="text-[10px] text-[#64748B]">{res.kelas}</span>
+                            </div>
+                            <div className="w-6 h-6 rounded-full overflow-hidden bg-[#F8FAFC] border border-[#E2E8F0] group-hover:bg-[#059669] group-hover:border-[#059669] text-[#475569] group-hover:text-white flex items-center justify-center transition-all duration-300 shrink-0">
+                              <div className="relative w-3.5 h-3.5 overflow-hidden flex items-center justify-center">
+                                <ArrowUpRight className="w-3.5 h-3.5 text-inherit transition-transform duration-300 ease-out transform group-hover:translate-x-3.5 group-hover:-translate-y-3.5 shrink-0" />
+                                <ArrowUpRight className="w-3.5 h-3.5 text-inherit absolute inset-0 transition-transform duration-300 ease-out transform -translate-x-3.5 translate-y-3.5 group-hover:translate-x-0 group-hover:translate-y-0 shrink-0" />
+                              </div>
                             </div>
                           </div>
+                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#F1F5F9] text-[11px] text-[#64748B]">
+                            <span>{res.hafalan || '0 Juz'}</span>
+                            <span className={res.isTahsinPassed ? 'text-[#059669] font-medium' : 'text-[#D97706] font-medium'}>
+                              {res.isTahsinPassed ? 'Lulus Tahsin' : 'Bimbingan'}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#F1F5F9] text-[11px] text-[#64748B]">
-                          <span>{res.hafalan || '0 Juz'}</span>
-                          <span className={res.isTahsinPassed ? 'text-[#059669] font-medium' : 'text-[#D97706] font-medium'}>
-                            {res.isTahsinPassed ? 'Lulus Tahsin' : 'Bimbingan'}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </ScrollArea>
-                )}
-              </div>
-
-              {/* Rekam Prestasi & Rekam Pelanggaran (2 Kolom) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-[#0F172A] uppercase tracking-[0.5px] font-headline mb-2 text-xs">
-                    REKAM PRESTASI
-                  </h4>
-                  <div className="p-4 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
-                    <p className="text-[#64748B] italic">
-                      Belum ada riwayat prestasi.
-                    </p>
-                  </div>
+                      ))}
+                    </ScrollArea>
+                  )}
                 </div>
 
-                <div>
-                  <h4 className="font-semibold text-[#0F172A] uppercase tracking-[0.5px] font-headline mb-2 text-xs">
-                    REKAM PELANGGARAN
-                  </h4>
-                  <div className="p-4 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
-                    <p className="text-[#64748B] italic">
-                      Belum ada riwayat pelanggaran.
-                    </p>
+                {/* Rekam Prestasi & Rekam Pelanggaran (2 Kolom) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold text-[#0F172A] uppercase tracking-[0.5px] font-headline mb-2 text-xs">
+                      REKAM PRESTASI
+                    </h4>
+                    <div className="p-4 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+                      <p className="text-[#64748B] italic">
+                        Belum ada riwayat prestasi.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-[#0F172A] uppercase tracking-[0.5px] font-headline mb-2 text-xs">
+                      REKAM PELANGGARAN
+                    </h4>
+                    <div className="p-4 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+                      <p className="text-[#64748B] italic">
+                        Belum ada riwayat pelanggaran.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </ScrollArea>
+              </ScrollArea>
 
-            {/* Modal Fixed Footer */}
-            <div className="bg-[#F8FAFC] px-6 py-3.5 border-t border-[#E2E8F0] flex items-center justify-end shrink-0">
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setSelectedRoomModal(null)}
-                className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
-              >
-                Tutup Detail
-              </Button>
-            </div>
+              {/* Modal Fixed Footer */}
+              <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-[#E2E8F0] flex items-center justify-end shrink-0">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => setSelectedRoomModal(null)}
+                  className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
+                >
+                  Tutup Detail
+                </Button>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 };

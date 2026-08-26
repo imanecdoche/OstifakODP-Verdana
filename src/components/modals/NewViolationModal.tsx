@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   SeverityLevel, 
   PenaltyStatus, 
@@ -177,122 +177,134 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
   };
 
   return (
-    <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-      <div className="bg-white w-full max-w-2xl md:max-w-3xl rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden max-h-[90dvh] sm:max-h-[90vh] flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-        
-        {/* Mobile Top Drag Handle */}
-        <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-          <div className="w-10 h-1 bg-slate-300 rounded-full" />
-        </div>
+    <AnimatePresence>
+      {isOpen && (
+        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            onClick={onClose}
+            className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+          />
 
-        {/* Header Modal (Clean Flat Header, Zero Icon Policy) */}
-        <div className="px-6 sm:px-8 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-          <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">Catat Pelanggaran Santri</h3>
-          <p className="text-xs text-[#64748B] font-body mt-0.5">Input berkas sidang & rekam poin kedisiplinan santri</p>
-        </div>
-
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-5 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-8">
-          
-          {/* Row 1: Searchable Combobox Santri */}
-          <div ref={studentComboRef} className="relative">
-            <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
-              Nama Lengkap Santri *
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                required
-                value={isStudentOpen ? studentQuery : studentName}
-                onChange={(e) => {
-                  setStudentQuery(e.target.value);
-                  setIsStudentOpen(true);
-                }}
-                onFocus={() => {
-                  setStudentQuery('');
-                  setIsStudentOpen(true);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Escape') setIsStudentOpen(false);
-                  if (e.key === 'Enter' && isStudentOpen && filteredStudents.length > 0) {
-                    e.preventDefault();
-                    handleSelectStudent(filteredStudents[0]);
-                  }
-                }}
-                placeholder="Ketik untuk mencari nama santri..."
-                className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none transition-all cursor-pointer font-medium"
-              />
+          <motion.div
+            initial={{ y: '100%', opacity: 0.8 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{
+              type: 'spring',
+              damping: 30,
+              stiffness: 320,
+              mass: 0.8,
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative bg-white w-full max-w-2xl md:max-w-3xl rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden max-h-[88dvh] sm:max-h-[90vh] flex flex-col z-10"
+          >
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
             </div>
 
-            {/* Custom Floating Dropdown Overlay */}
-            {isStudentOpen && (
-              <div className="absolute top-full left-0 mt-1.5 w-full z-50 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden max-h-60 animate-in fade-in zoom-in-95">
-                <ScrollArea
-                  className="max-h-60"
-                  viewportClassName="p-1.5 space-y-1"
-                  topOffset="top-1"
-                  bottomOffset="bottom-1"
-                >
-                  {filteredStudents.length === 0 ? (
-                    <div className="p-4 text-xs text-slate-500 text-center">
-                      <p className="font-semibold text-slate-700">Santri tidak ditemukan</p>
-                      <p className="text-[11px] text-slate-400 mt-0.5">Coba cari dengan kata kunci nama atau asrama lain.</p>
-                    </div>
-                  ) : (
-                    filteredStudents.map((s) => (
-                      <button
-                        key={s.id}
-                        type="button"
-                        onClick={() => handleSelectStudent(s)}
-                        className={`w-full px-3.5 py-2.5 rounded-lg flex flex-col text-left transition-colors cursor-pointer hover:bg-slate-50 ${
-                          studentName === s.studentName ? 'bg-emerald-50/80 border border-emerald-200/60' : ''
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-slate-900 text-xs">{s.studentName}</span>
-                          {s.nis && s.nis !== '-' && (
-                            <span className="text-[10px] font-mono text-slate-400">NIS: {s.nis}</span>
-                          )}
+            <div className="px-6 sm:px-8 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">Catat Pelanggaran Santri</h3>
+              <p className="text-xs text-[#64748B] font-body mt-0.5">Input berkas sidang & rekam poin kedisiplinan santri</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-5 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-8">
+              
+              <div ref={studentComboRef} className="relative">
+                <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
+                  Nama Lengkap Santri *
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    value={isStudentOpen ? studentQuery : studentName}
+                    onChange={(e) => {
+                      setStudentQuery(e.target.value);
+                      setIsStudentOpen(true);
+                    }}
+                    onFocus={() => {
+                      setStudentQuery('');
+                      setIsStudentOpen(true);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') setIsStudentOpen(false);
+                      if (e.key === 'Enter' && isStudentOpen && filteredStudents.length > 0) {
+                        e.preventDefault();
+                        handleSelectStudent(filteredStudents[0]);
+                      }
+                    }}
+                    placeholder="Ketik untuk mencari nama santri..."
+                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none transition-all cursor-pointer font-medium"
+                  />
+                </div>
+
+                {isStudentOpen && (
+                  <div className="absolute top-full left-0 mt-1.5 w-full z-50 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden max-h-60 animate-in fade-in zoom-in-95">
+                    <ScrollArea
+                      className="max-h-60"
+                      viewportClassName="p-1.5 space-y-1"
+                      topOffset="top-1"
+                      bottomOffset="bottom-1"
+                    >
+                      {filteredStudents.length === 0 ? (
+                        <div className="p-4 text-xs text-slate-500 text-center">
+                          <p className="font-semibold text-slate-700">Santri tidak ditemukan</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">Coba cari dengan kata kunci nama atau asrama lain.</p>
                         </div>
-                        <span className="text-[11px] text-slate-500 mt-0.5">
-                          Kamar {s.kamar || '-'} • {s.kelas || '-'}
-                        </span>
-                      </button>
-                    ))
-                  )}
-                </ScrollArea>
+                      ) : (
+                        filteredStudents.map((s) => (
+                          <div
+                            key={s.id}
+                            onClick={() => handleSelectStudent(s)}
+                            className="p-2.5 hover:bg-slate-50 rounded-lg cursor-pointer flex items-center justify-between transition-colors"
+                          >
+                            <div>
+                              <p className="font-semibold text-xs text-slate-900">{s.studentName}</p>
+                              <p className="text-[10px] text-slate-400">NIS: {s.nis || '-'} • {s.kamar || 'Kamar -'}</p>
+                            </div>
+                            <span className="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
+                              {s.kelas || '-'}
+                            </span>
+                          </div>
+                        ))
+                      )}
+                    </ScrollArea>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Row 2: Kamar Asrama & Kelas Santri (Otomatis & Disabled) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
-                Kamar Asrama (Otomatis)
-              </label>
-              <input
-                type="text"
-                readOnly
-                disabled
-                value={kamar || 'Pilih santri terlebih dahulu'}
-                className="w-full h-10 px-3.5 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-500 cursor-not-allowed font-medium select-none"
-              />
-            </div>
+              {/* Row 2: Kamar & Kelas (Auto-Filled) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
+                    Kamar Asrama (Otomatis)
+                  </label>
+                  <input
+                    type="text"
+                    readOnly
+                    disabled
+                    value={kamar || 'Pilih santri terlebih dahulu'}
+                    className="w-full h-10 px-3.5 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-500 cursor-not-allowed font-medium select-none"
+                  />
+                </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
-                Kelas Santri (Otomatis)
-              </label>
-              <input
-                type="text"
-                readOnly
-                disabled
-                value={kelas || 'Pilih santri terlebih dahulu'}
-                className="w-full h-10 px-3.5 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-500 cursor-not-allowed font-medium select-none"
-              />
-            </div>
-          </div>
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
+                    Kelas Santri (Otomatis)
+                  </label>
+                  <input
+                    type="text"
+                    readOnly
+                    disabled
+                    value={kelas || 'Pilih santri terlebih dahulu'}
+                    className="w-full h-10 px-3.5 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-500 cursor-not-allowed font-medium select-none"
+                  />
+                </div>
+              </div>
 
           {/* Row 3: Kategori Pelanggaran & Tindakan Pelanggaran */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -396,10 +408,12 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
               Simpan Berkas Pelanggaran
             </Button>
           </div>
-        </form>
+            </form>
 
-      </div>
-    </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 };
 

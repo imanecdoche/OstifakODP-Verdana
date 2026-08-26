@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollText, Plus, Send, X } from 'lucide-react';
 import { MudirDirective } from '../../types';
 import { Button } from '../ui/Button';
@@ -188,110 +189,135 @@ export const DirectivesView: React.FC = () => {
       </div>
 
       {/* Popup Modal (Jendela Mengapung / Dialog Overlay) */}
-      {isModalOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          data-modal="true"
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto font-body"
-        >
-          <div className="relative w-full max-w-xl bg-white rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-2xl border-t sm:border border-slate-200 overflow-hidden flex flex-col max-h-[90dvh] sm:max-h-[92vh] animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
+      <AnimatePresence>
+        {isModalOpen && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            data-modal="true"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6 overflow-hidden pointer-events-auto font-body"
+          >
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setIsModalOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-default"
+            />
 
-            {/* Modal Header (Clean Flat Header, Zero Icon Policy) */}
-            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-              <h2 className="text-base sm:text-lg font-bold text-[#0F172A] font-headline tracking-tight">
-                Penerbitan Instruksi Resmi
-              </h2>
-              <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                Arahan Mudir: K.H. Mulhat Ali Nuh, Lc., M.A.
-              </p>
-            </div>
-
-            {/* Modal Form Content */}
-            <form onSubmit={handleCreateDirective} className="p-6 sm:p-7 space-y-5 overflow-y-auto text-xs flex-1 min-h-0">
-              <div>
-                <label className="block font-semibold mb-1.5 text-[#0F172A] font-headline">
-                  Judul / Perihal Instruksi *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Contoh: Pengetatan Disiplin Shalat Shubuh & Halaqah"
-                  className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-slate-900 focus:outline-none font-body shadow-2xs"
-                />
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-xl bg-white rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-2xl border-t sm:border border-slate-200 overflow-hidden flex flex-col max-h-[88dvh] sm:max-h-[90vh] z-10"
+            >
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Modal Header (Clean Flat Header, Zero Icon Policy) */}
+              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+                <h2 className="text-base sm:text-lg font-bold text-[#0F172A] font-headline tracking-tight">
+                  Penerbitan Instruksi Resmi
+                </h2>
+                <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                  Arahan Mudir: K.H. Mulhat Ali Nuh, Lc., M.A.
+                </p>
+              </div>
+
+              {/* Modal Form Content */}
+              <form onSubmit={handleCreateDirective} className="p-6 sm:p-7 space-y-5 overflow-y-auto text-xs flex-1 min-h-0">
                 <div>
                   <label className="block font-semibold mb-1.5 text-[#0F172A] font-headline">
-                    Target Divisi
+                    Judul / Perihal Instruksi *
                   </label>
                   <input
                     type="text"
-                    value={targetDivision}
-                    onChange={(e) => setTargetDivision(e.target.value)}
-                    placeholder="Contoh: Keamanan, Pengasuhan..."
+                    required
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Contoh: Pengetatan Disiplin Shalat Shubuh & Halaqah"
                     className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-slate-900 focus:outline-none font-body shadow-2xs"
                   />
                 </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-semibold mb-1.5 text-[#0F172A] font-headline">
+                      Target Divisi
+                    </label>
+                    <input
+                      type="text"
+                      value={targetDivision}
+                      onChange={(e) => setTargetDivision(e.target.value)}
+                      placeholder="Contoh: Keamanan, Pengasuhan..."
+                      className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-slate-900 focus:outline-none font-body shadow-2xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold mb-1.5 text-[#0F172A] font-headline">
+                      Tingkat Prioritas
+                    </label>
+                    <select
+                      value={priority}
+                      onChange={(e) => setPriority(e.target.value as any)}
+                      className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-slate-900 focus:outline-none font-body shadow-2xs"
+                    >
+                      <option value="normal">Normal</option>
+                      <option value="sedang">Sedang</option>
+                      <option value="tinggi">Tinggi (Mendesak)</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div>
                   <label className="block font-semibold mb-1.5 text-[#0F172A] font-headline">
-                    Tingkat Prioritas
+                    Rincian Instruksi / Petunjuk Pelaksanaan *
                   </label>
-                  <select
-                    value={priority}
-                    onChange={(e) => setPriority(e.target.value as any)}
-                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-slate-900 focus:outline-none font-body shadow-2xs"
-                  >
-                    <option value="normal">Normal</option>
-                    <option value="sedang">Sedang</option>
-                    <option value="tinggi">Tinggi (Mendesak)</option>
-                  </select>
+                  <textarea
+                    required
+                    rows={4}
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Tuliskan butir-butir instruksi, batas waktu, dan teknis implementasi..."
+                    className="w-full p-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-slate-900 focus:outline-none font-body shadow-2xs resize-none"
+                  />
                 </div>
-              </div>
 
-              <div>
-                <label className="block font-semibold mb-1.5 text-[#0F172A] font-headline">
-                  Rincian Instruksi / Petunjuk Pelaksanaan *
-                </label>
-                <textarea
-                  required
-                  rows={4}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Tuliskan butir-butir instruksi, batas waktu, dan teknis implementasi..."
-                  className="w-full p-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-slate-900 focus:outline-none font-body shadow-2xs resize-none"
-                />
-              </div>
-
-              {/* Modal Actions Footer with Safe Bottom Padding */}
-              <div className="flex items-center justify-end gap-3 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-5 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-2"
-                >
-                  {loading ? 'Menyimpan...' : 'Terbitkan Instruksi'}
-                </button>
-              </div>
-            </form>
+                {/* Modal Actions Footer with Safe Bottom Padding */}
+                <div className="flex items-center justify-end gap-3 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-4 py-2 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-5 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-2"
+                  >
+                    {loading ? 'Menyimpan...' : 'Terbitkan Instruksi'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* Directives Grid List (2 Cards Per Row) */}
       {directives.length === 0 ? (

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Users,
   X,
@@ -2368,617 +2369,744 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       </div>
 
       {/* 2. NESTED MODAL: REKAM IZIN SANTRI */}
-      {isIzinModalOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-lg max-h-[90dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
+      <AnimatePresence>
+        {isIzinModalOpen && (
+          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setIsIzinModalOpen(false)}
+              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+            />
 
-            {/* Header Modal */}
-            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
-                Rekam Izin Santri
-              </h3>
-              <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                {currentStudent.studentName} • {currentStudent.kamar}
-              </p>
-            </div>
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-white w-full max-w-lg max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
+            >
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
+              </div>
 
-            <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-6">
-              <div>
-                <label className="block font-semibold text-[#0F172A] mb-1">Tipe Izin</label>
-                <select
-                  value={izinType}
-                  onChange={(e) => setIzinType(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-[#E2E8F0] rounded-lg text-xs font-medium focus:border-[#0F172A] focus:outline-none"
+              {/* Header Modal */}
+              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+                <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
+                  Rekam Izin Santri
+                </h3>
+                <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                  {currentStudent.studentName} • {currentStudent.kamar}
+                </p>
+              </div>
+
+              <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-6">
+                <div>
+                  <label className="block font-semibold text-[#0F172A] mb-1">Tipe Izin</label>
+                  <select
+                    value={izinType}
+                    onChange={(e) => setIzinType(e.target.value)}
+                    className="w-full h-10 px-3 bg-white border border-[#E2E8F0] rounded-lg text-xs font-medium focus:border-[#0F172A] focus:outline-none"
+                  >
+                    <option value="Pulang (Sakit)">Pulang (Sakit)</option>
+                    <option value="Pulang (Keluarga/Acara)">Pulang (Keluarga/Acara)</option>
+                    <option value="Keluar Kampus (Medis)">Keluar Kampus (Medis)</option>
+                    <option value="Keluar Kampus (Lomba/Tugas)">Keluar Kampus (Lomba/Tugas)</option>
+                    <option value="Izin Khusus">Izin Khusus</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-[#0F172A] mb-1">Tanggal Mulai</label>
+                    <input
+                      type="date"
+                      value={izinStartDate}
+                      onChange={(e) => setIzinStartDate(e.target.value)}
+                      className="w-full h-10 px-3 bg-white border border-[#E2E8F0] rounded-lg text-xs focus:border-[#0F172A] focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-[#0F172A] mb-1">Tanggal Selesai</label>
+                    <input
+                      type="date"
+                      value={izinEndDate}
+                      onChange={(e) => setIzinEndDate(e.target.value)}
+                      className="w-full h-10 px-3 bg-white border border-[#E2E8F0] rounded-lg text-xs focus:border-[#0F172A] focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-[#0F172A] mb-1">Alasan / Keterangan Izin</label>
+                  <textarea
+                    rows={3}
+                    value={izinReason}
+                    onChange={(e) => setIzinReason(e.target.value)}
+                    placeholder="Contoh: Berobat ke RS dan istirahat dokter selama 3 hari..."
+                    className="w-full p-3 bg-white border border-[#E2E8F0] rounded-lg text-xs focus:border-[#0F172A] focus:outline-none resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  onClick={() => setIsIzinModalOpen(false)}
                 >
-                  <option value="Pulang (Sakit)">Pulang (Sakit)</option>
-                  <option value="Pulang (Keluarga/Acara)">Pulang (Keluarga/Acara)</option>
-                  <option value="Keluar Kampus (Medis)">Keluar Kampus (Medis)</option>
-                  <option value="Keluar Kampus (Lomba/Tugas)">Keluar Kampus (Lomba/Tugas)</option>
-                  <option value="Izin Khusus">Izin Khusus</option>
-                </select>
+                  Batal
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  type="button"
+                  onClick={handleSaveIzin}
+                  className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
+                >
+                  Simpan Surat Izin
+                </Button>
               </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-[#0F172A] mb-1">Tanggal Mulai</label>
-                  <input
-                    type="date"
-                    value={izinStartDate}
-                    onChange={(e) => setIzinStartDate(e.target.value)}
-                    className="w-full h-10 px-3 bg-white border border-[#E2E8F0] rounded-lg text-xs focus:border-[#0F172A] focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-[#0F172A] mb-1">Tanggal Selesai</label>
-                  <input
-                    type="date"
-                    value={izinEndDate}
-                    onChange={(e) => setIzinEndDate(e.target.value)}
-                    className="w-full h-10 px-3 bg-white border border-[#E2E8F0] rounded-lg text-xs focus:border-[#0F172A] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-[#0F172A] mb-1">Alasan / Keterangan Izin</label>
-                <textarea
-                  rows={3}
-                  value={izinReason}
-                  onChange={(e) => setIzinReason(e.target.value)}
-                  placeholder="Contoh: Berobat ke RS dan istirahat dokter selama 3 hari..."
-                  className="w-full p-3 bg-white border border-[#E2E8F0] rounded-lg text-xs focus:border-[#0F172A] focus:outline-none resize-none"
-                />
-              </div>
-            </div>
-
-            <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
-              <Button
-                variant="ghost"
-                size="sm"
-                type="button"
-                onClick={() => setIsIzinModalOpen(false)}
-              >
-                Batal
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                type="button"
-                onClick={handleSaveIzin}
-                className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
-              >
-                Simpan Surat Izin
-              </Button>
-            </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* 3. NESTED MODAL: PINDAH KAMAR ASRAMA */}
-      {isMoveKamarModalOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-md max-h-[90dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
+      <AnimatePresence>
+        {isMoveKamarModalOpen && (
+          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setIsMoveKamarModalOpen(false)}
+              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+            />
 
-            {/* Header Modal */}
-            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
-                Pindah Kamar Asrama
-              </h3>
-              <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                {currentStudent.studentName} (Saat ini: {currentStudent.kamar})
-              </p>
-            </div>
-
-            <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-6">
-              <div className="p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
-                <p className="text-[#64748B]">Santri: <strong className="text-[#0F172A]">{currentStudent.studentName}</strong></p>
-                <p className="text-[#64748B] mt-1">Kamar Saat Ini: <strong className="text-[#059669]">{currentStudent.kamar}</strong></p>
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-white w-full max-w-md max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
+            >
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
               </div>
 
-              <div>
-                <label className="block font-semibold text-[#0F172A] mb-1">Pilih Kamar Tujuan</label>
-                <select
-                  value={targetKamar}
-                  onChange={(e) => setTargetKamar(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-[#E2E8F0] rounded-lg text-xs font-medium focus:border-[#0F172A] focus:outline-none"
+              {/* Header Modal */}
+              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+                <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
+                  Pindah Kamar Asrama
+                </h3>
+                <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                  {currentStudent.studentName} (Saat ini: {currentStudent.kamar})
+                </p>
+              </div>
+
+              <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-6">
+                <div className="p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+                  <p className="text-[#64748B]">Santri: <strong className="text-[#0F172A]">{currentStudent.studentName}</strong></p>
+                  <p className="text-[#64748B] mt-1">Kamar Saat Ini: <strong className="text-[#059669]">{currentStudent.kamar}</strong></p>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-[#0F172A] mb-1">Pilih Kamar Tujuan</label>
+                  <select
+                    value={targetKamar}
+                    onChange={(e) => setTargetKamar(e.target.value)}
+                    className="w-full h-10 px-3 bg-white border border-[#E2E8F0] rounded-lg text-xs font-medium focus:border-[#0F172A] focus:outline-none"
+                  >
+                    {liveRooms.map((r) => (
+                      <option key={r.id || r.roomName} value={r.roomName}>
+                        {r.dormitoryName} — Kamar {r.roomName} (Kapasitas: {r.occupiedCount ?? 0}/{r.capacity})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  onClick={() => setIsMoveKamarModalOpen(false)}
                 >
-                  {liveRooms.map((r) => (
-                    <option key={r.id || r.roomName} value={r.roomName}>
-                      {r.dormitoryName} — Kamar {r.roomName} (Kapasitas: {r.occupiedCount ?? 0}/{r.capacity})
-                    </option>
-                  ))}
-                </select>
+                  Batal
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  type="button"
+                  onClick={handleSaveMoveKamar}
+                  className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
+                >
+                  Konfirmasi Pindah Kamar
+                </Button>
               </div>
-            </div>
-
-            <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
-              <Button
-                variant="ghost"
-                size="sm"
-                type="button"
-                onClick={() => setIsMoveKamarModalOpen(false)}
-              >
-                Batal
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                type="button"
-                onClick={handleSaveMoveKamar}
-                className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
-              >
-                Konfirmasi Pindah Kamar
-              </Button>
-            </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* 4. NESTED MODAL: PINDAH KELAS */}
-      {isMoveKelasModalOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-md max-h-[90dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
+      <AnimatePresence>
+        {isMoveKelasModalOpen && (
+          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setIsMoveKelasModalOpen(false)}
+              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+            />
 
-            {/* Header Modal */}
-            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
-                Pindah Kelas / Tingkat
-              </h3>
-              <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                {currentStudent.studentName} (Saat ini: {currentStudent.kelas})
-              </p>
-            </div>
-
-            <div className="p-6 space-y-4 text-xs">
-              <div className="p-3 bg-[#F8FAFC] rounded-lg border border-slate-200">
-                <p className="text-slate-500">Santri: <strong className="text-slate-900">{currentStudent.studentName}</strong></p>
-                <p className="text-slate-500 mt-1">Kelas Saat Ini: <strong className="text-indigo-700">{currentStudent.kelas}</strong></p>
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-white w-full max-w-md max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
+            >
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
               </div>
 
-              <div>
-                <label className="block font-semibold text-[#0F172A] mb-1">Pilih Kelas Baru</label>
-                <select
-                  value={targetKelas}
-                  onChange={(e) => setTargetKelas(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:border-[#142A18] focus:outline-none"
+              {/* Header Modal */}
+              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+                <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
+                  Pindah Kelas / Tingkat
+                </h3>
+                <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                  {currentStudent.studentName} (Saat ini: {currentStudent.kelas})
+                </p>
+              </div>
+
+              <div className="p-6 space-y-4 text-xs">
+                <div className="p-3 bg-[#F8FAFC] rounded-lg border border-slate-200">
+                  <p className="text-slate-500">Santri: <strong className="text-slate-900">{currentStudent.studentName}</strong></p>
+                  <p className="text-slate-500 mt-1">Kelas Saat Ini: <strong className="text-indigo-700">{currentStudent.kelas}</strong></p>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-[#0F172A] mb-1">Pilih Kelas Baru</label>
+                  <select
+                    value={targetKelas}
+                    onChange={(e) => setTargetKelas(e.target.value)}
+                    className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:border-[#142A18] focus:outline-none"
+                  >
+                    {liveClasses.map((c) => (
+                      <option key={c.id || c.className} value={c.className}>
+                        {c.className} {c.level ? `(${c.level})` : ''} {c.major && c.major !== 'Reguler' ? `— Jurusan ${c.major}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-slate-200/80 flex items-center justify-end gap-3 shrink-0">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  type="button"
+                  onClick={() => setIsMoveKelasModalOpen(false)}
                 >
-                  {liveClasses.map((c) => (
-                    <option key={c.id || c.className} value={c.className}>
-                      {c.className} {c.level ? `(${c.level})` : ''} {c.major && c.major !== 'Reguler' ? `— Jurusan ${c.major}` : ''}
-                    </option>
-                  ))}
-                </select>
+                  Batal
+                </Button>
+                <button
+                  type="button"
+                  onClick={handleSaveMoveKelas}
+                  className="px-5 py-2 bg-[#142A18] text-white rounded-full text-xs font-semibold hover:bg-[#2E5B37] transition-colors cursor-pointer shadow-xs active:scale-[0.98]"
+                >
+                  Konfirmasi Pindah Kelas
+                </button>
               </div>
-            </div>
-
-            <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-slate-200/80 flex items-center justify-end gap-3 shrink-0">
-              <Button
-                variant="secondary"
-                size="sm"
-                type="button"
-                onClick={() => setIsMoveKelasModalOpen(false)}
-              >
-                Batal
-              </Button>
-              <button
-                type="button"
-                onClick={handleSaveMoveKelas}
-                className="px-5 py-2 bg-[#142A18] text-white rounded-full text-xs font-semibold hover:bg-[#2E5B37] transition-colors cursor-pointer shadow-xs active:scale-[0.98]"
-              >
-                Konfirmasi Pindah Kelas
-              </button>
-            </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* 5. NESTED MODAL: CATAT SETORAN SANTRI (114 SURAHS & DYNAMIC PAGES) */}
-      {isSetoranModalOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-2xl max-h-[90dvh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
-            
-            {/* Header Modal */}
-            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
-                {editingSetoranId ? "Edit Setoran Mutaba'ah Tahfizh" : "Catat Setoran Mutaba'ah Tahfizh"}
-              </h3>
-              <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                Santri: {currentStudent.studentName} • {currentStudent.kamar} • {currentStudent.kelas}
-              </p>
-            </div>
+      <AnimatePresence>
+        {isSetoranModalOpen && (
+          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => {
+                setIsSetoranModalOpen(false);
+                setEditingSetoranId(null);
+              }}
+              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+            />
 
-            <ScrollArea
-              className="flex-1 min-h-0"
-              viewportClassName="p-6 space-y-5 text-xs"
-              topOffset="top-3"
-              bottomOffset="bottom-3"
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-white w-full max-w-2xl max-h-[88dvh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden z-10"
             >
-              {/* 1. Kategori Setoran */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="block font-semibold text-[#0F172A] font-headline">
-                    Kategori Mutaba'ah
-                  </label>
-                  {currentSetoranAnalysis?.mode === 'mixed' && (
-                    <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                      Otomatis Campuran (Ziyadah + Murojaah)
-                    </span>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    disabled={currentStudent.hafalan?.includes('30') || parseInt(currentStudent.hafalan || '0', 10) >= 30}
-                    onClick={() => setSetoranCategory('Hafalan Baru')}
-                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                      (setoranCategory === 'Hafalan Baru' || currentSetoranAnalysis?.mode === 'mixed')
-                        ? 'bg-emerald-50/70 border-[#142A18] ring-1 ring-[#142A18]'
-                        : 'bg-white border-slate-200 hover:bg-slate-50'
-                    } ${(currentStudent.hafalan?.includes('30') || parseInt(currentStudent.hafalan || '0', 10) >= 30) ? 'opacity-40 cursor-not-allowed' : ''}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-xs text-[#0F172A]">Hafalan Baru (Ziyadah)</span>
-                      <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                        (setoranCategory === 'Hafalan Baru' || currentSetoranAnalysis?.mode === 'mixed') ? 'border-[#142A18] bg-[#142A18]' : 'border-slate-300'
-                      }`}>
-                        {(setoranCategory === 'Hafalan Baru' || currentSetoranAnalysis?.mode === 'mixed') && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 mt-1">
-                      {currentSetoranAnalysis?.mode === 'mixed' && currentSetoranAnalysis.ziyadahRange
-                        ? `Ayat ${currentSetoranAnalysis.ziyadahRange.from}-${currentSetoranAnalysis.ziyadahRange.to} (Hafalan Baru)`
-                        : 'Menambah ayat atau surat baru dalam kurikulum.'}
-                    </p>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setSetoranCategory('Murojaah')}
-                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                      (setoranCategory === 'Murojaah' || currentSetoranAnalysis?.mode === 'mixed')
-                        ? 'bg-blue-50/70 border-blue-600 ring-1 ring-blue-600'
-                        : 'bg-white border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-xs text-[#0F172A]">Murojaah (Pengulangan)</span>
-                      <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                        (setoranCategory === 'Murojaah' || currentSetoranAnalysis?.mode === 'mixed') ? 'border-blue-600 bg-blue-600' : 'border-slate-300'
-                      }`}>
-                        {(setoranCategory === 'Murojaah' || currentSetoranAnalysis?.mode === 'mixed') && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 mt-1">
-                      {currentSetoranAnalysis?.mode === 'mixed' && currentSetoranAnalysis.murojaahRange
-                        ? `Ayat ${currentSetoranAnalysis.murojaahRange.from}-${currentSetoranAnalysis.murojaahRange.to} (Pengulangan)`
-                        : 'Mengulang hafalan yang telah disetorkan sebelumnya.'}
-                    </p>
-                  </button>
-                </div>
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
+              </div>
+              
+              {/* Header Modal */}
+              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+                <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
+                  {editingSetoranId ? "Edit Setoran Mutaba'ah Tahfizh" : "Catat Setoran Mutaba'ah Tahfizh"}
+                </h3>
+                <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                  Santri: {currentStudent.studentName} • {currentStudent.kamar} • {currentStudent.kelas}
+                </p>
               </div>
 
-              {/* 2. Searchable Combobox Nama Surah (Divider) */}
-              <div className="space-y-1.5 relative pt-4 border-t border-[#E2E8F0]" ref={surahComboRef}>
-                <div className="flex items-center justify-between">
-                  <label className="font-semibold text-[#0F172A] font-headline">
-                    Nama Surah
-                  </label>
-                  {selectedSurah && (
-                    <span className="text-[11px] font-bold text-slate-700">
-                      Juz {setoranJuz} • {selectedSurah.totalAyat} Ayat • {selectedSurah.arabicName}
-                    </span>
-                  )}
+              <ScrollArea
+                className="flex-1 min-h-0"
+                viewportClassName="p-6 space-y-5 text-xs"
+                topOffset="top-3"
+                bottomOffset="bottom-3"
+              >
+                {/* 1. Kategori Setoran */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block font-semibold text-[#0F172A] font-headline">
+                      Kategori Mutaba'ah
+                    </label>
+                    {currentSetoranAnalysis?.mode === 'mixed' && (
+                      <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                        Otomatis Campuran (Ziyadah + Murojaah)
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      disabled={currentStudent.hafalan?.includes('30') || parseInt(currentStudent.hafalan || '0', 10) >= 30}
+                      onClick={() => setSetoranCategory('Hafalan Baru')}
+                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        (setoranCategory === 'Hafalan Baru' || currentSetoranAnalysis?.mode === 'mixed')
+                          ? 'bg-emerald-50/70 border-[#142A18] ring-1 ring-[#142A18]'
+                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                      } ${(currentStudent.hafalan?.includes('30') || parseInt(currentStudent.hafalan || '0', 10) >= 30) ? 'opacity-40 cursor-not-allowed' : ''}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs text-[#0F172A]">Hafalan Baru (Ziyadah)</span>
+                        <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
+                          (setoranCategory === 'Hafalan Baru' || currentSetoranAnalysis?.mode === 'mixed') ? 'border-[#142A18] bg-[#142A18]' : 'border-slate-300'
+                        }`}>
+                          {(setoranCategory === 'Hafalan Baru' || currentSetoranAnalysis?.mode === 'mixed') && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        {currentSetoranAnalysis?.mode === 'mixed' && currentSetoranAnalysis.ziyadahRange
+                          ? `Ayat ${currentSetoranAnalysis.ziyadahRange.from}-${currentSetoranAnalysis.ziyadahRange.to} (Hafalan Baru)`
+                          : 'Menambah ayat atau surat baru dalam kurikulum.'}
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setSetoranCategory('Murojaah')}
+                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        (setoranCategory === 'Murojaah' || currentSetoranAnalysis?.mode === 'mixed')
+                          ? 'bg-blue-50/70 border-blue-600 ring-1 ring-blue-600'
+                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs text-[#0F172A]">Murojaah (Pengulangan)</span>
+                        <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
+                          (setoranCategory === 'Murojaah' || currentSetoranAnalysis?.mode === 'mixed') ? 'border-blue-600 bg-blue-600' : 'border-slate-300'
+                        }`}>
+                          {(setoranCategory === 'Murojaah' || currentSetoranAnalysis?.mode === 'mixed') && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        {currentSetoranAnalysis?.mode === 'mixed' && currentSetoranAnalysis.murojaahRange
+                          ? `Ayat ${currentSetoranAnalysis.murojaahRange.from}-${currentSetoranAnalysis.murojaahRange.to} (Pengulangan)`
+                          : 'Mengulang hafalan yang telah disetorkan sebelumnya.'}
+                      </p>
+                    </button>
+                  </div>
                 </div>
 
-                <div className="relative">
-                  <div
-                    onClick={() => setIsSurahDropdownOpen(!isSurahDropdownOpen)}
-                    className="w-full h-11 px-3.5 bg-white border border-slate-200 rounded-lg flex items-center justify-between text-xs text-slate-900 cursor-pointer hover:border-slate-300 shadow-2xs"
-                  >
-                    <div className="flex items-center gap-2 truncate">
-                      <span className="w-6 h-6 rounded-md bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-[10px] shrink-0">
-                        {selectedSurah ? selectedSurah.number : '-'}
+                {/* 2. Searchable Combobox Nama Surah (Divider) */}
+                <div className="space-y-1.5 relative pt-4 border-t border-[#E2E8F0]" ref={surahComboRef}>
+                  <div className="flex items-center justify-between">
+                    <label className="font-semibold text-[#0F172A] font-headline">
+                      Nama Surah
+                    </label>
+                    {selectedSurah && (
+                      <span className="text-[11px] font-bold text-slate-700">
+                        Juz {setoranJuz} • {selectedSurah.totalAyat} Ayat • {selectedSurah.arabicName}
                       </span>
-                      <span className="font-semibold text-slate-900">
-                        {selectedSurah ? selectedSurah.name : 'Pilih Surah...'}
-                      </span>
-                      {selectedSurah && (
-                        <span className="text-slate-400 text-[11px]">({selectedSurah.englishName})</span>
-                      )}
-                    </div>
-                    <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                    )}
                   </div>
 
-                  {isSurahDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1.5 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden animate-in fade-in zoom-in-95">
-                      <div className="p-2 border-b border-slate-100 bg-[#F8FAFC]">
-                        <div className="relative">
-                          <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400" />
+                  <div className="relative">
+                    <div
+                      onClick={() => setIsSurahDropdownOpen(!isSurahDropdownOpen)}
+                      className="w-full h-11 px-3.5 bg-white border border-slate-200 rounded-lg flex items-center justify-between text-xs text-slate-900 cursor-pointer hover:border-slate-300 shadow-2xs"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="w-6 h-6 rounded-md bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-[10px] shrink-0">
+                          {selectedSurah ? selectedSurah.number : '-'}
+                        </span>
+                        <span className="font-semibold text-slate-900">
+                          {selectedSurah ? selectedSurah.name : 'Pilih Surah...'}
+                        </span>
+                        {selectedSurah && (
+                          <span className="text-slate-400 text-[11px]">({selectedSurah.englishName})</span>
+                        )}
+                      </div>
+                      <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                    </div>
+
+                    {isSurahDropdownOpen && (
+                      <div className="absolute top-full left-0 right-0 mt-1.5 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden animate-in fade-in zoom-in-95">
+                        <div className="p-2 border-b border-slate-100 bg-[#F8FAFC]">
+                          <div className="relative">
+                            <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400" />
+                            <input
+                              type="text"
+                              autoFocus
+                              value={surahQuery}
+                              onChange={(e) => setSurahQuery(e.target.value)}
+                              placeholder="Cari nama atau nomor surah..."
+                              className="w-full h-8 pl-8 pr-3 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-[#142A18]"
+                            />
+                          </div>
+                        </div>
+
+                        <ScrollArea className="max-h-56" viewportClassName="p-1 space-y-0.5 text-xs">
+                          {filteredSurahs.map((surah) => {
+                            const isSelected = selectedSurah?.number === surah.number;
+                            return (
+                              <button
+                                key={surah.number}
+                                type="button"
+                                onClick={() => handleSelectSurah(surah)}
+                                className={`w-full p-2 rounded-lg flex items-center justify-between text-left transition-colors cursor-pointer ${
+                                  isSelected ? 'bg-[#142A18] text-white' : 'hover:bg-slate-100 text-slate-800'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <span className={`w-6 h-6 rounded flex items-center justify-center font-bold text-[10px] shrink-0 ${
+                                    isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                                  }`}>
+                                    {surah.number}
+                                  </span>
+                                  <div className="truncate">
+                                    <p className="font-semibold text-xs truncate">{surah.name}</p>
+                                    <p className={`text-[10px] truncate ${isSelected ? 'text-slate-300' : 'text-slate-400'}`}>
+                                      {surah.englishName} • {surah.totalAyat} Ayat
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="text-right shrink-0 pl-2">
+                                  <span className={`font-arabic text-sm block ${isSelected ? 'text-emerald-300' : 'text-slate-600'}`}>
+                                    {surah.arabicName}
+                                  </span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </ScrollArea>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 3. Rentang Ayat & Nomor Halaman (Unboxed, with Thin Divider) */}
+                <div className="pt-4 border-t border-[#E2E8F0] space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="block font-semibold text-[#0F172A] font-headline">
+                        Rentang Ayat (Maks: {selectedSurah?.totalAyat || 1})
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-[11px] text-slate-500 block mb-1">Dari Ayat</span>
                           <input
-                            type="text"
-                            autoFocus
-                            value={surahQuery}
-                            onChange={(e) => setSurahQuery(e.target.value)}
-                            placeholder="Cari nama atau nomor surah..."
-                            className="w-full h-8 pl-8 pr-3 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-[#142A18]"
+                            type="number"
+                            min={1}
+                            max={selectedSurah?.totalAyat || 286}
+                            value={setoranAyatFrom}
+                            onChange={(e) => handleAyatFromChange(e.target.value)}
+                            onWheel={(e) => {
+                              e.preventDefault();
+                              const delta = e.deltaY;
+                              const num = parseInt(String(setoranAyatFrom), 10) || 1;
+                              const max = selectedSurah?.totalAyat || 286;
+                              const next = delta < 0 ? Math.min(max, num + 1) : Math.max(1, num - 1);
+                              handleAyatFromChange(String(next));
+                            }}
+                            className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
+                          />
+                        </div>
+                        <div>
+                          <span className="text-[11px] text-slate-500 block mb-1">Sampai Ayat</span>
+                          <input
+                            type="number"
+                            min={parseInt(String(setoranAyatFrom), 10) || 1}
+                            max={selectedSurah?.totalAyat || 286}
+                            value={setoranAyatTo}
+                            onChange={(e) => handleAyatToChange(e.target.value)}
+                            onWheel={(e) => {
+                              e.preventDefault();
+                              const delta = e.deltaY;
+                              const num = parseInt(String(setoranAyatTo), 10) || 1;
+                              const min = parseInt(String(setoranAyatFrom), 10) || 1;
+                              const max = selectedSurah?.totalAyat || 286;
+                              const next = delta < 0 ? Math.min(max, num + 1) : Math.max(min, num - 1);
+                              handleAyatToChange(String(next));
+                            }}
+                            className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
                           />
                         </div>
                       </div>
-
-                      <ScrollArea className="max-h-56" viewportClassName="p-1 space-y-0.5 text-xs">
-                        {filteredSurahs.map((surah) => {
-                          const isSelected = selectedSurah?.number === surah.number;
-                          return (
-                            <button
-                              key={surah.number}
-                              type="button"
-                              onClick={() => handleSelectSurah(surah)}
-                              className={`w-full p-2 rounded-lg flex items-center justify-between text-left transition-colors cursor-pointer ${
-                                isSelected ? 'bg-[#142A18] text-white' : 'hover:bg-slate-100 text-slate-800'
-                              }`}
-                            >
-                              <div className="flex items-center gap-2.5 min-w-0">
-                                <span className={`w-6 h-6 rounded flex items-center justify-center font-bold text-[10px] shrink-0 ${
-                                  isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-                                }`}>
-                                  {surah.number}
-                                </span>
-                                <div className="truncate">
-                                  <p className="font-semibold text-xs truncate">{surah.name}</p>
-                                  <p className={`text-[10px] truncate ${isSelected ? 'text-slate-300' : 'text-slate-400'}`}>
-                                    {surah.englishName} • {surah.totalAyat} Ayat
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="text-right shrink-0 pl-2">
-                                <span className={`font-arabic text-sm block ${isSelected ? 'text-emerald-300' : 'text-slate-600'}`}>
-                                  {surah.arabicName}
-                                </span>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </ScrollArea>
                     </div>
-                  )}
-                </div>
-              </div>
 
-              {/* 3. Rentang Ayat & Nomor Halaman (Unboxed, with Thin Divider) */}
-              <div className="pt-4 border-t border-[#E2E8F0] space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block font-semibold text-[#0F172A] font-headline">
-                      Rentang Ayat (Maks: {selectedSurah?.totalAyat || 1})
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="block font-semibold text-[#0F172A] font-headline">
+                          Nomor Halaman
+                        </label>
+                        {setoranPageFrom && setoranPageTo && (
+                          <span className="text-xs font-semibold text-slate-600">
+                            {Math.max(1, (parseInt(String(setoranPageTo), 10) || 1) - (parseInt(String(setoranPageFrom), 10) || 1) + 1)} Hal.
+                          </span>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-[11px] text-slate-500 block mb-1">Dari Halaman</span>
+                          <input
+                            type="number"
+                            min={1}
+                            max={604}
+                            value={setoranPageFrom}
+                            onChange={(e) => {
+                              setSetoranPageFrom(e.target.value);
+                              const pFrom = parseInt(e.target.value, 10) || 1;
+                              const pTo = parseInt(String(setoranPageTo), 10) || pFrom;
+                              setSetoranJuz(calculateJuzRange(pFrom, pTo));
+                            }}
+                            onWheel={(e) => {
+                              e.preventDefault();
+                              const delta = e.deltaY;
+                              const num = parseInt(String(setoranPageFrom), 10) || 1;
+                              const next = delta < 0 ? Math.min(604, num + 1) : Math.max(1, num - 1);
+                              setSetoranPageFrom(next);
+                              const pTo = parseInt(String(setoranPageTo), 10) || next;
+                              setSetoranJuz(calculateJuzRange(next, pTo));
+                            }}
+                            className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
+                          />
+                        </div>
+                        <div>
+                          <span className="text-[11px] text-slate-500 block mb-1">Sampai Halaman</span>
+                          <input
+                            type="number"
+                            min={1}
+                            max={604}
+                            value={setoranPageTo}
+                            onChange={(e) => {
+                              setSetoranPageTo(e.target.value);
+                              const pFrom = parseInt(String(setoranPageFrom), 10) || 1;
+                              const pTo = parseInt(e.target.value, 10) || pFrom;
+                              setSetoranJuz(calculateJuzRange(pFrom, pTo));
+                            }}
+                            onWheel={(e) => {
+                              e.preventDefault();
+                              const delta = e.deltaY;
+                              const num = parseInt(String(setoranPageTo), 10) || 1;
+                              const next = delta < 0 ? Math.min(604, num + 1) : Math.max(1, num - 1);
+                              setSetoranPageTo(next);
+                              const pFrom = parseInt(String(setoranPageFrom), 10) || 1;
+                              setSetoranJuz(calculateJuzRange(pFrom, next));
+                            }}
+                            className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. Tingkat Kelancaran & Mutaba'ah (Unboxed, with Thin Divider, No Capsule) */}
+                <div className="pt-4 border-t border-[#E2E8F0] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="font-semibold text-[#0F172A] font-headline">
+                      Tingkat Kelancaran & Mutaba'ah
                     </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <span className="text-[11px] text-slate-500 block mb-1">Dari Ayat</span>
-                        <input
-                          type="number"
-                          min={1}
-                          max={selectedSurah?.totalAyat || 286}
-                          value={setoranAyatFrom}
-                          onChange={(e) => handleAyatFromChange(e.target.value)}
-                          onWheel={(e) => {
-                            e.preventDefault();
-                            const delta = e.deltaY;
-                            const num = parseInt(String(setoranAyatFrom), 10) || 1;
-                            const max = selectedSurah?.totalAyat || 286;
-                            const next = delta < 0 ? Math.min(max, num + 1) : Math.max(1, num - 1);
-                            handleAyatFromChange(String(next));
-                          }}
-                          className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
-                        />
-                      </div>
-                      <div>
-                        <span className="text-[11px] text-slate-500 block mb-1">Sampai Ayat</span>
-                        <input
-                          type="number"
-                          min={parseInt(String(setoranAyatFrom), 10) || 1}
-                          max={selectedSurah?.totalAyat || 286}
-                          value={setoranAyatTo}
-                          onChange={(e) => handleAyatToChange(e.target.value)}
-                          onWheel={(e) => {
-                            e.preventDefault();
-                            const delta = e.deltaY;
-                            const num = parseInt(String(setoranAyatTo), 10) || 1;
-                            const min = parseInt(String(setoranAyatFrom), 10) || 1;
-                            const max = selectedSurah?.totalAyat || 286;
-                            const next = delta < 0 ? Math.min(max, num + 1) : Math.max(min, num - 1);
-                            handleAyatToChange(String(next));
-                          }}
-                          className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
-                        />
-                      </div>
-                    </div>
+                    <span className="text-xs font-bold text-slate-800">
+                      {['Perlu diulang', 'Lumayan', 'Lancar', 'Sangat Lancar (Mumtaz)'][setoranKelancaranIndex]}
+                    </span>
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="block font-semibold text-[#0F172A] font-headline">
-                        Nomor Halaman
-                      </label>
-                      {setoranPageFrom && setoranPageTo && (
-                        <span className="text-xs font-semibold text-slate-600">
-                          {Math.max(1, (parseInt(String(setoranPageTo), 10) || 1) - (parseInt(String(setoranPageFrom), 10) || 1) + 1)} Hal.
-                        </span>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <span className="text-[11px] text-slate-500 block mb-1">Dari Halaman</span>
-                        <input
-                          type="number"
-                          min={1}
-                          max={604}
-                          value={setoranPageFrom}
-                          onChange={(e) => {
-                            setSetoranPageFrom(e.target.value);
-                            const pFrom = parseInt(e.target.value, 10) || 1;
-                            const pTo = parseInt(String(setoranPageTo), 10) || pFrom;
-                            setSetoranJuz(calculateJuzRange(pFrom, pTo));
-                          }}
-                          onWheel={(e) => {
-                            e.preventDefault();
-                            const delta = e.deltaY;
-                            const num = parseInt(String(setoranPageFrom), 10) || 1;
-                            const next = delta < 0 ? Math.min(604, num + 1) : Math.max(1, num - 1);
-                            setSetoranPageFrom(next);
-                            const pTo = parseInt(String(setoranPageTo), 10) || next;
-                            setSetoranJuz(calculateJuzRange(next, pTo));
-                          }}
-                          className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
-                        />
-                      </div>
-                      <div>
-                        <span className="text-[11px] text-slate-500 block mb-1">Sampai Halaman</span>
-                        <input
-                          type="number"
-                          min={1}
-                          max={604}
-                          value={setoranPageTo}
-                          onChange={(e) => {
-                            setSetoranPageTo(e.target.value);
-                            const pFrom = parseInt(String(setoranPageFrom), 10) || 1;
-                            const pTo = parseInt(e.target.value, 10) || pFrom;
-                            setSetoranJuz(calculateJuzRange(pFrom, pTo));
-                          }}
-                          onWheel={(e) => {
-                            e.preventDefault();
-                            const delta = e.deltaY;
-                            const num = parseInt(String(setoranPageTo), 10) || 1;
-                            const next = delta < 0 ? Math.min(604, num + 1) : Math.max(1, num - 1);
-                            setSetoranPageTo(next);
-                            const pFrom = parseInt(String(setoranPageFrom), 10) || 1;
-                            setSetoranJuz(calculateJuzRange(pFrom, next));
-                          }}
-                          className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 4. Tingkat Kelancaran & Mutaba'ah (Unboxed, with Thin Divider, No Capsule) */}
-              <div className="pt-4 border-t border-[#E2E8F0] space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="font-semibold text-[#0F172A] font-headline">
-                    Tingkat Kelancaran & Mutaba'ah
-                  </label>
-                  <span className="text-xs font-bold text-slate-800">
-                    {['Perlu diulang', 'Lumayan', 'Lancar', 'Sangat Lancar (Mumtaz)'][setoranKelancaranIndex]}
-                  </span>
-                </div>
-
-                <input
-                  type="range"
-                  min="0"
-                  max="3"
-                  step="1"
-                  value={setoranKelancaranIndex}
-                  onChange={(e) => setSetoranKelancaranIndex(Number(e.target.value))}
-                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#142A18]"
-                />
-
-                <div className="flex justify-between text-[10px] text-slate-500 font-medium px-1">
-                  <span className={setoranKelancaranIndex === 0 ? 'font-bold text-slate-900' : ''}>Perlu diulang</span>
-                  <span className={setoranKelancaranIndex === 1 ? 'font-bold text-slate-900' : ''}>Lumayan</span>
-                  <span className={setoranKelancaranIndex === 2 ? 'font-bold text-slate-900' : ''}>Lancar</span>
-                  <span className={setoranKelancaranIndex === 3 ? 'font-bold text-slate-900' : ''}>Sangat Lancar</span>
-                </div>
-              </div>
-
-              {/* 5. Ustadz & Catatan (Unboxed, with Thin Divider) */}
-              <div className="pt-4 border-t border-[#E2E8F0] space-y-3">
-                <div>
-                  <label className="block font-semibold text-[#0F172A] mb-1 font-headline">
-                    Ustadz Penguji / Pembimbing
-                  </label>
                   <input
-                    type="text"
-                    value={setoranUstadz}
-                    onChange={(e) => setSetoranUstadz(e.target.value)}
-                    placeholder="Nama Ustadz Pembimbing"
-                    className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
+                    type="range"
+                    min="0"
+                    max="3"
+                    step="1"
+                    value={setoranKelancaranIndex}
+                    onChange={(e) => setSetoranKelancaranIndex(Number(e.target.value))}
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#142A18]"
                   />
+
+                  <div className="flex justify-between text-[10px] text-slate-500 font-medium px-1">
+                    <span className={setoranKelancaranIndex === 0 ? 'font-bold text-slate-900' : ''}>Perlu diulang</span>
+                    <span className={setoranKelancaranIndex === 1 ? 'font-bold text-slate-900' : ''}>Lumayan</span>
+                    <span className={setoranKelancaranIndex === 2 ? 'font-bold text-slate-900' : ''}>Lancar</span>
+                    <span className={setoranKelancaranIndex === 3 ? 'font-bold text-slate-900' : ''}>Sangat Lancar</span>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block font-semibold text-[#0F172A] mb-1 font-headline">
-                    Catatan Mutaba'ah (Opsional)
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={setoranNotes}
-                    onChange={(e) => setSetoranNotes(e.target.value)}
-                    placeholder="Catatan makharijul huruf, tajwid, atau waqaf-ibtidai..."
-                    className="w-full p-3 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18] resize-none"
-                  />
+                {/* 5. Ustadz & Catatan (Unboxed, with Thin Divider) */}
+                <div className="pt-4 border-t border-[#E2E8F0] space-y-3">
+                  <div>
+                    <label className="block font-semibold text-[#0F172A] mb-1 font-headline">
+                      Ustadz Penguji / Pembimbing
+                    </label>
+                    <input
+                      type="text"
+                      value={setoranUstadz}
+                      onChange={(e) => setSetoranUstadz(e.target.value)}
+                      placeholder="Nama Ustadz Pembimbing"
+                      className="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-[#0F172A] mb-1 font-headline">
+                      Catatan Mutaba'ah (Opsional)
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={setoranNotes}
+                      onChange={(e) => setSetoranNotes(e.target.value)}
+                      placeholder="Catatan makharijul huruf, tajwid, atau waqaf-ibtidai..."
+                      className="w-full p-3 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#142A18] resize-none"
+                    />
+                  </div>
                 </div>
+              </ScrollArea>
+
+              <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  onClick={() => {
+                    setIsSetoranModalOpen(false);
+                    setEditingSetoranId(null);
+                  }}
+                >
+                  Batal
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  type="button"
+                  onClick={handleSaveSetoran}
+                  disabled={isSubmittingSetoran}
+                  className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
+                >
+                  {isSubmittingSetoran
+                    ? 'Menyimpan...'
+                    : editingSetoranId
+                    ? 'Simpan Perubahan'
+                    : 'Simpan Setoran'}
+                </Button>
               </div>
-            </ScrollArea>
 
-            <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
-              <Button
-                variant="ghost"
-                size="sm"
-                type="button"
-                onClick={() => {
-                  setIsSetoranModalOpen(false);
-                  setEditingSetoranId(null);
-                }}
-              >
-                Batal
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                type="button"
-                onClick={handleSaveSetoran}
-                disabled={isSubmittingSetoran}
-                className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
-              >
-                {isSubmittingSetoran
-                  ? 'Menyimpan...'
-                  : editingSetoranId
-                  ? 'Simpan Perubahan'
-                  : 'Simpan Setoran'}
-              </Button>
-            </div>
-
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* 6. NESTED MODAL: STATISTIK & TREN GRAFIK HAFALAN (SMOOTH MONOTONE SPLINE) */}
-      {isHafalanChartModalOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-3xl max-h-[90dvh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
-            
-            {/* Header Modal */}
-            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+      <AnimatePresence>
+        {isHafalanChartModalOpen && (
+          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setIsHafalanChartModalOpen(false)}
+              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+            />
+
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-white w-full max-w-3xl max-h-[88dvh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden z-10"
+            >
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
+              </div>
+              
+              {/* Header Modal */}
+              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
               <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
                 Statistik & Tren Perkembangan Hafalan
               </h3>
@@ -3396,9 +3524,10 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               </Button>
             </div>
 
-          </div>
+          </motion.div>
         </div>
       )}
+    </AnimatePresence>
 
       {/* 7. Mobile Bottom Sheet (Action Sheet) for Setoran Records */}
       <ActionSheet
@@ -3469,45 +3598,70 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       )}
 
       {/* 8. CONFIRMATION DIALOG FOR DELETE SETORAN */}
-      {setoranToDelete && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-md rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden p-6 space-y-4 animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95 flex flex-col">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden -mt-2 mb-1 flex justify-center shrink-0">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
+      <AnimatePresence>
+        {setoranToDelete && (
+          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setSetoranToDelete(null)}
+              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+            />
 
-            <div className="space-y-1.5">
-              <h3 className="text-base font-bold text-[#0F172A] font-headline">
-                Hapus Rekam Setoran Mutaba'ah?
-              </h3>
-              <p className="text-xs text-[#64748B] font-body leading-relaxed">
-                Apakah Anda yakin ingin menghapus catatan setoran <strong>{setoranToDelete.surah}</strong> ({setoranToDelete.date})? Tindakan ini tidak dapat dibatalkan.
-              </p>
-            </div>
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-white w-full max-w-md rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden p-6 space-y-4 max-h-[88dvh] sm:max-h-[90vh] flex flex-col z-10"
+            >
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden -mt-2 mb-1 flex justify-center shrink-0">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
+              </div>
 
-            <div className="flex items-center justify-end gap-2.5 pt-2 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
-              <Button
-                variant="ghost"
-                size="sm"
-                type="button"
-                onClick={() => setSetoranToDelete(null)}
-              >
-                Batal
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                type="button"
-                onClick={handleConfirmDeleteSetoran}
-                className="bg-rose-600 text-white hover:bg-rose-700 font-semibold"
-              >
-                Hapus Setoran
-              </Button>
-            </div>
+              <div className="space-y-1.5">
+                <h3 className="text-base font-bold text-[#0F172A] font-headline">
+                  Hapus Rekam Setoran Mutaba'ah?
+                </h3>
+                <p className="text-xs text-[#64748B] font-body leading-relaxed">
+                  Apakah Anda yakin ingin menghapus catatan setoran <strong>{setoranToDelete.surah}</strong> ({setoranToDelete.date})? Tindakan ini tidak dapat dibatalkan.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  onClick={() => setSetoranToDelete(null)}
+                >
+                  Batal
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  type="button"
+                  onClick={handleConfirmDeleteSetoran}
+                  className="bg-rose-600 text-white hover:bg-rose-700 font-semibold"
+                >
+                  Hapus Setoran
+                </Button>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </>
   );
 };

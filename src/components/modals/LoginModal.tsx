@@ -1,5 +1,6 @@
 import { useLenisModalLock } from '../../lib/lenis';
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
   Lock, 
@@ -104,165 +105,186 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   };
 
   return (
-    <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/40 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain">
-      <div className="bg-[#FFFFFF] w-full max-w-2xl rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_8px_32px_rgba(15,23,42,0.15)] border-t sm:border border-[#E2E8F0] overflow-hidden max-h-[90dvh] sm:max-h-[90vh] flex flex-col font-body animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-        
-        {/* Mobile Top Drag Handle */}
-        <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-          <div className="w-10 h-1 bg-slate-300 rounded-full" />
-        </div>
+    <AnimatePresence>
+      {isOpen && (
+        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+          {/* 1. Backdrop (Clicking backdrop closes the sheet) */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            onClick={onClose}
+            className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+          />
 
-        {/* Header Modal (Clean Flat Header, Zero Icon Policy) */}
-        <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-          <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">Autentikasi Akun Resmi</h3>
-          <p className="text-xs text-[#64748B] mt-0.5 font-body">
-            Masuk dengan email & password resmi pengurus divisi
-          </p>
-        </div>
-
-        {/* Content Body */}
-        <div className="p-6 space-y-6 overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-6">
-
-          {/* Messages Alert */}
-          {errorMessage && (
-            <div className="p-3 rounded-md bg-[#EF4444]/10 border border-[#EF4444]/20 text-[#DC2626] text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{errorMessage}</span>
-            </div>
-          )}
-
-          {successMessage && (
-            <div className="p-3 rounded-md bg-[#22C55E]/10 border border-[#22C55E]/20 text-[#16A34A] text-xs flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 shrink-0 text-[#16A34A]" />
-              <span>{successMessage}</span>
-            </div>
-          )}
-
-          {/* Form Login Direct */}
-          <form onSubmit={handleManualLogin} className="space-y-4 bg-[#F8FAFC] p-4 rounded-md border border-[#E2E8F0]">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#0F172A] uppercase tracking-[0.5px] flex items-center gap-1.5 font-headline">
-                <Key className="w-3.5 h-3.5 text-[#059669]" /> Login Email & Password
-              </span>
-              <span className="text-[11px] text-[#64748B] font-medium bg-white px-2 py-0.5 rounded-[4px] border border-[#E2E8F0]">
-                Default: <code className="text-[#059669] font-bold">ostifak1234</code>
-              </span>
+          {/* 2. Sheet Panel (Spring Entry & Spring Exit Animation) */}
+          <motion.div
+            initial={{ y: '100%', opacity: 0.8 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{
+              type: 'spring',
+              damping: 30,
+              stiffness: 320,
+              mass: 0.8,
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative bg-[#FFFFFF] w-full max-w-2xl rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_8px_32px_rgba(15,23,42,0.15)] border-t sm:border border-[#E2E8F0] overflow-hidden max-h-[88dvh] sm:max-h-[90vh] flex flex-col z-10"
+          >
+            {/* Mobile Top Drag Handle */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
-                  Email Akun Resmi
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" />
+            {/* Header Modal (Clean Flat Header, Zero Icon Policy) */}
+            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">Autentikasi Akun Resmi</h3>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                Masuk dengan email & password resmi pengurus divisi
+              </p>
+            </div>
+
+            {/* Content Body */}
+            <div className="p-6 space-y-6 overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-6">
+
+              {/* Messages Alert */}
+              {errorMessage && (
+                <div className="p-3 rounded-md bg-[#EF4444]/10 border border-[#EF4444]/20 text-[#DC2626] text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
+              {successMessage && (
+                <div className="p-3 rounded-md bg-[#22C55E]/10 border border-[#22C55E]/20 text-[#16A34A] text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-[#16A34A]" />
+                  <span>{successMessage}</span>
+                </div>
+              )}
+
+              {/* 1. Manual Form Login */}
+              <form onSubmit={handleManualLogin} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
+                    Email Pengurus
+                  </label>
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="nama@ostifak.edu"
-                    className="w-full h-10 pl-9 pr-3 bg-white border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A]"
+                    className="w-full h-10 px-3 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none transition-colors"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
-                  Password
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" />
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
+                    Kata Sandi (Password)
+                  </label>
                   <input
                     type="password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="ostifak1234"
-                    className="w-full h-10 pl-9 pr-3 bg-white border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A]"
+                    placeholder="••••••••"
+                    className="w-full h-10 px-3 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none transition-colors"
                   />
                 </div>
-              </div>
-            </div>
 
-            <div className="flex items-center justify-end pt-1">
-              <Button
-                type="submit"
-                variant="primary"
-                size="sm"
-                disabled={loading}
-                icon={loading ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <UserCheck className="w-4 h-4 text-white" />}
-              >
-                Masuk Sekarang
-              </Button>
-            </div>
-          </form>
-
-          {/* Quick Account Selector Grid */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <label className="text-xs font-bold text-[#0F172A] uppercase tracking-[0.5px] flex items-center gap-1.5 font-headline">
-                <Sparkles className="w-3.5 h-3.5 text-[#059669]" /> Pilih Akun Pesantren / Divisi
-              </label>
-              <span className="text-[10px] text-[#64748B]">
-                Klik untuk mengisi otomatis
-              </span>
-            </div>
-
-            <ScrollArea
-              className="max-h-56"
-              viewportClassName="grid grid-cols-1 sm:grid-cols-2 gap-2 pr-1"
-              topOffset="top-1"
-              bottomOffset="bottom-1"
-            >
-              {OFFICIAL_ACCOUNTS.map((acc) => (
-                <button
-                  key={acc.email}
-                  type="button"
-                  onClick={() => handleSelectAccount(acc)}
-                  className={`p-2.5 text-left rounded-md border transition-all cursor-pointer flex items-center gap-2.5 active:scale-[0.97] ${
-                    email === acc.email
-                      ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-xs'
-                      : 'bg-white border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#0F172A]'
-                  }`}
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="md"
+                  disabled={loading}
+                  className="w-full h-10 bg-[#0F172A] text-white hover:bg-[#1E293B] flex items-center justify-center gap-2 font-headline"
                 >
-                  <img
-                    src={acc.avatar}
-                    alt={acc.name}
-                    className="w-7 h-7 rounded-full object-cover border border-[#E2E8F0] shrink-0"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold truncate font-headline">{acc.name}</p>
-                    <p className={`text-[11px] truncate ${email === acc.email ? 'text-white/80' : 'text-[#64748B]'}`}>{acc.email}</p>
-                  </div>
-                </button>
-              ))}
-            </ScrollArea>
-          </div>
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                      <span>Memproses Autentikasi...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-4 h-4" />
+                      <span>Masuk ke Sistem</span>
+                    </>
+                  )}
+                </Button>
+              </form>
 
-          {/* Database Setup & Close Button with Mobile Safe Bottom Padding */}
-          <div className="pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0] flex items-center justify-between">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-            >
-              Tutup
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={handleSeedAccounts}
-              disabled={seedingLoading}
-            >
-              {seedingLoading ? 'Menginisialisasi...' : 'Inisialisasi Data Akun'}
-            </Button>
-          </div>
+              {/* Divider */}
+              <div className="relative flex items-center justify-center my-6">
+                <div className="border-t border-[#E2E8F0] w-full" />
+                <span className="bg-white px-3 text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider absolute">
+                  Atau Pilih Akun Cepat (Dev / Demo)
+                </span>
+              </div>
 
+              {/* 2. Fast Login Preset Grid (Scrollable List) */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-[#0F172A] font-headline">Daftar Akun Resmi Tersedia</span>
+                  <span className="text-[11px] text-[#64748B]">Klik untuk mengisi otomatis</span>
+                </div>
+
+                <ScrollArea
+                  className="max-h-48"
+                  viewportClassName="grid grid-cols-1 sm:grid-cols-2 gap-2 p-1"
+                  topOffset="top-1"
+                  bottomOffset="bottom-1"
+                >
+                  {OFFICIAL_ACCOUNTS.map((acc) => {
+                    const isSelected = email.toLowerCase() === acc.email.toLowerCase();
+                    return (
+                      <button
+                        key={acc.email}
+                        type="button"
+                        onClick={() => handleSelectAccount(acc)}
+                        className={`text-left p-2.5 rounded-lg border transition-all cursor-pointer flex items-center gap-2.5 ${
+                          isSelected
+                            ? 'bg-[#F8FAFC] border-[#0F172A] shadow-xs'
+                            : 'bg-white border-[#E2E8F0] hover:bg-[#F8FAFC] hover:border-[#CBD5E1]'
+                        }`}
+                      >
+                        <span className="text-base">{acc.avatar}</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-[#0F172A] truncate font-headline">{acc.name}</p>
+                          <p className="text-[10px] text-[#64748B] truncate">{acc.roleTitle}</p>
+                        </div>
+                        {isSelected && <CheckCircle2 className="w-4 h-4 text-[#0F172A] shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </ScrollArea>
+              </div>
+
+              {/* Database Setup & Close Button with Mobile Safe Bottom Padding */}
+              <div className="pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0] flex items-center justify-between">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={onClose}
+                >
+                  Tutup
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleSeedAccounts}
+                  disabled={seedingLoading}
+                >
+                  {seedingLoading ? 'Menginisialisasi...' : 'Inisialisasi Data Akun'}
+                </Button>
+              </div>
+
+            </div>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 };

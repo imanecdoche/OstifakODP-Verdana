@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   SantriRecord, 
   StudentAchievementEntry, 
@@ -886,565 +887,626 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
       )}
 
       {/* MODAL 1: CATAT PRESTASI MANUAL */}
-      {isNewModalOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-lg max-h-[90dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
+      <AnimatePresence>
+        {isNewModalOpen && (
+          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setIsNewModalOpen(false)}
+              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+            />
 
-            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-              <h3 className="text-base font-bold text-[#0F172A] font-headline">Catat Rekam Jejak Prestasi Baru</h3>
-              <p className="text-xs text-[#64748B] mt-0.5 font-body">Input penghargaan santri dan alokasi Poin Prestasi (PP)</p>
-            </div>
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-white w-full max-w-lg max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
+            >
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
+              </div>
 
-            <form onSubmit={handleSubmitNewAchievement} className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0">
-              {/* Searchable Combobox Santri (Nama, Kamar, NIS, Kelas) */}
-              <div ref={studentComboRef} className="relative">
-                <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
-                  Pilih Santri Penerima Prestasi *
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    required
-                    value={
-                      isStudentComboOpen 
-                        ? studentComboQuery 
-                        : (selectedStudentObj ? `${selectedStudentObj.studentName} (${selectedStudentObj.nis || '-'}) — ${selectedStudentObj.kelas || '-'} / ${selectedStudentObj.kamar || '-'}` : '')
-                    }
-                    onChange={(e) => {
-                      setStudentComboQuery(e.target.value);
-                      setIsStudentComboOpen(true);
-                    }}
-                    onFocus={() => {
-                      setStudentComboQuery('');
-                      setIsStudentComboOpen(true);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Escape') {
-                        e.stopPropagation();
-                        setIsStudentComboOpen(false);
+              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+                <h3 className="text-base font-bold text-[#0F172A] font-headline">Catat Rekam Jejak Prestasi Baru</h3>
+                <p className="text-xs text-[#64748B] mt-0.5 font-body">Input penghargaan santri dan alokasi Poin Prestasi (PP)</p>
+              </div>
+
+              <form onSubmit={handleSubmitNewAchievement} className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0">
+                {/* Searchable Combobox Santri (Nama, Kamar, NIS, Kelas) */}
+                <div ref={studentComboRef} className="relative">
+                  <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
+                    Pilih Santri Penerima Prestasi *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      required
+                      value={
+                        isStudentComboOpen 
+                          ? studentComboQuery 
+                          : (selectedStudentObj ? `${selectedStudentObj.studentName} (${selectedStudentObj.nis || '-'}) — ${selectedStudentObj.kelas || '-'} / ${selectedStudentObj.kamar || '-'}` : '')
                       }
-                      if (e.key === 'Enter' && isStudentComboOpen && filteredStudentsForNewAchievement.length > 0) {
-                        e.preventDefault();
-                        const s = filteredStudentsForNewAchievement[0];
-                        setSelectedStudentId(s.id);
-                        setStudentComboQuery('');
-                        setIsStudentComboOpen(false);
-                      }
-                    }}
-                    placeholder="Ketik untuk mencari nama, kamar, NIS, atau kelas..."
-                    className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none transition-all cursor-pointer font-medium"
-                  />
-                  {selectedStudentId && !isStudentComboOpen && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedStudentId('');
+                      onChange={(e) => {
+                        setStudentComboQuery(e.target.value);
+                        setIsStudentComboOpen(true);
+                      }}
+                      onFocus={() => {
                         setStudentComboQuery('');
                         setIsStudentComboOpen(true);
                       }}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-200/50 cursor-pointer"
-                      title="Ganti Santri"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
+                      placeholder="Cari nama santri, kamar, atau kelas..."
+                      className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none transition-all cursor-pointer font-medium"
+                    />
+                  </div>
+
+                  {isStudentComboOpen && (
+                    <div className="absolute top-full left-0 mt-1.5 w-full z-50 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden max-h-60 animate-in fade-in zoom-in-95">
+                      <ScrollArea
+                        className="max-h-60"
+                        viewportClassName="p-1.5 space-y-1"
+                        topOffset="top-1"
+                        bottomOffset="bottom-1"
+                      >
+                        {filteredStudentOptions.length === 0 ? (
+                          <div className="p-4 text-xs text-slate-500 text-center">
+                            <p className="font-semibold text-slate-700">Santri tidak ditemukan</p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">Coba cari dengan nama atau kamar lain.</p>
+                          </div>
+                        ) : (
+                          filteredStudentOptions.map((st) => (
+                            <div
+                              key={st.id}
+                              onClick={() => handleSelectStudentOption(st)}
+                              className="px-3.5 py-2.5 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer flex items-center justify-between group"
+                            >
+                              <div>
+                                <p className="font-bold text-slate-800 text-xs group-hover:text-slate-950">{st.studentName}</p>
+                                <p className="text-[11px] text-slate-500">{st.nis || 'NIS -'} • {st.kamar || 'Kamar -'}</p>
+                              </div>
+                              <span className="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200">
+                                {st.kelas || 'Umum'}
+                              </span>
+                            </div>
+                          ))
+                        )}
+                      </ScrollArea>
+                    </div>
                   )}
                 </div>
 
-                {/* Floating Dropdown Results */}
-                {isStudentComboOpen && (
-                  <div className="absolute top-full left-0 mt-1.5 w-full z-50 bg-white border border-[#CBD5E1] rounded-xl shadow-2xl overflow-hidden max-h-60 animate-in fade-in zoom-in-95 font-body">
-                    <ScrollArea
-                      className="max-h-60"
-                      viewportClassName="p-1.5 space-y-1"
-                      topOffset="top-1"
-                      bottomOffset="bottom-1"
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
+                    Nama Prestasi / Kejuaraan *
+                  </label>
+                  <input
+                    type="text"
+                    value={achievementTitle}
+                    onChange={(e) => setAchievementTitle(e.target.value)}
+                    required
+                    placeholder="Contoh: Juara 1 MHQ 10 Juz Tingkat Provinsi"
+                    className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
+                      Kategori Prestasi
+                    </label>
+                    <select
+                      value={achievementCategory}
+                      onChange={(e) => setAchievementCategory(e.target.value)}
+                      className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none cursor-pointer"
                     >
-                      {filteredStudentsForNewAchievement.length === 0 ? (
-                        <div className="p-4 text-xs text-[#64748B] text-center">
-                          <p className="font-semibold text-[#0F172A]">Santri tidak ditemukan</p>
-                          <p className="text-[11px] text-[#94A3B8] mt-0.5">Cari berdasarkan kata kunci nama, kamar, NIS, atau kelas.</p>
-                        </div>
-                      ) : (
-                        filteredStudentsForNewAchievement.map((s) => (
-                          <button
-                            key={s.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedStudentId(s.id);
-                              setStudentComboQuery('');
-                              setIsStudentComboOpen(false);
-                            }}
-                            className={`w-full px-3.5 py-2.5 rounded-lg flex flex-col text-left transition-colors cursor-pointer hover:bg-slate-50 ${
-                              selectedStudentId === s.id ? 'bg-[#059669]/10 border border-[#059669]/30' : ''
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-[#0F172A] text-xs font-headline">{s.studentName}</span>
-                              {s.nis && s.nis !== '-' && (
-                                <span className="text-[10px] font-mono text-[#64748B]">NIS: {s.nis}</span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 text-[11px] text-[#64748B] mt-0.5">
-                              <span>Kelas: <strong className="text-[#0F172A]">{s.kelas || '-'}</strong></span>
-                              <span>•</span>
-                              <span>Kamar: <strong className="text-[#0F172A]">{s.kamar || '-'}</strong></span>
-                            </div>
-                          </button>
-                        ))
-                      )}
-                    </ScrollArea>
+                      <option value="Tahfizh Al-Quran">Tahfizh Al-Quran</option>
+                      <option value="Santri Teladan">Santri Teladan</option>
+                      <option value="Hafalan Terbanyak">Hafalan Terbanyak</option>
+                      <option value="Akademik & Sekolah">Akademik & Sekolah</option>
+                      <option value="Bahasa Arab & Inggris">Bahasa Arab & Inggris</option>
+                      <option value="Kebersihan & Kerapian">Kebersihan & Kerapian</option>
+                      <option value="Lomba Eksternal">Lomba Eksternal</option>
+                      <option value="Kedisiplinan & Ibadah">Kedisiplinan & Ibadah</option>
+                    </select>
                   </div>
-                )}
-              </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
-                  Nama Prestasi / Kejuaraan *
-                </label>
-                <input
-                  type="text"
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="Contoh: Juara 1 MHQ 30 Juz Tingkat Provinsi"
-                  required
-                  className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none placeholder:text-[#94A3B8]"
-                />
-              </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
+                      Peringkat / Capaian
+                    </label>
+                    <input
+                      type="text"
+                      value={achievementRank}
+                      onChange={(e) => setAchievementRank(e.target.value)}
+                      placeholder="Contoh: Juara 1 / Terbaik"
+                      className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
+                    />
+                  </div>
+                </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
-                    Kategori Prestasi
-                  </label>
-                  <select
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none cursor-pointer"
-                  >
-                    <option value="Santri Teladan">Santri Teladan</option>
-                    <option value="Tahfizh Al-Quran">Tahfizh Al-Quran</option>
-                    <option value="Hafalan Terbanyak">Hafalan Terbanyak</option>
-                    <option value="Akademik & Sekolah">Akademik & Sekolah</option>
-                    <option value="Bahasa Arab & Inggris">Bahasa Arab & Inggris</option>
-                    <option value="Kebersihan & Kerapian">Kebersihan & Kerapian</option>
-                    <option value="Lomba Eksternal">Lomba Eksternal</option>
-                  </select>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
+                      Alokasi Poin Prestasi (PP) *
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={achievementPoints}
+                        onChange={(e) => setAchievementPoints(Number(e.target.value))}
+                        className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs font-bold text-[#059669] focus:border-[#0F172A] focus:outline-none"
+                      />
+                      <span className="text-xs font-bold text-[#059669] font-mono shrink-0">PP</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
+                      Tanggal Terbit
+                    </label>
+                    <input
+                      type="date"
+                      value={achievementDate}
+                      onChange={(e) => setAchievementDate(e.target.value)}
+                      className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
+                    />
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
-                    Peringkat / Capaian
+                    Penyelenggara / Lembaga
                   </label>
                   <input
                     type="text"
-                    value={newRank}
-                    onChange={(e) => setNewRank(e.target.value)}
-                    placeholder="Juara 1 / Terbaik"
+                    value={achievementOrganizer}
+                    onChange={(e) => setAchievementOrganizer(e.target.value)}
+                    placeholder="Contoh: Kemenag / Pesantren / LPTQ"
                     className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
-                    Alokasi Poin Prestasi (PP) *
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min="1"
-                      max="100"
-                      value={newPoints}
-                      onChange={(e) => setNewPoints(Number(e.target.value))}
-                      className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs font-bold text-[#059669] focus:border-[#0F172A] focus:outline-none"
-                    />
-                    <span className="text-xs font-bold text-[#059669] font-mono shrink-0">PP</span>
-                  </div>
-                </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
-                    Tanggal Terbit
+                    Keterangan Tambahan (Opsional)
                   </label>
-                  <input
-                    type="date"
-                    value={newDate}
-                    onChange={(e) => setNewDate(e.target.value)}
-                    className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
+                  <textarea
+                    rows={2}
+                    value={achievementDescription}
+                    onChange={(e) => setAchievementDescription(e.target.value)}
+                    placeholder="Catatan tambahan mengenai prestasi santri..."
+                    className="w-full p-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none resize-none"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
-                  Penyelenggara / Lembaga
-                </label>
-                <input
-                  type="text"
-                  value={newOrganizer}
-                  onChange={(e) => setNewOrganizer(e.target.value)}
-                  placeholder="Pesantren Fajrul Karim / Kemenag"
-                  className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
-                  Keterangan Tambahan (Opsional)
-                </label>
-                <textarea
-                  rows={2}
-                  value={newDescription}
-                  onChange={(e) => setNewDescription(e.target.value)}
-                  placeholder="Catatan prestasi, piagam, atau rincian pencapaian..."
-                  className="w-full p-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none resize-none"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsNewModalOpen(false)}
-                >
-                  Batal
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="sm"
-                  disabled={isSubmitting}
-                  className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
-                >
-                  {isSubmitting ? 'Menyimpan...' : 'Simpan Prestasi (+PP)'}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 2: EDIT PRESTASI */}
-      {editingAchievement && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-lg max-h-[90dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
-
-            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0 flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-bold text-[#0F172A] font-headline">Edit Rekam Jejak Prestasi</h3>
-                <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                  Santri: <strong>{editingAchievement.studentName}</strong> ({editingAchievement.kamar})
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setEditingAchievement(null)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveEdit} className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0">
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
-                  Nama Prestasi / Kejuaraan *
-                </label>
-                <input
-                  type="text"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  required
-                  className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
-                    Kategori Prestasi
-                  </label>
-                  <select
-                    value={editCategory}
-                    onChange={(e) => setEditCategory(e.target.value)}
-                    className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none cursor-pointer"
-                  >
-                    <option value="Santri Teladan">Santri Teladan</option>
-                    <option value="Tahfizh Al-Quran">Tahfizh Al-Quran</option>
-                    <option value="Hafalan Terbanyak">Hafalan Terbanyak</option>
-                    <option value="Setoran Terbanyak Bulan Ini">Setoran Terbanyak Bulan Ini</option>
-                    <option value="Murojaah Terbanyak Bulan Ini">Murojaah Terbanyak Bulan Ini</option>
-                    <option value="Akademik & Sekolah">Akademik & Sekolah</option>
-                    <option value="Bahasa Arab & Inggris">Bahasa Arab & Inggris</option>
-                    <option value="Kebersihan & Kerapian">Kebersihan & Kerapian</option>
-                    <option value="Lomba Eksternal">Lomba Eksternal</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
-                    Peringkat / Capaian
-                  </label>
-                  <input
-                    type="text"
-                    value={editRank}
-                    onChange={(e) => setEditRank(e.target.value)}
-                    className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
-                    Alokasi Poin Prestasi (PP) *
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={editPoints}
-                      onChange={(e) => setEditPoints(Number(e.target.value))}
-                      className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs font-bold text-[#059669] focus:border-[#0F172A] focus:outline-none"
-                    />
-                    <span className="text-xs font-bold text-[#059669] font-mono shrink-0">PP</span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
-                    Tanggal Terbit
-                  </label>
-                  <input
-                    type="date"
-                    value={editDate}
-                    onChange={(e) => setEditDate(e.target.value)}
-                    className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
-                  Penyelenggara / Lembaga
-                </label>
-                <input
-                  type="text"
-                  value={editOrganizer}
-                  onChange={(e) => setEditOrganizer(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
-                  Keterangan Tambahan
-                </label>
-                <textarea
-                  rows={2}
-                  value={editDescription}
-                  onChange={(e) => setEditDescription(e.target.value)}
-                  className="w-full p-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none resize-none"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setEditingAchievement(null)}
-                >
-                  Batal
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="sm"
-                  disabled={isSavingEdit}
-                  className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
-                >
-                  {isSavingEdit ? 'Menyimpan...' : 'Simpan Perubahan'}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 3: HAPUS PRESTASI CONFIRMATION */}
-      {deletingAchievement && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-md rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-white">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div className="flex items-start gap-3.5">
-                <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-200">
-                  <AlertTriangle className="w-5 h-5" />
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-[#0F172A] font-headline">Hapus Rekam Prestasi?</h3>
-                  <p className="text-xs text-[#64748B] font-body leading-relaxed">
-                    Rekam prestasi <strong>"{deletingAchievement.title}"</strong> milik santri <strong>{deletingAchievement.studentName}</strong> akan dihapus permanen.
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/80 text-xs space-y-1">
-                <div className="flex justify-between text-[#64748B]">
-                  <span>Poin Prestasi Terkait:</span>
-                  <span className="font-bold text-[#EF4444] font-mono inline-flex items-center gap-1">
-                    <span>-{deletingAchievement.points}</span>
-                    <PPIcon className="w-3.5 h-3.5" />
-                  </span>
-                </div>
-                <div className="flex justify-between text-[#64748B]">
-                  <span>Tanggal Terbit:</span>
-                  <span className="font-medium text-[#0F172A]">{deletingAchievement.date}</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-2 pb-8 sm:pb-0">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setDeletingAchievement(null)}
-                  disabled={isDeleting}
-                >
-                  Batal
-                </Button>
-                <Button
-                  type="button"
-                  variant="danger"
-                  size="sm"
-                  disabled={isDeleting}
-                  onClick={handleConfirmDelete}
-                  className="bg-[#EF4444] hover:bg-[#DC2626] text-white"
-                >
-                  {isDeleting ? 'Menghapus...' : 'Ya, Hapus Prestasi'}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 4: PREVIEW & EKSEKUSI OTOMASI PP BULANAN (21:00 WIB) */}
-      {isAutoPreviewOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto overscroll-contain font-body">
-          <div className="bg-white w-full max-w-2xl max-h-[90dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0 sm:zoom-in-95">
-            {/* Mobile Top Drag Handle */}
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
-
-            <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-              <h3 className="text-base font-bold text-[#0F172A] font-headline">Otomasi Poin Prestasi Akhir Bulan</h3>
-              <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                Jadwal Otomasi Resmi: <strong>{scheduleInfo.formattedSchedule}</strong> (Pukul 21:00 WIB)
-              </p>
-            </div>
-
-            <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0">
-              <div className="p-3.5 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] space-y-2">
-                <p className="font-bold text-[#0F172A]">Ketentuan Sistem Poin Otomatis:</p>
-                <ul className="list-disc list-inside text-[#64748B] space-y-1 text-[11px]">
-                  <li><strong>Santri Teladan:</strong> Top 5 santri (0 PK + hafalan tertinggi) mendapat <strong>+25</strong> (Juara 1) dan <strong>+20</strong> (Juara 2-5).</li>
-                  <li><strong>Hafalan Terbanyak:</strong> Top 5 hafalan juz tertinggi bagi santri proses aktif (&lt; 30 Juz, santri 30 Juz/Huffazh dikecualikan) mendapat <strong>+20</strong>.</li>
-                  <li><strong>Setoran Terbanyak Bulan Ini:</strong> Top 5 rekam setoran baru bulan ini mendapat <strong>+15</strong>.</li>
-                  <li><strong>Murojaah Terbanyak Bulan Ini:</strong> Top 5 rekam murojaah bulan ini mendapat <strong>+15</strong>.</li>
-                </ul>
-              </div>
-
-              <div>
-                <p className="font-bold text-xs text-[#0F172A] mb-2 font-headline">
-                  Daftar Santri Calon Penerima Bulan Ini ({monthlyPreviewAwards.length} Predikat):
-                </p>
-
-                <div className="border border-[#E2E8F0] rounded-lg overflow-hidden">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0] text-[10px] font-bold text-[#64748B] uppercase">
-                      <tr>
-                        <th className="p-2.5">Santri</th>
-                        <th className="p-2.5">Kategori Predikat</th>
-                        <th className="p-2.5">Peringkat</th>
-                        <th className="p-2.5 text-right">Alokasi Poin</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#E2E8F0]">
-                      {monthlyPreviewAwards.length === 0 ? (
-                        <tr>
-                          <td colSpan={4} className="p-4 text-center text-[#64748B]">
-                            Belum ada santri yang memenuhi kriteria predikat bulan ini.
-                          </td>
-                        </tr>
-                      ) : (
-                        monthlyPreviewAwards.map((a, i) => (
-                          <tr key={i} className="hover:bg-slate-50">
-                            <td className="p-2.5 font-semibold text-[#0F172A]">{a.studentName}</td>
-                            <td className="p-2.5 text-[#64748B]">{a.category}</td>
-                            <td className="p-2.5 text-[#64748B]">{a.rank}</td>
-                            <td className="p-2.5 text-right font-bold text-[#059669] font-mono">
-                              <span className="inline-flex items-center gap-1">
-                                <span>+{a.points}</span>
-                                <PPIcon className="w-3.5 h-3.5" />
-                              </span>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
-                <p className="text-[11px] text-[#64748B]">
-                  {executionStatus.lastExecutedDate ? `Terakhir dieksekusi: ${new Date(executionStatus.lastExecutedDate).toLocaleDateString('id-ID')}` : 'Belum dieksekusi untuk bulan ini.'}
-                </p>
-
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-end gap-2.5 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
                   <Button
                     type="button"
                     variant="secondary"
                     size="sm"
-                    onClick={() => setIsAutoPreviewOpen(false)}
+                    onClick={() => setIsNewModalOpen(false)}
                   >
-                    Tutup
+                    Batal
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="sm"
+                    disabled={isSubmitting}
+                    className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
+                  >
+                    {isSubmitting ? 'Menyimpan...' : 'Simpan Prestasi (+PP)'}
+                  </Button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL 2: EDIT PRESTASI */}
+      <AnimatePresence>
+        {editingAchievement && (
+          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setEditingAchievement(null)}
+              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+            />
+
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-white w-full max-w-lg max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
+            >
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
+              </div>
+
+              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0 flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-[#0F172A] font-headline">Edit Rekam Jejak Prestasi</h3>
+                  <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                    Santri: <strong>{editingAchievement.studentName}</strong> ({editingAchievement.kamar})
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditingAchievement(null)}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveEdit} className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0">
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
+                    Nama Prestasi / Kejuaraan *
+                  </label>
+                  <input
+                    type="text"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    required
+                    className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
+                      Kategori Prestasi
+                    </label>
+                    <select
+                      value={editCategory}
+                      onChange={(e) => setEditCategory(e.target.value)}
+                      className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none cursor-pointer"
+                    >
+                      <option value="Santri Teladan">Santri Teladan</option>
+                      <option value="Tahfizh Al-Quran">Tahfizh Al-Quran</option>
+                      <option value="Hafalan Terbanyak">Hafalan Terbanyak</option>
+                      <option value="Setoran Terbanyak Bulan Ini">Setoran Terbanyak Bulan Ini</option>
+                      <option value="Murojaah Terbanyak Bulan Ini">Murojaah Terbanyak Bulan Ini</option>
+                      <option value="Akademik & Sekolah">Akademik & Sekolah</option>
+                      <option value="Bahasa Arab & Inggris">Bahasa Arab & Inggris</option>
+                      <option value="Kebersihan & Kerapian">Kebersihan & Kerapian</option>
+                      <option value="Lomba Eksternal">Lomba Eksternal</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
+                      Peringkat / Capaian
+                    </label>
+                    <input
+                      type="text"
+                      value={editRank}
+                      onChange={(e) => setEditRank(e.target.value)}
+                      className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
+                      Alokasi Poin Prestasi (PP) *
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={editPoints}
+                        onChange={(e) => setEditPoints(Number(e.target.value))}
+                        className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs font-bold text-[#059669] focus:border-[#0F172A] focus:outline-none"
+                      />
+                      <span className="text-xs font-bold text-[#059669] font-mono shrink-0">PP</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
+                      Tanggal Terbit
+                    </label>
+                    <input
+                      type="date"
+                      value={editDate}
+                      onChange={(e) => setEditDate(e.target.value)}
+                      className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
+                    Penyelenggara / Lembaga
+                  </label>
+                  <input
+                    type="text"
+                    value={editOrganizer}
+                    onChange={(e) => setEditOrganizer(e.target.value)}
+                    className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
+                    Keterangan Tambahan
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    className="w-full p-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none resize-none"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2.5 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setEditingAchievement(null)}
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="sm"
+                    disabled={isSavingEdit}
+                    className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
+                  >
+                    {isSavingEdit ? 'Menyimpan...' : 'Simpan Perubahan'}
+                  </Button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL 3: HAPUS PRESTASI CONFIRMATION */}
+      <AnimatePresence>
+        {deletingAchievement && (
+          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setDeletingAchievement(null)}
+              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+            />
+
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-white w-full max-w-md max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
+            >
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-white">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-200">
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-bold text-[#0F172A] font-headline">Hapus Rekam Prestasi?</h3>
+                    <p className="text-xs text-[#64748B] font-body leading-relaxed">
+                      Rekam prestasi <strong>"{deletingAchievement.title}"</strong> milik santri <strong>{deletingAchievement.studentName}</strong> akan dihapus permanen.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/80 text-xs space-y-1">
+                  <div className="flex justify-between text-[#64748B]">
+                    <span>Poin Prestasi Terkait:</span>
+                    <span className="font-bold text-[#EF4444] font-mono inline-flex items-center gap-1">
+                      <span>-{deletingAchievement.points}</span>
+                      <PPIcon className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[#64748B]">
+                    <span>Tanggal Terbit:</span>
+                    <span className="font-medium text-[#0F172A]">{deletingAchievement.date}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-2.5 pt-2 pb-8 sm:pb-0">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setDeletingAchievement(null)}
+                    disabled={isDeleting}
+                  >
+                    Batal
                   </Button>
                   <Button
                     type="button"
-                    variant="primary"
+                    variant="danger"
                     size="sm"
-                    disabled={isExecutingAuto || monthlyPreviewAwards.length === 0}
-                    onClick={handleExecuteAutoAward}
-                    className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
+                    disabled={isDeleting}
+                    onClick={handleConfirmDelete}
+                    className="bg-[#EF4444] hover:bg-[#DC2626] text-white"
                   >
-                    {isExecutingAuto ? 'Mengeksekusi...' : '⚡ Jalankan Eksekusi PP Sekarang'}
+                    {isDeleting ? 'Menghapus...' : 'Ya, Hapus Prestasi'}
                   </Button>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
+
+      {/* MODAL 4: PREVIEW & EKSEKUSI OTOMASI PP BULANAN (21:00 WIB) */}
+      <AnimatePresence>
+        {isAutoPreviewOpen && (
+          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => setIsAutoPreviewOpen(false)}
+              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+            />
+
+            {/* Sheet Panel (Spring Animation) */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0.8 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 320,
+                mass: 0.8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-white w-full max-w-2xl max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
+            >
+              {/* Mobile Top Drag Handle */}
+              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+                <div className="w-10 h-1 bg-slate-300 rounded-full" />
+              </div>
+
+              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+                <h3 className="text-base font-bold text-[#0F172A] font-headline">Otomasi Poin Prestasi Akhir Bulan</h3>
+                <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                  Jadwal Otomasi Resmi: <strong>{scheduleInfo.formattedSchedule}</strong> (Pukul 21:00 WIB)
+                </p>
+              </div>
+
+              <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0">
+                <div className="p-3.5 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] space-y-2">
+                  <p className="font-bold text-[#0F172A]">Ketentuan Sistem Poin Otomatis:</p>
+                  <ul className="list-disc list-inside text-[#64748B] space-y-1 text-[11px]">
+                    <li><strong>Santri Teladan:</strong> Top 5 santri (0 PK + hafalan tertinggi) mendapat <strong>+25</strong> (Juara 1) dan <strong>+20</strong> (Juara 2-5).</li>
+                    <li><strong>Hafalan Terbanyak:</strong> Top 5 hafalan juz tertinggi bagi santri proses aktif (&lt; 30 Juz, santri 30 Juz/Huffazh dikecualikan) mendapat <strong>+20</strong>.</li>
+                    <li><strong>Setoran Terbanyak Bulan Ini:</strong> Top 5 rekam setoran baru bulan ini mendapat <strong>+15</strong>.</li>
+                    <li><strong>Murojaah Terbanyak Bulan Ini:</strong> Top 5 rekam murojaah bulan ini mendapat <strong>+15</strong>.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <p className="font-bold text-xs text-[#0F172A] mb-2 font-headline">
+                    Daftar Santri Calon Penerima Bulan Ini ({monthlyPreviewAwards.length} Predikat):
+                  </p>
+
+                  <div className="border border-[#E2E8F0] rounded-lg overflow-hidden">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0] text-[10px] font-bold text-[#64748B] uppercase">
+                        <tr>
+                          <th className="p-2.5">Santri</th>
+                          <th className="p-2.5">Kategori Predikat</th>
+                          <th className="p-2.5">Peringkat</th>
+                          <th className="p-2.5 text-right">Alokasi Poin</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#E2E8F0]">
+                        {monthlyPreviewAwards.length === 0 ? (
+                          <tr>
+                            <td colSpan={4} className="p-4 text-center text-[#64748B]">
+                              Belum ada santri yang memenuhi kriteria predikat bulan ini.
+                            </td>
+                          </tr>
+                        ) : (
+                          monthlyPreviewAwards.map((a, i) => (
+                            <tr key={i} className="hover:bg-slate-50">
+                              <td className="p-2.5 font-semibold text-[#0F172A]">{a.studentName}</td>
+                              <td className="p-2.5 text-[#64748B]">{a.category}</td>
+                              <td className="p-2.5 text-[#64748B]">{a.rank}</td>
+                              <td className="p-2.5 text-right font-bold text-[#059669] font-mono">
+                                <span className="inline-flex items-center gap-1">
+                                  <span>+{a.points}</span>
+                                  <PPIcon className="w-3.5 h-3.5" />
+                                </span>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
+                  <p className="text-[11px] text-[#64748B]">
+                    {executionStatus.lastExecutedDate ? `Terakhir dieksekusi: ${new Date(executionStatus.lastExecutedDate).toLocaleDateString('id-ID')}` : 'Belum dieksekusi untuk bulan ini.'}
+                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setIsAutoPreviewOpen(false)}
+                    >
+                      Tutup
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      disabled={isExecutingAuto || monthlyPreviewAwards.length === 0}
+                      onClick={handleExecuteAutoAward}
+                      className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
+                    >
+                      {isExecutingAuto ? 'Mengeksekusi...' : '⚡ Jalankan Eksekusi PP Sekarang'}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
