@@ -60,10 +60,11 @@ export const DEFAULT_OFFLINE_USER: UserProfile = {
   id: 'offline_operator',
   name: 'Petugas Lapangan (Mode Offline)',
   email: 'offline@ostifak.edu',
-  role: 'admin',
+  role: 'bph',
+  roleLevel: 2,
   roleTitle: 'Administrator Offline',
   division: 'keamanan',
-  assignedDivision: 'keamanan',
+  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
 };
 
 /**

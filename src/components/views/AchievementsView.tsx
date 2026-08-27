@@ -960,16 +960,20 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                         topOffset="top-1"
                         bottomOffset="bottom-1"
                       >
-                        {filteredStudentOptions.length === 0 ? (
+                        {filteredStudentsForNewAchievement.length === 0 ? (
                           <div className="p-4 text-xs text-slate-500 text-center">
                             <p className="font-semibold text-slate-700">Santri tidak ditemukan</p>
                             <p className="text-[11px] text-slate-400 mt-0.5">Coba cari dengan nama atau kamar lain.</p>
                           </div>
                         ) : (
-                          filteredStudentOptions.map((st) => (
+                          filteredStudentsForNewAchievement.map((st) => (
                             <div
                               key={st.id}
-                              onClick={() => handleSelectStudentOption(st)}
+                              onClick={() => {
+                                setSelectedStudentId(st.id);
+                                setStudentComboQuery(st.studentName);
+                                setIsStudentComboOpen(false);
+                              }}
                               className="px-3.5 py-2.5 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer flex items-center justify-between group"
                             >
                               <div>
@@ -993,8 +997,8 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                   </label>
                   <input
                     type="text"
-                    value={achievementTitle}
-                    onChange={(e) => setAchievementTitle(e.target.value)}
+                    value={newTitle}
+                    onChange={(e) => setNewTitle(e.target.value)}
                     required
                     placeholder="Contoh: Juara 1 MHQ 10 Juz Tingkat Provinsi"
                     className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
@@ -1007,8 +1011,8 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                       Kategori Prestasi
                     </label>
                     <select
-                      value={achievementCategory}
-                      onChange={(e) => setAchievementCategory(e.target.value)}
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
                       className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none cursor-pointer"
                     >
                       <option value="Tahfizh Al-Quran">Tahfizh Al-Quran</option>
@@ -1028,8 +1032,8 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                     </label>
                     <input
                       type="text"
-                      value={achievementRank}
-                      onChange={(e) => setAchievementRank(e.target.value)}
+                      value={newRank}
+                      onChange={(e) => setNewRank(e.target.value)}
                       placeholder="Contoh: Juara 1 / Terbaik"
                       className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
                     />
@@ -1046,8 +1050,8 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                         type="number"
                         min="0"
                         max="100"
-                        value={achievementPoints}
-                        onChange={(e) => setAchievementPoints(Number(e.target.value))}
+                        value={newPoints}
+                        onChange={(e) => setNewPoints(Number(e.target.value))}
                         className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs font-bold text-[#059669] focus:border-[#0F172A] focus:outline-none"
                       />
                       <span className="text-xs font-bold text-[#059669] font-mono shrink-0">PP</span>
@@ -1060,8 +1064,8 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                     </label>
                     <input
                       type="date"
-                      value={achievementDate}
-                      onChange={(e) => setAchievementDate(e.target.value)}
+                      value={newDate}
+                      onChange={(e) => setNewDate(e.target.value)}
                       className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
                     />
                   </div>
@@ -1073,8 +1077,8 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                   </label>
                   <input
                     type="text"
-                    value={achievementOrganizer}
-                    onChange={(e) => setAchievementOrganizer(e.target.value)}
+                    value={newOrganizer}
+                    onChange={(e) => setNewOrganizer(e.target.value)}
                     placeholder="Contoh: Kemenag / Pesantren / LPTQ"
                     className="w-full h-10 px-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none"
                   />
@@ -1086,8 +1090,8 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                   </label>
                   <textarea
                     rows={2}
-                    value={achievementDescription}
-                    onChange={(e) => setAchievementDescription(e.target.value)}
+                    value={newDescription}
+                    onChange={(e) => setNewDescription(e.target.value)}
                     placeholder="Catatan tambahan mengenai prestasi santri..."
                     className="w-full p-3 bg-white border border-[#CBD5E1] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:outline-none resize-none"
                   />

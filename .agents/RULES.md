@@ -7,6 +7,19 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Perbaikan Kesalahan Variabel Undefined pada Form Prestasi, Kas Transaksi, Pelanggaran, dan Mode Offline (Versi v1.1.0.72b):
+  - 1. PERBAIKAN VARIABEL SCOPE FORM PRESTASI (`AchievementsView.tsx`):
+    * Memperbaiki variabel form yang tidak terdefinisi (`achievementTitle`, `achievementCategory`, `achievementRank`, `achievementPoints`, `achievementDate`, `achievementOrganizer`, `achievementDescription`) dan menghubungkannya secara presisi ke state form yang valid (`newTitle`, `newCategory`, `newRank`, `newPoints`, `newDate`, `newOrganizer`, `newDescription`).
+    * Memperbaiki pencarian santri combobox (`filteredStudentOptions` -> `filteredStudentsForNewAchievement`) dan handler seleksi santri.
+  - 2. PERBAIKAN VARIABEL FORM TRANSAKSI KAS (`TreasuryView.tsx`):
+    * Memperbaiki variabel form yang tidak terdefinisi (`date`, `amount`, `category`) dan menyelaraskannya dengan state yang valid (`inputDate`, `displayAmount`, `divisionId`).
+  - 3. PERBAIKAN TINGKAT PELANGGARAN & STATUS SIDANG (`ViolationsView.tsx`):
+    * Mengganti `editSeverity` yang tidak terdefinisi dengan input auto-calculated `editSeverityInfo.label`, serta menyesuaikan opsi `editStatus` agar sesuai dengan `PenaltyStatus`.
+  - 4. PERBAIKAN TIPE DATA USERPROFILE & PROMISE TOAST (`LoginPage.tsx`, `offlineManager.ts`, `toast.ts`):
+    * Menyelaraskan properti `DEFAULT_OFFLINE_USER` dan `offlineProfile` dengan tipe `UserProfile` (`role: 'bph'`, `roleLevel: 2`, `avatar`).
+    * Memperbaiki passing opsi generic promise pada `toast.ts`.
+  - 5. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Memastikan kode 100% bebas dari error kompilasi dan runtime lint TypeScript (`tsc --noEmit`), sehingga seluruh alur CRUD berjalan mulus dan stabil.
 - **[2026-08-27]**: Animasi Spring Masuk & Keluar, Batasan Tinggi Maksimum Tanpa Offset, dan Dismiss Backdrop pada Seluruh Sheet Panel (Versi v1.1.0.71b):
   - 1. ANIMASI MASUK & KELUAR TIPE SPRING (SPRING PHYSICS):
     * Seluruh komponen sheet panel, modal, dan dialog overlay di seluruh aplikasi (`Modal.tsx`, `NewViolationModal.tsx`, `LoginModal.tsx`, `AchievementsView.tsx`, `ViolationsView.tsx`, `StudentsView.tsx`, `ClassesView.tsx`, `DormitoryView.tsx`, `DirectivesView.tsx`, `TreasuryView.tsx`, dan `StudentDetailModal.tsx`) wajib dibungkus dengan `<AnimatePresence>` dari `framer-motion`.

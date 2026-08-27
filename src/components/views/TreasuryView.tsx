@@ -608,8 +608,8 @@ export const TreasuryView: React.FC<TreasuryViewProps> = () => {
                   <input
                     type="date"
                     required
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
+                    value={inputDate}
+                    onChange={(e) => setInputDate(e.target.value)}
                     className="w-full h-10 px-3.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A]"
                   />
                 </div>
@@ -624,31 +624,28 @@ export const TreasuryView: React.FC<TreasuryViewProps> = () => {
                     required
                     min="1"
                     step="1"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    value={displayAmount}
+                    onChange={(e) => setDisplayAmount(e.target.value)}
                     placeholder="Contoh: 150000"
                     className="w-full h-10 px-3.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A] font-mono"
                   />
                 </div>
 
-                {/* 4. Pilihan Kategori */}
+                {/* 4. Divisi Terkait */}
                 <div>
                   <label className="block font-semibold text-[#0F172A] mb-1.5 font-headline">
-                    Kategori Anggaran
+                    Divisi Terkait
                   </label>
                   <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
+                    value={divisionId}
+                    onChange={(e) => setDivisionId(e.target.value)}
                     className="w-full h-10 px-3.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-md text-xs text-[#0F172A] focus:outline-none focus:border-[#0F172A]"
                   >
-                    <option value="Iuran Kas">Iuran Kas</option>
-                    <option value="Dana Santri">Dana Santri</option>
-                    <option value="Infaq / Donasi">Infaq / Donasi</option>
-                    <option value="Konsumsi">Konsumsi</option>
-                    <option value="Perlengkapan">Perlengkapan</option>
-                    <option value="ATK & Administrasi">ATK & Administrasi</option>
-                    <option value="Kebersihan">Kebersihan</option>
-                    <option value="Lainnya">Lainnya</option>
+                    {mockDivisions.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

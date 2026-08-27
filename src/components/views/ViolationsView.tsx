@@ -846,18 +846,15 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
-                      Tingkat Pelanggaran *
+                      Tingkat Pelanggaran (Otomatis)
                     </label>
-                    <select
-                      value={editSeverity}
-                      onChange={(e) => setEditSeverity(e.target.value as any)}
-                      className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none"
-                    >
-                      <option value="ringan">Ringan (1-12 Poin)</option>
-                      <option value="sedang">Sedang (13-25 Poin)</option>
-                      <option value="berat">Berat (26-38 Poin)</option>
-                      <option value="sangat_berat">Sangat Berat (39-50 Poin)</option>
-                    </select>
+                    <input
+                      type="text"
+                      readOnly
+                      disabled
+                      value={editSeverityInfo.label}
+                      className="w-full h-10 px-3.5 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-600 font-semibold cursor-not-allowed select-none"
+                    />
                   </div>
 
                   <div>
@@ -866,11 +863,13 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
                     </label>
                     <select
                       value={editStatus}
-                      onChange={(e) => setEditStatus(e.target.value as any)}
-                      className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none font-medium"
+                      onChange={(e) => setEditStatus(e.target.value as PenaltyStatus)}
+                      className="w-full h-10 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs text-[#0F172A] focus:border-[#0F172A] focus:bg-white focus:outline-none font-medium cursor-pointer"
                     >
-                      <option value="pending">Belum Selesai (Pending)</option>
-                      <option value="selesai">Selesai (Sudah Takzir)</option>
+                      <option value="belum_dihukum">Belum Dihukum (Pending)</option>
+                      <option value="proses_sidang">Proses Sidang</option>
+                      <option value="sudah_dihukum">Sudah Dihukum (Selesai)</option>
+                      <option value="bebas_hukuman">Bebas Hukuman (Dimaafkan)</option>
                     </select>
                   </div>
                 </div>

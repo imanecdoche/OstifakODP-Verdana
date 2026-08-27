@@ -41,19 +41,18 @@ export const gooeyToast = Object.assign(
     warning: (title: string, options?: GooeyToastOptions) => rawGooeyToast.warning(title, mergeOptions(options)),
     info: (title: string, options?: GooeyToastOptions) => rawGooeyToast.info(title, mergeOptions(options)),
     promise: <T>(promise: Promise<T>, data: GooeyPromiseData<T>) => {
-      const hasDesc = Boolean(data.description);
+      const hasDesc = Boolean((data as any).description);
       const targetDuration = hasDesc ? DESCRIPTION_TOAST_DURATION : DEFAULT_TOAST_DURATION;
       return rawGooeyToast.promise(promise, {
         ...data,
-        borderColor: data.borderColor ?? DEFAULT_TOAST_OPTIONS.borderColor,
-        borderWidth: data.borderWidth ?? DEFAULT_TOAST_OPTIONS.borderWidth,
-        bounce: data.bounce ?? DEFAULT_TOAST_OPTIONS.bounce,
-        showTimestamp: data.showTimestamp ?? DEFAULT_TOAST_OPTIONS.showTimestamp,
-        duration: data.duration ?? targetDuration,
-        timing: data.timing ?? {
+        borderColor: (data as any).borderColor ?? DEFAULT_TOAST_OPTIONS.borderColor,
+        borderWidth: (data as any).borderWidth ?? DEFAULT_TOAST_OPTIONS.borderWidth,
+        bounce: (data as any).bounce ?? DEFAULT_TOAST_OPTIONS.bounce,
+        showTimestamp: (data as any).showTimestamp ?? DEFAULT_TOAST_OPTIONS.showTimestamp,
+        timing: (data as any).timing ?? {
           displayDuration: targetDuration,
         },
-      });
+      } as any);
     },
     dismiss: rawGooeyToast.dismiss,
     update: rawGooeyToast.update,
