@@ -106,3 +106,167 @@ export interface NotificationItem {
   type: 'violation' | 'proposal' | 'directive' | 'cleanliness';
   read: boolean;
 }
+
+export interface RoomAchievement {
+  category: 'kebersihan' | 'kerapihan' | 'keindahan' | 'umum';
+  title: string;
+  score: number;
+  date: string;
+  note?: string;
+}
+
+export interface RoomViolation {
+  title: string;
+  date: string;
+  points: number;
+  description: string;
+}
+
+export interface DormitoryRoom {
+  id: string;
+  dormitoryId: string;
+  dormitoryName: string;
+  roomNumber: string;
+  roomName: string;
+  ketuaKamar: string;
+  capacity: number;
+  occupiedCount: number;
+  residents: string[];
+  cleanlinessScore: number;
+  neatnessScore: number;
+  aestheticScore: number;
+  achievements: RoomAchievement[];
+  violations: RoomViolation[];
+  specialNotes?: string;
+  tags: string[];
+}
+
+export interface Dormitory {
+  id: string;
+  name: string;
+  leaderName: string;
+  leaderClass: string;
+  roomCount: number;
+  rooms: DormitoryRoom[];
+  achievements: { title: string; date: string; category: string }[];
+  violations: { title: string; date: string; points: number }[];
+  tags: string[];
+}
+
+export interface ClassAchievement {
+  category: string;
+  title: string;
+  date: string;
+  score?: number;
+}
+
+export interface ClassViolation {
+  title: string;
+  date: string;
+  points: number;
+  description: string;
+}
+
+export interface SchoolClass {
+  id: string;
+  className: string;
+  level: string;
+  generation: string;
+  major: string;
+  waliKelas: string;
+  studentCount: number;
+  students: string[];
+  cleanlinessScore: number;
+  disciplineScore: number;
+  academicScore: number;
+  achievements: ClassAchievement[];
+  violations: ClassViolation[];
+  specialNotes?: string;
+  tags: string[];
+}
+
+export interface StudentViolationEntry {
+  id: string;
+  title: string;
+  date: string;
+  points: number;
+  penalty: string;
+  notes?: string;
+}
+
+export interface StudentHafalanEntry {
+  id: string;
+  surah: string;
+  juz: string;
+  date: string;
+  timestamp?: number;
+  predikat: string;
+  category?: 'Hafalan Baru' | 'Murojaah';
+  pageFrom?: number;
+  pageTo?: number;
+  pageCount?: number;
+  ayatFrom?: number;
+  ayatTo?: number;
+  ayatCount?: number;
+  kelancaran?: string;
+  ustadz?: string;
+  notes?: string;
+}
+
+export interface StudentAchievementEntry {
+  id: string;
+  title: string;
+  category: string;
+  date: string;
+  rank: string;
+  organizer: string;
+  points?: number; // Poin Prestasi (PP)
+  description?: string;
+  level?: string;
+}
+
+export interface StudentPermissionEntry {
+  id: string;
+  type: string;
+  reason: string;
+  startDate: string;
+  endDate: string;
+  status: 'Aktif' | 'Selesai' | 'Disetujui';
+  notes?: string;
+}
+
+export interface StudentMahkamahEntry {
+  id: string;
+  divisions: string[];
+  violation: string;
+  penalty: string;
+  date: string;
+  points?: number;
+  sessionNotes?: string;
+  createdAt?: string;
+}
+
+export interface SantriRecord {
+  id: string;
+  studentName: string;
+  nis: string;
+  kamar: string;
+  kelas: string;
+  hafalan: string;
+  poinPelanggaran: number;
+  poinPrestasi?: number; // Akumulasi Poin Prestasi (PP)
+  statusIbadah: string;
+  birthDate?: string;
+  domicile?: string;
+  guardianName?: string;
+  guardianPhone?: string;
+  address?: string;
+  isTahsinPassed?: boolean;
+  violationsHistory?: StudentViolationEntry[];
+  mahkamahHistory?: StudentMahkamahEntry[];
+  hafalanHistory?: StudentHafalanEntry[];
+  achievementsHistory?: StudentAchievementEntry[];
+  permissionsHistory?: StudentPermissionEntry[];
+}
+
+

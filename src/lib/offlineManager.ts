@@ -10,15 +10,8 @@ import {
   mockMudirDirectives, 
   OFFICIAL_ACCOUNTS 
 } from '../data/mockData';
-import { 
-  SchoolClass, 
-  OFFICIAL_CLASSES, 
-  Dormitory, 
-  DormitoryRoom, 
-  OFFICIAL_DORMITORIES, 
-  ALL_OFFICIAL_ROOMS,
-  SantriRecord
-} from './firestoreService';
+import type { SchoolClass, Dormitory, DormitoryRoom, SantriRecord } from '../types';
+import { OFFICIAL_CLASSES, OFFICIAL_DORMITORIES, ALL_OFFICIAL_ROOMS } from './constants';
 
 // Storage Keys for Offline Isolation
 export const OFFLINE_KEYS = {

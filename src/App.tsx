@@ -148,6 +148,27 @@ export default function App() {
     }
   }, [selectedDivision]);
 
+
+
+  // Global Search Query
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // UI Panels Toggles
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
+
+  // Modals
+  const [isNewViolationModalOpen, setIsNewViolationModalOpen] = useState(false);
+  const [isNewProgramModalOpen, setIsNewProgramModalOpen] = useState(false);
+
+  // Live Collections Data
+  const [violations, setViolations] = useState<ViolationRecord[]>([]);
+  const [workPrograms, setWorkPrograms] = useState<WorkProgram[]>([]);
+  const [students, setStudents] = useState<SantriRecord[]>([]);
+  const [dormitories, setDormitories] = useState<Dormitory[]>(OFFICIAL_DORMITORIES);
+  const [rooms, setRooms] = useState<DormitoryRoom[]>(ALL_OFFICIAL_ROOMS);
+  const [classes, setClasses] = useState<SchoolClass[]>(OFFICIAL_CLASSES);
+
   // Hardware Back Button Handler for Android (Capacitor)
   useEffect(() => {
     let lastBackPress = 0;
@@ -230,25 +251,6 @@ export default function App() {
     selectedDivision,
     activeView
   ]);
-
-  // Global Search Query
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // UI Panels Toggles
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
-
-  // Modals
-  const [isNewViolationModalOpen, setIsNewViolationModalOpen] = useState(false);
-  const [isNewProgramModalOpen, setIsNewProgramModalOpen] = useState(false);
-
-  // Live Collections Data
-  const [violations, setViolations] = useState<ViolationRecord[]>([]);
-  const [workPrograms, setWorkPrograms] = useState<WorkProgram[]>([]);
-  const [students, setStudents] = useState<SantriRecord[]>([]);
-  const [dormitories, setDormitories] = useState<Dormitory[]>(OFFICIAL_DORMITORIES);
-  const [rooms, setRooms] = useState<DormitoryRoom[]>(ALL_OFFICIAL_ROOMS);
-  const [classes, setClasses] = useState<SchoolClass[]>(OFFICIAL_CLASSES);
 
   // Data Fetching & Sync Status (Global Bottom Loading Bar)
   const [isDataFetching, setIsDataFetching] = useState<boolean>(() => !isOfflineModeActive());
