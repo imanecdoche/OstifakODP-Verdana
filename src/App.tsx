@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { App } from '@capacitor/app';
+import { App as CapacitorApp } from '@capacitor/app';
 import { UserProfile, DivisionId, ViolationRecord, WorkProgram } from './types';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
@@ -198,14 +198,14 @@ export default function App() {
       // 5. Back on Dashboard -> Show exit confirmation (Double tap back to exit)
       const now = Date.now();
       if (now - lastBackPress < 2000) {
-        App.exitApp();
+        CapacitorApp.exitApp();
       } else {
         lastBackPress = now;
         gooeyToast.info('Tekan sekali lagi untuk keluar aplikasi', { duration: 2000 });
       }
     };
 
-    const listenerPromise = App.addListener('backButton', handleBackButton);
+    const listenerPromise = CapacitorApp.addListener('backButton', handleBackButton);
 
     return () => {
       listenerPromise.then(l => l.remove());
