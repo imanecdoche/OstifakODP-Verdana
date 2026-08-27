@@ -182,6 +182,19 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     } catch {}
   }, [detailActiveTab]);
 
+  useEffect(() => {
+    const handleBackButton = (e: Event) => {
+      if (student !== null) {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener('ostifak-back-pressed', handleBackButton);
+    return () => {
+      window.removeEventListener('ostifak-back-pressed', handleBackButton);
+    };
+  }, [student, onClose]);
+
   // Tab horizontal scroll & shadow edge state
   const tabContainerRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});

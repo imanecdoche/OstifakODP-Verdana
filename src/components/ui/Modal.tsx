@@ -26,13 +26,21 @@ export const Modal: React.FC<ModalProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
+    const handleBackButton = (e: Event) => {
+      if (isOpen) {
+        e.preventDefault();
+        onClose();
+      }
+    };
     if (isOpen) {
       document.body.style.overflow = 'hidden';
       window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener('ostifak-back-pressed', handleBackButton);
     }
     return () => {
       document.body.style.overflow = 'auto';
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('ostifak-back-pressed', handleBackButton);
     };
   }, [isOpen, onClose]);
 
