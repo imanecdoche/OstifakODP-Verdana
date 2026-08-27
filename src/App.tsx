@@ -15,6 +15,7 @@ import { DirectivesView } from './components/views/DirectivesView';
 import { WhoAmIView } from './components/views/WhoAmIView';
 import { TreasuryView } from './components/views/TreasuryView';
 import { DivisionDetailView } from './components/views/DivisionDetailView';
+import { FirestoreStatsView } from './components/views/FirestoreStatsView';
 import { LoginPage } from './components/views/LoginPage';
 import { PageTransition } from './components/ui/PageTransition';
 import { NewViolationModal } from './components/modals/NewViolationModal';
@@ -105,7 +106,7 @@ export default function App() {
 
   // Navigation State with localStorage Persistence
   const [activeView, setActiveView] = useState<string>(() => {
-    const VALID_VIEWS = ['dashboard', 'students', 'achievements', 'dormitory', 'classes', 'violations', 'programs', 'directives'];
+    const VALID_VIEWS = ['dashboard', 'students', 'achievements', 'dormitory', 'classes', 'violations', 'programs', 'directives', 'firestore-stats'];
     try {
       const savedView = localStorage.getItem('ostifak_active_view');
       if (savedView && VALID_VIEWS.includes(savedView)) return savedView;
@@ -772,8 +773,8 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col lg:pl-[224px] relative font-body selection:bg-[#0F172A] selection:text-white">
-      {/* Primary Sidebar (Fixed Left 224px desktop, 260px mobile) */}
+    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col lg:pl-[220px] relative font-body selection:bg-[#0F172A] selection:text-white">
+      {/* Primary Sidebar (Fixed Left 220px desktop, 240px mobile) */}
       <Sidebar
         currentUser={currentUser}
         onLogout={handleLogout}
@@ -805,6 +806,10 @@ export default function App() {
           unreadCount={violations.filter(v => v.status === 'proses' || v.status === 'pending').length}
           isOfflineMode={isOfflineMode}
           onExitOfflineMode={handleExitOfflineMode}
+          onNavigateFirestoreStats={() => {
+            setActiveView('firestore-stats');
+            setSelectedDivision(null);
+          }}
         />
 
         {/* Content Canvas */}
@@ -876,6 +881,13 @@ export default function App() {
             ) : activeView === 'whoami' ? (
               <PageTransition key="whoami">
                 <WhoAmIView />
+              </PageTransition>
+            ) : activeView === 'firestore-stats' ? (
+              <PageTransition key="firestore-stats">
+                <FirestoreStatsView
+                  isOfflineMode={isOfflineMode}
+                  onBack={() => setActiveView('dashboard')}
+                />
               </PageTransition>
             ) : (
               <PageTransition key="dashboard">

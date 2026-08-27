@@ -37,6 +37,7 @@ interface HeaderProps {
   unreadCount: number;
   isOfflineMode?: boolean;
   onExitOfflineMode?: () => void;
+  onNavigateFirestoreStats?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -53,6 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
   unreadCount,
   isOfflineMode,
   onExitOfflineMode,
+  onNavigateFirestoreStats,
 }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -187,13 +189,14 @@ export const Header: React.FC<HeaderProps> = ({
       case 'programs': return 'Program Kerja & Proposal';
       case 'directives': return 'Instruksi Mudir';
       case 'whoami': return 'Siapa Aku';
+      case 'firestore-stats': return 'Firestore Stats';
       default: return 'Dashboard';
     }
   };
 
   return (
     <>
-      <header className="fixed top-0 inset-x-0 lg:left-[224px] z-40 h-16 lg:h-14 bg-[#FFFFFF] border-b border-[#E2E8F0] px-6 flex items-center gap-4 shadow-[0_1px_3px_rgba(15,23,42,0.03)]">
+      <header className="fixed top-0 inset-x-0 lg:left-[220px] z-40 h-16 lg:h-14 bg-[#FFFFFF] border-b border-[#E2E8F0] px-6 flex items-center gap-4 shadow-[0_1px_3px_rgba(15,23,42,0.03)]">
         {/* Left: Mobile Toggle, Brand "OSDIGI" (Google Sans Flex Black) & Breadcrumbs */}
         <div className="flex-1 flex items-center gap-3">
           <button
@@ -378,6 +381,19 @@ export const Header: React.FC<HeaderProps> = ({
                     className="w-full px-3 py-2 text-left rounded-md hover:bg-[#F8FAFC] text-xs font-medium text-slate-700 hover:text-slate-900 flex items-center justify-between transition-colors cursor-pointer"
                   >
                     <span>Preferensi Portal</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+
+                  {/* Firestore Stats Option */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSettingsMenuOpen(false);
+                      if (onNavigateFirestoreStats) onNavigateFirestoreStats();
+                    }}
+                    className="w-full px-3 py-2 text-left rounded-md hover:bg-[#F8FAFC] text-xs font-medium text-slate-700 hover:text-slate-900 flex items-center justify-between transition-colors cursor-pointer"
+                  >
+                    <span>Firestore Stats</span>
                     <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
                   </button>
                 </div>

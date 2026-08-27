@@ -231,23 +231,8 @@ html.lenis, html.lenis body {
   }
 }
 
-/* Scaling Header & Left Sidebar only to counteract the html zoom: 0.8 */
-aside[data-sidebar="true"],
-header {
-  zoom: 1.25 !important;
-}
 
-@media (min-width: 1024px) {
-  /* Offset main wrapper to match the unzoomed 1.0 (visual 260px) width on screen */
-  .lg\:pl-\[260px\] {
-    padding-left: 325px !important;
-  }
-}
 
-/* Clear the unzoomed 1.0 height (visual h-16 / 64px) of the Header */
-main.mt-16 {
-  margin-top: 80px !important;
-}
 
 
 

@@ -7,6 +7,16 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-27]**: Peringkasan Lebar Sidebar, Pencegahan Wrapped Text, & Penyelarasan Judul Halaman (Versi v1.1.0.73b):
+  - 1. PERINGKASAN LEBAR SIDEBAR & PENCEGAHAN WRAPPED TEXT (`Sidebar.tsx`, `index.css`):
+    * Mengurangi lebar sidebar desktop menjadi `220px` (`lg:w-[220px]`, mobile `240px`), sehingga proporsional, ramping, dan tidak memakan terlalu banyak ruang horizontal.
+    * Menghapus aturan `zoom: 1.25` parsial pada sidebar/header di `index.css` sehingga seluruh elemen diskalakan secara konsisten dengan sistem global (`zoom: 0.8`).
+    * Menyesuaikan ukuran font menu (`text-[11.5px]`), spasi tombol (`px-2.5 py-1.5` / `h-8.5 lg:h-8`), gap ikon (`gap-2`), dan `whitespace-nowrap truncate` sehingga seluruh 9 divisi dan 8 navigasi utama tertata rapi dalam 1 baris utuh tanpa terjadi *wrapped text* atau patahan baris canggung.
+  - 2. PERBAIKAN TATA LETAK JUDUL HALAMAN (`App.tsx`, `Header.tsx`, `ClassesView.tsx`, `DormitoryView.tsx`, `StudentsView.tsx`):
+    * Menyelaraskan *left padding* kontainer utama (`lg:pl-[220px]`) dan posisi header (`lg:left-[220px]`), menghapus kompensasi manual `padding-left: 325px` / `margin-top: 80px` di `index.css`.
+    * Memastikan judul halaman (seperti *"Program Kerja & Proposal Kegiatan"*, *"Profil Santri"*, *"Dashboard"*) tidak lagi terpotong di sebelah kiri dan posisinya sejajar rapi dengan padding konten secara keseluruhan.
+  - 3. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Mempertahankan konsistensi desain minimalis *clean-flat*, tanpa kontainer card bertumpuk berlebihan, bebas ikon dekoratif tidak perlu, menggunakan garis pembatas tipis (*divider*), serta responsif dengan baik di berbagai ukuran layar.
 - **[2026-08-27]**: Perbaikan Kesalahan Variabel Undefined pada Form Prestasi, Kas Transaksi, Pelanggaran, dan Mode Offline (Versi v1.1.0.72b):
   - 1. PERBAIKAN VARIABEL SCOPE FORM PRESTASI (`AchievementsView.tsx`):
     * Memperbaiki variabel form yang tidak terdefinisi (`achievementTitle`, `achievementCategory`, `achievementRank`, `achievementPoints`, `achievementDate`, `achievementOrganizer`, `achievementDescription`) dan menghubungkannya secara presisi ke state form yang valid (`newTitle`, `newCategory`, `newRank`, `newPoints`, `newDate`, `newOrganizer`, `newDescription`).

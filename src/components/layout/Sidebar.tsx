@@ -108,12 +108,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         data-sidebar="true"
         onTouchStart={handleSidebarTouchStart}
         onTouchEnd={handleSidebarTouchEnd}
-        className={`fixed top-0 bottom-0 left-0 z-50 w-[260px] lg:w-[224px] bg-[#FFFFFF] border-r border-[#E2E8F0] flex flex-col transition-transform duration-200 ease-out lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-50 w-[240px] lg:w-[220px] bg-[#FFFFFF] border-r border-[#E2E8F0] flex flex-col transition-transform duration-200 ease-out lg:translate-x-0 ${
           isOpenMobile ? 'translate-x-0 shadow-[0_8px_32px_rgba(15,23,42,0.15)]' : '-translate-x-full'
         }`}
       >
         {/* Brand Header: Eksklusif Logo SVG Saja (Tanpa Teks OSDIGI) */}
-        <div className="relative h-16 lg:h-14 px-6 border-b border-[#E2E8F0] flex items-center justify-center">
+        <div className="relative h-16 lg:h-14 px-4 border-b border-[#E2E8F0] flex items-center justify-center">
           <img
             src="/logo.svg"
             alt="Logo OSTIFAK"
@@ -121,7 +121,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           />
           <button
             onClick={onCloseMobile}
-            className="absolute right-4 top-1/2 -translate-y-1/2 lg:hidden w-8 h-8 rounded-md flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] transition-colors cursor-pointer active:scale-95"
+            className="absolute right-3 top-1/2 -translate-y-1/2 lg:hidden w-8 h-8 rounded-md flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] transition-colors cursor-pointer active:scale-95"
             title="Tutup Menu"
           >
             <X className="w-4 h-4" />
@@ -131,15 +131,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Main Navigation Scroll Area */}
         <ScrollArea
           className="flex-1"
-          viewportClassName="p-4 space-y-6"
+          viewportClassName="p-3 space-y-5"
           topOffset="top-3"
           bottomOffset="bottom-3"
         >
           <div>
-            <p className="text-[11px] font-semibold text-[#64748B] uppercase tracking-[0.5px] px-3 mb-2 font-headline">
+            <p className="text-[10px] font-semibold text-[#64748B] uppercase tracking-[0.5px] px-2.5 mb-1.5 font-headline">
               Navigasi Utama
             </p>
-            <nav className="space-y-1">
+            <nav className="space-y-0.5">
               {navItems.map((item) => {
                 const isActive = activeView === item.id && selectedDivision === null;
                 return (
@@ -150,17 +150,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       onSelectDivision(null);
                       onCloseMobile();
                     }}
-                    className={`w-full h-10 lg:h-9 flex items-center justify-between px-3 rounded-md text-xs transition-all duration-160 cursor-pointer active:scale-[0.97] ${
+                    className={`w-full h-8.5 lg:h-8 flex items-center justify-between px-2.5 rounded-md text-[11.5px] transition-all duration-160 cursor-pointer active:scale-[0.97] ${
                       isActive
                         ? 'bg-[#0F172A] text-white font-semibold shadow-[0_1px_3px_rgba(15,23,42,0.12)]'
                         : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] font-medium'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <span className={isActive ? 'text-[#059669]' : 'text-[#64748B]'}>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={isActive ? 'text-[#059669]' : 'text-[#64748B]'} shrink-0>
                         {item.icon}
                       </span>
-                      <span>{item.label}</span>
+                      <span className="truncate whitespace-nowrap leading-none">{item.label}</span>
                     </div>
                   </button>
                 );
@@ -169,13 +169,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           <div>
-            <div className="flex items-center justify-between px-3 mb-2">
-              <p className="text-[11px] font-semibold text-[#64748B] uppercase tracking-[0.5px] font-headline">
+            <div className="flex items-center justify-between px-2.5 mb-1.5">
+              <p className="text-[10px] font-semibold text-[#64748B] uppercase tracking-[0.5px] font-headline">
                 Divisi OSTIFAK (9)
               </p>
               <SlidersHorizontal className="w-3 h-3 text-[#94A3B8]" />
             </div>
-            <nav className="space-y-1">
+            <nav className="space-y-0.5">
               {mockDivisions.map((div) => {
                 const isActive = selectedDivision === div.id;
                 return (
@@ -185,17 +185,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       onSelectDivision(div.id);
                       onCloseMobile();
                     }}
-                    className={`w-full h-9 lg:h-8 flex items-center justify-between px-3 rounded-md text-xs transition-all duration-160 cursor-pointer active:scale-[0.97] ${
+                    className={`w-full h-8 lg:h-7.5 flex items-center justify-between px-2.5 rounded-md text-[11.5px] transition-all duration-160 cursor-pointer active:scale-[0.97] ${
                       isActive
                         ? 'bg-[#0F172A] text-white font-semibold shadow-[0_1px_3px_rgba(15,23,42,0.12)]'
                         : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] font-medium'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5 truncate">
-                      <span className={isActive ? 'text-[#059669]' : 'text-[#64748B]'}>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={isActive ? 'text-[#059669]' : 'text-[#64748B]'} shrink-0>
                         {getDivisionIcon(div.iconName)}
                       </span>
-                      <span className="truncate">{div.name}</span>
+                      <span className="truncate whitespace-nowrap leading-none">{div.name}</span>
                     </div>
                   </button>
                 );
