@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { App as CapacitorApp } from '@capacitor/app';
 import { UserProfile, DivisionId, ViolationRecord, WorkProgram } from './types';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
@@ -152,63 +151,76 @@ export default function App() {
   // Hardware Back Button Handler for Android (Capacitor)
   useEffect(() => {
     let lastBackPress = 0;
+    let listenerPromise: Promise<{ remove: () => void }> | null = null;
     
-    const handleBackButton = async () => {
-      // 1. Dispatch custom event for child views/modals to handle first
-      const backEvent = new CustomEvent('ostifak-back-pressed', {
-        cancelable: true,
-        bubbles: true,
-      });
-      window.dispatchEvent(backEvent);
+    const setupBackButton = async () => {
+      try {
+        const { App: CapacitorApp } = await import('@capacitor/app');
 
-      if (backEvent.defaultPrevented) {
-        return;
-      }
+        const handleBackButton = async () => {
+          // 1. Dispatch custom event for child views/modals to handle first
+          const backEvent = new CustomEvent('ostifak-back-pressed', {
+            cancelable: true,
+            bubbles: true,
+          });
+          window.dispatchEvent(backEvent);
 
-      // 2. Handle app-level dialogs & panel overlays
-      if (isNewViolationModalOpen) {
-        setIsNewViolationModalOpen(false);
-        return;
-      }
-      if (isNewProgramModalOpen) {
-        setIsNewProgramModalOpen(false);
-        return;
-      }
-      if (isRightPanelOpen) {
-        setIsRightPanelOpen(false);
-        return;
-      }
-      if (isMobileSidebarOpen) {
-        setIsMobileSidebarOpen(false);
-        return;
-      }
+          if (backEvent.defaultPrevented) {
+            return;
+          }
 
-      // 3. Close division sub-module
-      if (selectedDivision !== null) {
-        setSelectedDivision(null);
-        return;
-      }
+          // 2. Handle app-level dialogs & panel overlays
+          if (isNewViolationModalOpen) {
+            setIsNewViolationModalOpen(false);
+            return;
+          }
+          if (isNewProgramModalOpen) {
+            setIsNewProgramModalOpen(false);
+            return;
+          }
+          if (isRightPanelOpen) {
+            setIsRightPanelOpen(false);
+            return;
+          }
+          if (isMobileSidebarOpen) {
+            setIsMobileSidebarOpen(false);
+            return;
+          }
 
-      // 4. Return to home/dashboard view
-      if (activeView !== 'dashboard') {
-        setActiveView('dashboard');
-        return;
-      }
+          // 3. Close division sub-module
+          if (selectedDivision !== null) {
+            setSelectedDivision(null);
+            return;
+          }
 
-      // 5. Back on Dashboard -> Show exit confirmation (Double tap back to exit)
-      const now = Date.now();
-      if (now - lastBackPress < 2000) {
-        CapacitorApp.exitApp();
-      } else {
-        lastBackPress = now;
-        gooeyToast.info('Tekan sekali lagi untuk keluar aplikasi', { duration: 2000 });
+          // 4. Return to home/dashboard view
+          if (activeView !== 'dashboard') {
+            setActiveView('dashboard');
+            return;
+          }
+
+          // 5. Back on Dashboard -> Show exit confirmation (Double tap back to exit)
+          const now = Date.now();
+          if (now - lastBackPress < 2000) {
+            CapacitorApp.exitApp();
+          } else {
+            lastBackPress = now;
+            gooeyToast.info('Tekan sekali lagi untuk keluar aplikasi', { duration: 2000 });
+          }
+        };
+
+        listenerPromise = CapacitorApp.addListener('backButton', handleBackButton);
+      } catch (err) {
+        console.warn('Capacitor App plugin not available:', err);
       }
     };
 
-    const listenerPromise = CapacitorApp.addListener('backButton', handleBackButton);
+    setupBackButton();
 
     return () => {
-      listenerPromise.then(l => l.remove());
+      if (listenerPromise) {
+        listenerPromise.then(l => l.remove()).catch(() => {});
+      }
     };
   }, [
     isNewViolationModalOpen,
