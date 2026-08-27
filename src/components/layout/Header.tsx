@@ -193,7 +193,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="fixed top-0 inset-x-0 lg:left-[260px] z-40 h-16 bg-[#FFFFFF] border-b border-[#E2E8F0] px-6 flex items-center gap-4 shadow-[0_1px_3px_rgba(15,23,42,0.03)]">
+      <header className="fixed top-0 inset-x-0 lg:left-[224px] z-40 h-16 lg:h-14 bg-[#FFFFFF] border-b border-[#E2E8F0] px-6 flex items-center gap-4 shadow-[0_1px_3px_rgba(15,23,42,0.03)]">
         {/* Left: Mobile Toggle, Brand "OSDIGI" (Google Sans Flex Black) & Breadcrumbs */}
         <div className="flex-1 flex items-center gap-3">
           <button
@@ -234,7 +234,7 @@ export const Header: React.FC<HeaderProps> = ({
                   requestAnimationFrame(() => searchRef.current?.focus());
                 }
               }}
-              className={`flex items-center h-10 rounded-md cursor-pointer overflow-hidden transition-colors ${
+              className={`flex items-center h-10 lg:h-9 rounded-md cursor-pointer overflow-hidden transition-colors ${
                 isSearchBoxExpanded
                   ? 'w-64 lg:w-72 pl-4'
                   : 'w-10 justify-center hover:bg-[#F8FAFC]'
@@ -291,7 +291,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Right Contextual Panel Toggle */}
           <button
             onClick={onToggleRightPanel}
-            className={`shrink-0 h-8 px-3 rounded-md border text-xs font-medium uppercase tracking-[0.5px] transition-all cursor-pointer hidden xl:inline-flex items-center gap-1.5 active:scale-[0.97] ${
+            className={`shrink-0 h-8 lg:h-7 px-3 rounded-md border text-xs font-medium uppercase tracking-[0.5px] transition-all cursor-pointer hidden xl:inline-flex items-center gap-1.5 active:scale-[0.97] ${
               isRightPanelOpen
                 ? 'bg-[#0F172A] text-white border-[#0F172A]'
                 : 'bg-[#FFFFFF] text-[#64748B] border-[#E2E8F0] hover:bg-[#F8FAFC] hover:text-[#0F172A]'
@@ -307,8 +307,8 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           {/* Notifications Icon Button */}
-          <button className="shrink-0 w-8 h-8 rounded-md bg-[#FFFFFF] border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] flex items-center justify-center relative transition-colors cursor-pointer active:scale-[0.97]">
-            <Bell className="w-4 h-4" />
+          <button className="shrink-0 w-8 h-8 lg:w-7 lg:h-7 rounded-md bg-[#FFFFFF] border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] flex items-center justify-center relative transition-colors cursor-pointer active:scale-[0.97]">
+            <Bell className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#EF4444] text-white text-[10px] font-bold flex items-center justify-center">
                 {unreadCount}
@@ -322,14 +322,14 @@ export const Header: React.FC<HeaderProps> = ({
               ref={settingsButtonRef}
               type="button"
               onClick={() => setIsSettingsMenuOpen(!isSettingsMenuOpen)}
-              className={`w-8 h-8 rounded-md border transition-all cursor-pointer flex items-center justify-center active:scale-[0.97] ${
+              className={`w-8 h-8 lg:w-7 lg:h-7 rounded-md border transition-all cursor-pointer flex items-center justify-center active:scale-[0.97] ${
                 isSettingsMenuOpen
                   ? 'bg-[#0F172A] text-white border-[#0F172A]'
                   : 'bg-[#FFFFFF] text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] border-[#E2E8F0]'
               }`}
               title="Pengaturan Sistem & Rekam Sesi"
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
             </button>
 
             {/* Settings Dropdown Menu */}
@@ -393,11 +393,11 @@ export const Header: React.FC<HeaderProps> = ({
                   ref={avatarButtonRef}
                   type="button"
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="w-8 h-8 rounded-md bg-rose-50 border border-rose-200 text-[#EF4444] hover:bg-rose-100 transition-all cursor-pointer flex items-center justify-center active:scale-[0.97]"
+                  className="w-8 h-8 lg:w-7 lg:h-7 rounded-md bg-rose-50 border border-rose-200 text-[#EF4444] hover:bg-rose-100 transition-all cursor-pointer flex items-center justify-center active:scale-[0.97]"
                   title="Aplikasi Berjalan dalam Mode Offline (Lokal 100 MB)"
                   aria-label="Mode Offline Aktif"
                 >
-                  <WifiOff className="w-4 h-4 text-[#EF4444]" />
+                  <WifiOff className="w-4 h-4 lg:w-3.5 lg:h-3.5 text-[#EF4444]" />
                 </button>
 
                 {/* Offline Status Popover */}
@@ -450,14 +450,14 @@ export const Header: React.FC<HeaderProps> = ({
                   ref={avatarButtonRef}
                   type="button"
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className={`w-8 h-8 rounded-md border transition-all cursor-pointer flex items-center justify-center active:scale-[0.97] ${
+                  className={`w-8 h-8 lg:w-7 lg:h-7 rounded-md border transition-all cursor-pointer flex items-center justify-center active:scale-[0.97] ${
                     isProfileOpen
                       ? 'bg-[#0F172A] text-white border-[#0F172A]'
                       : 'bg-[#FFFFFF] text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] border-[#E2E8F0]'
                   }`}
                   title="Profil & Pengaturan Akun"
                 >
-                  <User className="w-4 h-4" />
+                  <User className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
                 </button>
 
                 {/* Profile Popover Window */}

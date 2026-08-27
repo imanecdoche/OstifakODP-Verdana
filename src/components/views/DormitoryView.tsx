@@ -448,7 +448,7 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -16, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-            className="fixed top-20 left-6 lg:left-[280px] z-40 bg-white/95 backdrop-blur-md border border-slate-200 shadow-lg rounded-full p-1.5 flex items-center gap-2 max-w-[calc(100vw-3rem)] lg:max-w-[calc(100vw-340px)]"
+            className="fixed top-20 lg:top-[60px] left-6 lg:left-[244px] z-40 bg-white/95 backdrop-blur-md border border-slate-200 shadow-lg rounded-full p-1.5 flex items-center gap-2 max-w-[calc(100vw-3rem)] lg:max-w-[calc(100vw-284px)]"
           >
             <PillTabs
               tabs={filterTabs}
@@ -482,7 +482,7 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
               duration: 0.65,
               ease: [0.4, 0, 0.2, 1],
             }}
-            className="fixed inset-x-0 bottom-0 top-16 lg:left-[260px] z-30 bg-[#F8FAFC] overflow-y-auto overscroll-contain"
+            className="fixed inset-x-0 bottom-0 top-16 lg:top-14 lg:left-[224px] z-30 bg-[#F8FAFC] overflow-y-auto overscroll-contain"
           >
             <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 font-body">
               <StudentDetailModal

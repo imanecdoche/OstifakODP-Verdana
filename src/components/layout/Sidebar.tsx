@@ -108,12 +108,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         data-sidebar="true"
         onTouchStart={handleSidebarTouchStart}
         onTouchEnd={handleSidebarTouchEnd}
-        className={`fixed top-0 bottom-0 left-0 z-50 w-[260px] bg-[#FFFFFF] border-r border-[#E2E8F0] flex flex-col transition-transform duration-200 ease-out lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-50 w-[260px] lg:w-[224px] bg-[#FFFFFF] border-r border-[#E2E8F0] flex flex-col transition-transform duration-200 ease-out lg:translate-x-0 ${
           isOpenMobile ? 'translate-x-0 shadow-[0_8px_32px_rgba(15,23,42,0.15)]' : '-translate-x-full'
         }`}
       >
         {/* Brand Header: Eksklusif Logo SVG Saja (Tanpa Teks OSDIGI) */}
-        <div className="relative h-16 px-6 border-b border-[#E2E8F0] flex items-center justify-center">
+        <div className="relative h-16 lg:h-14 px-6 border-b border-[#E2E8F0] flex items-center justify-center">
           <img
             src="/logo.svg"
             alt="Logo OSTIFAK"
@@ -150,7 +150,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       onSelectDivision(null);
                       onCloseMobile();
                     }}
-                    className={`w-full h-10 flex items-center justify-between px-3 rounded-md text-xs transition-all duration-160 cursor-pointer active:scale-[0.97] ${
+                    className={`w-full h-10 lg:h-9 flex items-center justify-between px-3 rounded-md text-xs transition-all duration-160 cursor-pointer active:scale-[0.97] ${
                       isActive
                         ? 'bg-[#0F172A] text-white font-semibold shadow-[0_1px_3px_rgba(15,23,42,0.12)]'
                         : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] font-medium'
@@ -185,7 +185,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       onSelectDivision(div.id);
                       onCloseMobile();
                     }}
-                    className={`w-full h-9 flex items-center justify-between px-3 rounded-md text-xs transition-all duration-160 cursor-pointer active:scale-[0.97] ${
+                    className={`w-full h-9 lg:h-8 flex items-center justify-between px-3 rounded-md text-xs transition-all duration-160 cursor-pointer active:scale-[0.97] ${
                       isActive
                         ? 'bg-[#0F172A] text-white font-semibold shadow-[0_1px_3px_rgba(15,23,42,0.12)]'
                         : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] font-medium'

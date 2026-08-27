@@ -772,8 +772,8 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col lg:pl-[260px] relative font-body selection:bg-[#0F172A] selection:text-white">
-      {/* Primary Sidebar (Fixed Left 260px) */}
+    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col lg:pl-[224px] relative font-body selection:bg-[#0F172A] selection:text-white">
+      {/* Primary Sidebar (Fixed Left 224px desktop, 260px mobile) */}
       <Sidebar
         currentUser={currentUser}
         onLogout={handleLogout}
@@ -808,7 +808,7 @@ export default function App() {
         />
 
         {/* Content Canvas */}
-        <main className="flex-1 p-6 mt-16 max-w-7xl mx-auto w-full overflow-x-hidden">
+        <main className="flex-1 p-6 mt-16 lg:mt-14 max-w-7xl mx-auto w-full overflow-x-hidden">
           <AnimatePresence mode="wait">
             {selectedDivision === 'bph' ? (
               <PageTransition key="division-bph">
