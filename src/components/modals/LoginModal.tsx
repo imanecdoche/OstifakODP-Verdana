@@ -130,6 +130,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               mass: 0.8,
             }}
             onClick={(e) => e.stopPropagation()}
+            data-bottom-sheet
             className="relative bg-[#FFFFFF] w-full max-w-2xl rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_8px_32px_rgba(15,23,42,0.15)] border-t sm:border border-[#E2E8F0] overflow-hidden max-h-[88dvh] sm:max-h-[90vh] flex flex-col z-10"
           >
             {/* Mobile Top Drag Handle */}

@@ -43,9 +43,10 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   // Strict 8-Point Grid Sizes: sm (32px, px-14), md (40px, px-22), lg (48px, px-28)
+  // Mobile keeps a >=44px touch target; desktop keeps the compact density.
   const sizeStyles: Record<ButtonSize, string> = {
-    sm: 'h-8 px-3.5 text-xs gap-1.5 leading-none',
-    md: 'h-10 px-5 text-sm gap-2 leading-none',
+    sm: 'min-h-[44px] sm:min-h-0 h-11 sm:h-8 px-3.5 text-xs gap-1.5 leading-none',
+    md: 'min-h-[44px] sm:min-h-0 h-11 sm:h-10 px-5 text-sm gap-2 leading-none',
     lg: 'h-12 px-7 text-base gap-2.5 leading-none',
   };
 

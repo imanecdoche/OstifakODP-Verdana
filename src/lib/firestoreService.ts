@@ -2,6 +2,8 @@ import {
   collection, 
   addDoc, 
   query, 
+  where,
+  getDocs,
   orderBy, 
   onSnapshot, 
   serverTimestamp,
@@ -78,6 +80,45 @@ import {
   getOfflineClasses,
   saveOfflineClasses
 } from './offlineManager';
+
+/**
+ * Collision-proof local document id. Uses crypto.randomUUID when available,
+ * so rapid successive writes inside the same millisecond can never collide.
+ */
+export function createLocalId(prefix: string): string {
+  const unique =
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+  return `${prefix}_${unique}`;
+}
+
+export function normalizeSantriRecord(student: SantriRecord): SantriRecord {
+  const violations = student.violationsHistory || [];
+  const achievements = student.achievementsHistory || [];
+  return {
+    ...student,
+    violationsHistory: violations,
+    achievementsHistory: achievements,
+    poinPelanggaran: violations.length
+      ? violations.reduce((sum, entry) => sum + (Number(entry.points) || 0), 0)
+      : Number(student.poinPelanggaran) || 0,
+    poinPrestasi: achievements.length
+      ? achievements.reduce((sum, entry) => sum + (Number(entry.points) || 0), 0)
+      : Number(student.poinPrestasi) || 0,
+  };
+}
+
+export function reconcileSantriViolationTotals(students: SantriRecord[], violations: ViolationRecord[]): SantriRecord[] {
+  return students.map((student) => {
+    const related = violations
+      .filter((violation) => violation.studentId === student.id ||
+        (!violation.studentId && violation.nis === student.nis) ||
+        (!violation.studentId && violation.studentName.trim().toLowerCase() === student.studentName.trim().toLowerCase()));
+    const total = related.reduce((sum, violation) => sum + (Number(violation.points) || 0), 0);
+    return related.length ? { ...normalizeSantriRecord(student), poinPelanggaran: total } : normalizeSantriRecord(student);
+  });
+}
 
 /**
  * 2. AUTHENTICATION SERVICES
@@ -256,6 +297,7 @@ export function subscribeToPelanggaran(callback: (records: ViolationRecord[]) =>
       const pts = Number(data.points !== undefined ? data.points : data.poin) || 0;
       return {
         id: docSnap.id,
+        studentId: data.studentId || undefined,
         studentName: data.studentName || data.name || 'Santri',
         nis: data.nis || '-',
         kamar: data.kamar || '-',
@@ -303,9 +345,9 @@ export function subscribeToPelanggaran(callback: (records: ViolationRecord[]) =>
 export async function addPelanggaranRecord(record: Omit<ViolationRecord, 'id'>) {
   if (isOfflineModeActive()) {
     const current = getOfflineViolations();
-    const newDoc: ViolationRecord = {
+      const newDoc: ViolationRecord = {
       ...record,
-      id: `off_vio_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      id: createLocalId('off_vio'),
     };
     saveOfflineViolations([newDoc, ...current]);
     return { id: newDoc.id };
@@ -371,8 +413,8 @@ export async function deleteUnifiedViolation(
     saveOfflineViolations(next);
 
     const currentStudents = getOfflineStudents();
-    const targetStudent = currentStudents.find(
-      (s) => s.studentName.trim().toLowerCase() === violation.studentName.trim().toLowerCase()
+    const targetStudent = currentStudents.find((s) => s.id === violation.studentId) || currentStudents.find(
+      (s) => s.nis === violation.nis || s.studentName.trim().toLowerCase() === violation.studentName.trim().toLowerCase()
     );
     if (targetStudent && targetStudent.violationsHistory && targetStudent.violationsHistory.length > 0) {
       const updatedHistory = targetStudent.violationsHistory.filter(
@@ -402,8 +444,8 @@ export async function deleteUnifiedViolation(
   }
 
   // 3. Remove from matching student's violationsHistory (both local & Firestore)
-  const targetStudent = (students || []).find(
-    (s) => s.studentName.trim().toLowerCase() === violation.studentName.trim().toLowerCase()
+  const targetStudent = (students || []).find((s) => s.id === violation.studentId) || (students || []).find(
+    (s) => s.nis === violation.nis || s.studentName.trim().toLowerCase() === violation.studentName.trim().toLowerCase()
   );
 
   if (targetStudent && targetStudent.violationsHistory && targetStudent.violationsHistory.length > 0) {
@@ -430,8 +472,8 @@ export async function updateUnifiedViolation(
     saveOfflineViolations(next);
 
     const currentStudents = getOfflineStudents();
-    const targetStudent = currentStudents.find(
-      (s) => s.studentName.trim().toLowerCase() === violation.studentName.trim().toLowerCase()
+    const targetStudent = currentStudents.find((s) => s.id === violation.studentId) || currentStudents.find(
+      (s) => s.nis === violation.nis || s.studentName.trim().toLowerCase() === violation.studentName.trim().toLowerCase()
     );
     if (targetStudent && targetStudent.violationsHistory) {
       let historyChanged = false;
@@ -477,8 +519,8 @@ export async function updateUnifiedViolation(
   }
 
   // 3. If student has it in violationsHistory, update student's record (both local & Firestore)
-  const targetStudent = (students || []).find(
-    (s) => s.studentName.trim().toLowerCase() === violation.studentName.trim().toLowerCase()
+  const targetStudent = (students || []).find((s) => s.id === violation.studentId) || (students || []).find(
+    (s) => s.nis === violation.nis || s.studentName.trim().toLowerCase() === violation.studentName.trim().toLowerCase()
   );
 
   if (targetStudent && targetStudent.violationsHistory) {
@@ -618,7 +660,7 @@ export async function addProposalRecord(program: Omit<WorkProgram, 'id'>) {
     const current = getOfflinePrograms();
     const newProgram: WorkProgram = {
       ...program,
-      id: `off_prog_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      id: createLocalId('off_prog'),
     };
     saveOfflinePrograms([newProgram, ...current]);
     return { id: newProgram.id };
@@ -728,7 +770,7 @@ export async function addDirectiveRecord(directive: Omit<MudirDirective, 'id'>) 
     const current = getOfflineDirectives();
     const newDirective: MudirDirective = {
       ...directive,
-      id: `off_dir_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      id: createLocalId('off_dir'),
     };
     saveOfflineDirectives([newDirective, ...current]);
     return { id: newDirective.id };
@@ -883,7 +925,7 @@ export function saveCustomSantri(santri: SantriRecord) {
 export function subscribeToSantri(callback: (santri: SantriRecord[]) => void) {
   if (isOfflineModeActive()) {
     const emitOffline = () => {
-      callback(getOfflineStudents());
+      callback(getOfflineStudents().map(normalizeSantriRecord));
     };
     emitOffline();
     const handleLocalChange = () => emitOffline();
@@ -916,10 +958,10 @@ export function subscribeToSantri(callback: (santri: SantriRecord[]) => void) {
       seen.add(item.id);
       
       const localOverrides = updatedMap[item.id] || {};
-      final.push({
+      final.push(normalizeSantriRecord({
         ...item,
         ...localOverrides,
-      });
+      }));
     }
 
     callback(final);
@@ -986,6 +1028,12 @@ export function subscribeToSantri(callback: (santri: SantriRecord[]) => void) {
 }
 
 export async function updateSantriRecord(id: string, updates: Partial<SantriRecord>) {
+  if (updates.violationsHistory) {
+    updates = {
+      ...updates,
+      poinPelanggaran: updates.violationsHistory.reduce((sum, entry) => sum + (Number(entry.points) || 0), 0),
+    };
+  }
   if (isOfflineModeActive()) {
     const current = getOfflineStudents();
     const next = current.map(s => s.id === id ? { ...s, ...updates } : s);
@@ -1009,17 +1057,33 @@ export async function updateSantriRecord(id: string, updates: Partial<SantriReco
   }
 }
 
-export async function deleteSantriRecord(id: string) {
+export async function deleteSantriRecord(id: string, student?: SantriRecord) {
   if (isOfflineModeActive()) {
     const current = getOfflineStudents();
     const next = current.filter(s => s.id !== id);
     saveOfflineStudents(next);
+    const remainingViolations = getOfflineViolations().filter(v => v.studentId !== id);
+    if (remainingViolations.length !== getOfflineViolations().length) {
+      saveOfflineViolations(remainingViolations);
+    }
     return;
   }
 
   // 1. Instantly write to local persistent blacklist
   saveDeletedSantriId(id);
   broadcastSync({ module: 'santri', action: 'DELETE', id });
+
+  // 1b. Cascade: purge every violation row owned by this student (no ghost records).
+  try {
+    const q = query(
+      collection(db, 'pelanggaran'),
+      where('studentId', '==', id)
+    );
+    const snap = await getDocs(q);
+    await Promise.all(snap.docs.map((docSnap) => deleteDoc(docSnap.ref)));
+  } catch (err) {
+    console.warn('Cascade delete pelanggaran notice (student may be local-only):', err);
+  }
 
   // 2. Fire background Firestore delete (swallow permission errors gracefully)
   const docRef = doc(db, 'santri', id);
@@ -1040,7 +1104,7 @@ export async function deleteSantriRecord(id: string) {
 export async function addSantriRecord(santri: Omit<SantriRecord, 'id'>) {
   if (isOfflineModeActive()) {
     const current = getOfflineStudents();
-    const localId = `off_santri_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const localId = createLocalId('off_santri');
     const fullRecord: SantriRecord = {
       id: localId,
       ...santri,
@@ -1049,7 +1113,7 @@ export async function addSantriRecord(santri: Omit<SantriRecord, 'id'>) {
     return { id: localId };
   }
 
-  const localId = `santri_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+  const localId = createLocalId('santri');
   const fullRecord: SantriRecord = {
     id: localId,
     ...santri,
@@ -1103,7 +1167,7 @@ export async function recordCollectiveMahkamahSession(params: {
       if (!match) return s;
 
       const mahkamahEntry: StudentMahkamahEntry = {
-        id: `mhk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        id: createLocalId('mhk'),
         divisions,
         violation,
         penalty,
@@ -1119,7 +1183,7 @@ export async function recordCollectiveMahkamahSession(params: {
       const existingViolations = s.violationsHistory || [];
       const newViolationHistory = [
         {
-          id: `vio_mhk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          id: createLocalId('vio_mhk'),
           title: `[Sidang Mahkamah] ${violation}`,
           date,
           points: points || 0,
@@ -1133,7 +1197,7 @@ export async function recordCollectiveMahkamahSession(params: {
       const newPoints = currentPoints + (points || 0);
 
       newViolations.push({
-        id: `off_mhk_vio_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        id: createLocalId('off_mhk_vio'),
         studentName: s.studentName,
         nis: s.nis || '-',
         kamar: s.kamar || '-',
@@ -1162,7 +1226,7 @@ export async function recordCollectiveMahkamahSession(params: {
 
   for (const s of students) {
     const mahkamahEntry: StudentMahkamahEntry = {
-      id: `mhk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      id: createLocalId('mhk'),
       divisions,
       violation,
       penalty,
@@ -1180,7 +1244,7 @@ export async function recordCollectiveMahkamahSession(params: {
     const existingViolations = currentStudentOverride.violationsHistory || [];
     const newViolationHistory = [
       {
-        id: `vio_mhk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        id: createLocalId('vio_mhk'),
         title: `[Sidang Mahkamah] ${violation}`,
         date,
         points: points || 0,
@@ -1217,6 +1281,7 @@ export async function recordCollectiveMahkamahSession(params: {
     // 3. Record in unified violations collection
     try {
       await addPelanggaranRecord({
+        studentId: s.id,
         studentName: s.name,
         nis: s.nis || '-',
         kamar: s.kamar || '-',
@@ -1524,4 +1589,3 @@ export function subscribeToKasTransactions(callback: (transactions: KasTransacti
     }
   };
 }
-

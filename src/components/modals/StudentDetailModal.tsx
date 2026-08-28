@@ -36,6 +36,7 @@ import {
   StudentAchievementEntry,
   StudentPermissionEntry,
   updateSantriRecord,
+  createLocalId,
   Dormitory,
   DormitoryRoom,
   SchoolClass,
@@ -1277,7 +1278,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       const zJuz = calculateJuzRange(zPages.fromPage, zPages.toPage);
 
       const entryMurojaah: StudentHafalanEntry = {
-        id: `haf_m_${Date.now()}`,
+        id: createLocalId('haf_m'),
         surah: `QS. ${selectedSurah.name} (Ayat ${split.murojaahRange.from}-${split.murojaahRange.to})`,
         juz: `Juz ${mJuz}`,
         date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
@@ -1319,7 +1320,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       const finalCategory = (split && split.mode === 'murojaah_only') ? 'Murojaah' : setoranCategory;
       const surahDisplay = `QS. ${selectedSurah.name} (Ayat ${fromA}-${toA})`;
       const singleEntry: StudentHafalanEntry = {
-        id: `haf_${Date.now()}`,
+        id: createLocalId('haf'),
         surah: surahDisplay,
         juz: `Juz ${calculateJuzRange(fromP, toP)}`,
         date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
@@ -1384,7 +1385,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     setIsSubmittingIzin(true);
 
     const newIzinEntry: StudentPermissionEntry = {
-      id: `iz_${Date.now()}`,
+      id: createLocalId('iz'),
       type: izinType,
       reason: izinReason.trim(),
       startDate: izinStartDate,
@@ -1535,8 +1536,8 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           </div>
         </div>
 
-        {/* Navigasi Tab (Segmented Button 1 Row dengan Shadow Edge & Auto-Centering) */}
-        <div className="relative border-b border-[#E2E8F0] bg-white">
+        {/* Navigasi tab flat, horizontally scrollable on narrow screens. */}
+        <div className="relative border-b border-[#E2E8F0] bg-transparent">
           {/* Left Shadow Indicator */}
           <div
             className={`pointer-events-none absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white via-white/80 to-transparent z-10 transition-opacity duration-200 ${
@@ -1548,7 +1549,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           <div
             ref={tabContainerRef}
             onScroll={checkTabScroll}
-            className="pt-1 pb-3 flex flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth"
+            className="px-1 pt-1 flex flex-nowrap items-center gap-1 overflow-x-auto no-scrollbar scroll-smooth"
           >
             {[
               { id: 'bio', label: 'Bio' },
@@ -1567,17 +1568,17 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                   }}
                   type="button"
                   onClick={() => setDetailActiveTab(t.id as any)}
-                  className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 flex items-center gap-1.5 transition-all cursor-pointer select-none ${
+                  className={`px-5 py-2.5 border-b-2 border-transparent text-sm font-semibold whitespace-nowrap shrink-0 flex items-center gap-1.5 transition-colors cursor-pointer select-none ${
                     isActive
-                      ? 'bg-[#0F172A] text-white shadow-xs'
-                      : 'text-[#64748B] hover:text-[#0F172A] hover:bg-slate-100 font-medium'
+                      ? 'border-[#0F172A] text-[#0F172A] font-bold'
+                      : 'text-[#64748B] hover:text-[#0F172A] font-medium'
                   }`}
                 >
                   <span>{t.label}</span>
                   {t.id === 'pelanggaran' && currentStudent.poinPelanggaran > 0 && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-500 text-white font-bold inline-flex items-center gap-1">
+                    <span className="text-[11px] font-bold text-[#EF4444] inline-flex items-center gap-1">
                       <span>{currentStudent.poinPelanggaran}</span>
-                      <PKIcon className="w-2.5 h-2.5 brightness-0 invert" />
+                      <PKIcon className="w-2.5 h-2.5" />
                     </span>
                   )}
                   {t.id === 'mahkamah' && currentStudent.mahkamahHistory && currentStudent.mahkamahHistory.length > 0 && (
@@ -1679,7 +1680,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                           </div>
                           <div className="flex justify-between items-center pt-2">
                             <span className="text-slate-500 font-medium">Status Keaktifan</span>
-                            <span className="inline-flex items-center gap-1 font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full text-[11px]">
+                            <span className="inline-flex items-center gap-1 font-semibold text-emerald-700 text-[11px]">
                               <CheckCircle2 className="w-3.5 h-3.5" /> Santri Mukim Aktif
                             </span>
                           </div>
@@ -2095,7 +2096,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         ))}
                       </div>
                     ) : (
-                      <div className="p-6 bg-white rounded-xl border border-dashed border-slate-200 text-center text-slate-500 space-y-1.5">
+                      <div className="py-12 text-center text-slate-500 space-y-1.5">
                         <BookOpen className="w-6 h-6 text-slate-400 mx-auto" />
                         <p className="font-semibold text-slate-800">Belum Ada Riwayat Setoran</p>
                         <p className="text-[11px] text-slate-400">
@@ -2151,7 +2152,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                                 <p className="text-[11px] text-slate-500">Sanksi: <span className="font-medium text-slate-700">{v.penalty || v.penaltyDescription || '-'}</span></p>
                               </div>
                               <div className="text-right shrink-0">
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 inline-flex items-center gap-1">
+                                <span className="text-[11px] font-bold text-[#EF4444] inline-flex items-center gap-1">
                                   <span>+{v.points || 0}</span>
                                   <PKIcon className="w-3 h-3" />
                                 </span>
@@ -2161,7 +2162,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                           ))}
                         </div>
                       ) : (
-                        <div className="p-6 bg-white rounded-xl border border-dashed border-slate-200 text-center text-slate-500 space-y-1.5">
+                        <div className="py-12 text-center text-slate-500 space-y-1.5">
                           <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto" />
                           <p className="font-semibold text-slate-800">Catatan Pelanggaran Bersih</p>
                           <p className="text-[11px] text-slate-400">Santri ini belum memiliki catatan pelanggaran tata tertib.</p>
@@ -2265,7 +2266,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         ))}
                       </div>
                     ) : (
-                      <div className="p-8 text-center bg-slate-50/60 rounded-xl border border-dashed border-slate-200 text-slate-500 space-y-1.5">
+                      <div className="py-12 text-center text-slate-500 space-y-1.5">
                         <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto" />
                         <p className="font-semibold text-slate-800 text-xs font-headline">Tidak Ada Rekam Mahkamah</p>
                         <p className="text-[11px] text-slate-400 font-body">
@@ -2321,7 +2322,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                                 )}
                               </div>
                               <div className="text-right shrink-0">
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#059669] border border-emerald-200 font-mono inline-flex items-center gap-1">
+                                <span className="text-[11px] font-bold text-[#059669] font-mono inline-flex items-center gap-1">
                                   <span>+{a.points !== undefined ? a.points : 10}</span>
                                   <PPIcon className="w-3 h-3" />
                                 </span>
@@ -2331,7 +2332,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                           ))}
                         </div>
                       ) : (
-                        <div className="p-8 bg-white rounded-xl border border-dashed border-slate-200 text-center text-slate-500 space-y-1.5">
+                        <div className="py-12 text-center text-slate-500 space-y-1.5">
                           <CheckCircle2 className="w-6 h-6 text-slate-300 mx-auto" />
                           <p className="font-semibold text-slate-800">Belum Ada Rekam Prestasi</p>
                           <p className="text-[11px] text-slate-400">Prestasi akademik, tahfizh, atau kejuaraan akan tercatat di sini dan menambahkan poin PP otomatis.</p>
@@ -2369,7 +2370,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         ))}
                       </div>
                     ) : (
-                      <div className="p-6 bg-white rounded-xl border border-dashed border-slate-200 text-center text-slate-500 space-y-1.5">
+                      <div className="py-12 text-center text-slate-500 space-y-1.5">
                         <CalendarDays className="w-6 h-6 text-slate-300 mx-auto" />
                         <p className="font-semibold text-slate-800">Belum Ada Riwayat Perizinan</p>
                         <p className="text-[11px] text-slate-400">Santri tidak sedang dalam masa perizinan keluar pondok.</p>
@@ -2407,6 +2408,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 mass: 0.8,
               }}
               onClick={(e) => e.stopPropagation()}
+              data-bottom-sheet
               className="relative bg-white w-full max-w-lg max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
             >
               {/* Mobile Top Drag Handle */}
@@ -2473,24 +2475,23 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 </div>
               </div>
 
-              <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  type="button"
-                  onClick={() => setIsIzinModalOpen(false)}
-                >
-                  Batal
-                </Button>
+              <div data-sheet-actions className="bg-[#F8FAFC] px-6 pt-4 pb-8 sm:pb-4 border-t border-[#E2E8F0] shrink-0 space-y-1.5">
                 <Button
                   variant="primary"
-                  size="sm"
+                  size="lg"
                   type="button"
                   onClick={handleSaveIzin}
-                  className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
+                  className="w-full"
                 >
-                  Simpan Surat Izin
+                  SIMPAN
                 </Button>
+                <button
+                  type="button"
+                  onClick={() => setIsIzinModalOpen(false)}
+                  className="w-full h-10 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
+                >
+                  BATAL
+                </button>
               </div>
             </motion.div>
           </div>
@@ -2523,6 +2524,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 mass: 0.8,
               }}
               onClick={(e) => e.stopPropagation()}
+              data-bottom-sheet
               className="relative bg-white w-full max-w-md max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
             >
               {/* Mobile Top Drag Handle */}
@@ -2541,7 +2543,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               </div>
 
               <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-6">
-                <div className="p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+                <div className="pb-3 border-b border-[#E2E8F0]">
                   <p className="text-[#64748B]">Santri: <strong className="text-[#0F172A]">{currentStudent.studentName}</strong></p>
                   <p className="text-[#64748B] mt-1">Kamar Saat Ini: <strong className="text-[#059669]">{currentStudent.kamar}</strong></p>
                 </div>
@@ -2562,24 +2564,23 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 </div>
               </div>
 
-              <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  type="button"
-                  onClick={() => setIsMoveKamarModalOpen(false)}
-                >
-                  Batal
-                </Button>
+              <div className="bg-[#F8FAFC] px-6 pt-4 pb-8 sm:pb-4 border-t border-[#E2E8F0] shrink-0 space-y-1.5">
                 <Button
                   variant="primary"
-                  size="sm"
+                  size="lg"
                   type="button"
                   onClick={handleSaveMoveKamar}
-                  className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
+                  className="w-full"
                 >
-                  Konfirmasi Pindah Kamar
+                  SIMPAN
                 </Button>
+                <button
+                  type="button"
+                  onClick={() => setIsMoveKamarModalOpen(false)}
+                  className="w-full h-10 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
+                >
+                  BATAL
+                </button>
               </div>
             </motion.div>
           </div>
@@ -2612,6 +2613,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 mass: 0.8,
               }}
               onClick={(e) => e.stopPropagation()}
+              data-bottom-sheet
               className="relative bg-white w-full max-w-md max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
             >
               {/* Mobile Top Drag Handle */}
@@ -2630,7 +2632,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               </div>
 
               <div className="p-6 space-y-4 text-xs">
-                <div className="p-3 bg-[#F8FAFC] rounded-lg border border-slate-200">
+                <div className="pb-3 border-b border-[#E2E8F0]">
                   <p className="text-slate-500">Santri: <strong className="text-slate-900">{currentStudent.studentName}</strong></p>
                   <p className="text-slate-500 mt-1">Kelas Saat Ini: <strong className="text-indigo-700">{currentStudent.kelas}</strong></p>
                 </div>
@@ -2651,21 +2653,20 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 </div>
               </div>
 
-              <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-slate-200/80 flex items-center justify-end gap-3 shrink-0">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  type="button"
-                  onClick={() => setIsMoveKelasModalOpen(false)}
-                >
-                  Batal
-                </Button>
+              <div data-sheet-actions className="bg-[#F8FAFC] px-6 pt-4 pb-8 sm:pb-4 border-t border-slate-200/80 shrink-0 space-y-1.5">
                 <button
                   type="button"
                   onClick={handleSaveMoveKelas}
-                  className="px-5 py-2 bg-[#142A18] text-white rounded-full text-xs font-semibold hover:bg-[#2E5B37] transition-colors cursor-pointer shadow-xs active:scale-[0.98]"
+                  className="w-full h-12 bg-[#142A18] text-white rounded-xl text-sm font-bold uppercase tracking-wider hover:bg-[#2E5B37] transition-colors cursor-pointer shadow-xs active:scale-[0.98]"
                 >
-                  Konfirmasi Pindah Kelas
+                  SIMPAN
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsMoveKelasModalOpen(false)}
+                  className="w-full h-10 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
+                >
+                  BATAL
                 </button>
               </div>
             </motion.div>
@@ -2702,6 +2703,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 mass: 0.8,
               }}
               onClick={(e) => e.stopPropagation()}
+              data-bottom-sheet
               className="relative bg-white w-full max-w-2xl max-h-[88dvh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden z-10"
             >
               {/* Mobile Top Drag Handle */}
@@ -2732,7 +2734,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                       Kategori Mutaba'ah
                     </label>
                     {currentSetoranAnalysis?.mode === 'mixed' && (
-                      <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                      <span className="text-[11px] font-bold text-emerald-700">
                         Otomatis Campuran (Ziyadah + Murojaah)
                       </span>
                     )}
@@ -3052,32 +3054,27 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 </div>
               </ScrollArea>
 
-              <div className="bg-[#F8FAFC] px-6 py-3.5 pb-8 sm:pb-3.5 border-t border-[#E2E8F0] flex items-center justify-end gap-3 shrink-0">
+              <div data-sheet-actions className="bg-[#F8FAFC] px-6 pt-4 pb-8 sm:pb-4 border-t border-[#E2E8F0] shrink-0 space-y-1.5">
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  variant="primary"
+                  size="lg"
+                  type="button"
+                  onClick={handleSaveSetoran}
+                  disabled={isSubmittingSetoran}
+                  className="w-full"
+                >
+                  {isSubmittingSetoran ? 'MENYIMPAN...' : 'SIMPAN'}
+                </Button>
+                <button
                   type="button"
                   onClick={() => {
                     setIsSetoranModalOpen(false);
                     setEditingSetoranId(null);
                   }}
+                  className="w-full h-10 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
                 >
-                  Batal
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  type="button"
-                  onClick={handleSaveSetoran}
-                  disabled={isSubmittingSetoran}
-                  className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
-                >
-                  {isSubmittingSetoran
-                    ? 'Menyimpan...'
-                    : editingSetoranId
-                    ? 'Simpan Perubahan'
-                    : 'Simpan Setoran'}
-                </Button>
+                  BATAL
+                </button>
               </div>
 
             </motion.div>
@@ -3111,6 +3108,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 mass: 0.8,
               }}
               onClick={(e) => e.stopPropagation()}
+              data-bottom-sheet
               className="relative bg-white w-full max-w-3xl max-h-[88dvh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden z-10"
             >
               {/* Mobile Top Drag Handle */}
@@ -3214,7 +3212,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                   <div>
                     <h4 className="text-xs font-bold text-[#0F172A] font-headline uppercase tracking-wider flex items-center gap-2">
                       <span>Kurva Perkembangan Halaman</span>
-                      <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full lowercase">
+                      <span className="text-[10px] font-medium text-emerald-700 lowercase">
                         {chartTimeframe === 'pekan' ? 'harian' : chartTimeframe === 'bulan' ? 'mingguan' : 'bulanan'}
                       </span>
                     </h4>
@@ -3678,4 +3676,3 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     </>
   );
 };
-

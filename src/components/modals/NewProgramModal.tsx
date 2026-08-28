@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { WorkProgram, DivisionId } from '../../types';
+import { createLocalId } from '../../lib/firestoreService';
 import { mockDivisions } from '../../data/mockData';
 
 interface NewProgramModalProps {
@@ -28,7 +29,7 @@ export const NewProgramModal: React.FC<NewProgramModalProps> = ({
     const div = mockDivisions.find((d) => d.id === divisionId);
 
     const newProgram: WorkProgram = {
-      id: `wp-${Date.now()}`,
+      id: createLocalId('wp'),
       title,
       divisionId,
       divisionName: div ? div.name : 'Divisi OSTIFAK',
@@ -128,13 +129,17 @@ export const NewProgramModal: React.FC<NewProgramModalProps> = ({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-3 border-t border-[#E2E8F0]">
-          <Button type="button" variant="ghost" size="sm" onClick={onClose}>
-            Batal
+        <div data-sheet-actions className="space-y-1.5 pt-4 border-t border-[#E2E8F0] pb-2">
+          <Button type="submit" variant="primary" size="lg" className="w-full">
+            KIRIM PROPOSAL
           </Button>
-          <Button type="submit" variant="primary" size="sm">
-            Kirim Proposal
-          </Button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full h-10 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
+          >
+            BATAL
+          </button>
         </div>
       </form>
     </Modal>

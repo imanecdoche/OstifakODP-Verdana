@@ -1,7 +1,7 @@
 {
   "name": "ostifak-odp",
   "private": true,
-  "version": "1.1.0.73b",
+  "version": "1.1.0.75b",
   "type": "module",
   "main": "electron/main.cjs",
   "author": "Pesantren Fajrul Karim",

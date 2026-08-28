@@ -22,6 +22,7 @@ import { getSeverityInfo } from '../../lib/severityUtils';
 import { parseHafalanToPages } from '../../data/quranSurahs';
 import { PPIcon, PKIcon } from '../ui/PointIcons';
 import { Clock, CheckCircle2 } from 'lucide-react';
+import { RunningText } from '../ui/RunningText';
 
 interface DashboardViewProps {
   currentUser: UserProfile;
@@ -39,60 +40,6 @@ interface DashboardViewProps {
 }
 
 // Running Text / Marquee Looping Component for Anti-Wrapping Table Cells
-const RunningText: React.FC<{
-  text: string;
-  className?: string;
-}> = ({ text, className = '' }) => {
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const contentRef = React.useRef<HTMLSpanElement>(null);
-  const [isOverflowing, setIsOverflowing] = useState(false);
-  const [overflowDistance, setOverflowDistance] = useState(0);
-
-  React.useEffect(() => {
-    const checkOverflow = () => {
-      if (containerRef.current && contentRef.current) {
-        const containerWidth = containerRef.current.clientWidth;
-        const contentWidth = contentRef.current.scrollWidth;
-        if (contentWidth > containerWidth + 2) {
-          setIsOverflowing(true);
-          setOverflowDistance(contentWidth - containerWidth + 16);
-        } else {
-          setIsOverflowing(false);
-          setOverflowDistance(0);
-        }
-      }
-    };
-
-    checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
-  }, [text]);
-
-  const duration = Math.max(4, Math.min(14, overflowDistance / 14));
-
-  return (
-    <div
-      ref={containerRef}
-      className={`relative overflow-hidden whitespace-nowrap min-w-0 max-w-full ${className}`}
-      title={text}
-    >
-      <span
-        ref={contentRef}
-        style={
-          isOverflowing
-            ? ({
-                '--scroll-offset': `-${overflowDistance}px`,
-                animation: `running-ticker ${duration}s ease-in-out infinite alternate`,
-              } as React.CSSProperties)
-            : undefined
-        }
-        className={`inline-block whitespace-nowrap ${isOverflowing ? 'will-change-transform' : ''}`}
-      >
-        {text}
-      </span>
-    </div>
-  );
-};
 
 // Helper untuk memisahkan tanggal menjadi dua baris: Nama Hari dan Tanggal Lengkap
 const formatSplitDate = (dateStr: string): { dayName: string; formattedDate: string } => {

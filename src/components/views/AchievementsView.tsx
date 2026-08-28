@@ -4,6 +4,7 @@ import {
   SantriRecord, 
   StudentAchievementEntry, 
   updateSantriRecord,
+  createLocalId,
   OFFICIAL_CLASSES,
   ALL_OFFICIAL_ROOMS
 } from '../../lib/firestoreService';
@@ -15,6 +16,7 @@ import {
 } from '../../lib/achievementAutomationService';
 import { PillTabs } from '../ui/PillTabs';
 import { Button } from '../ui/Button';
+import { useLenisModalLock } from '../../lib/lenis';
 import { gooeyToast } from '../../lib/toast';
 import { recordSessionAction } from '../../lib/sessionLogService';
 import { MoreHorizontal, Pencil, Trash2, X, AlertTriangle } from 'lucide-react';
@@ -22,61 +24,8 @@ import { useIsMobile } from '../../lib/useIsMobile';
 import { ActionSheet } from '../ui/ActionSheet';
 import { PPIcon } from '../ui/PointIcons';
 import { ScrollArea } from '../ui/ScrollArea';
+import { RunningText } from '../ui/RunningText';
 
-const RunningText: React.FC<{
-  text: string;
-  className?: string;
-}> = ({ text, className = '' }) => {
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const contentRef = React.useRef<HTMLSpanElement>(null);
-  const [isOverflowing, setIsOverflowing] = useState(false);
-  const [overflowDistance, setOverflowDistance] = useState(0);
-
-  React.useEffect(() => {
-    const checkOverflow = () => {
-      if (containerRef.current && contentRef.current) {
-        const containerWidth = containerRef.current.clientWidth;
-        const contentWidth = contentRef.current.scrollWidth;
-        if (contentWidth > containerWidth + 2) {
-          setIsOverflowing(true);
-          setOverflowDistance(contentWidth - containerWidth + 16);
-        } else {
-          setIsOverflowing(false);
-          setOverflowDistance(0);
-        }
-      }
-    };
-
-    checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
-  }, [text]);
-
-  const duration = Math.max(4, Math.min(14, overflowDistance / 14));
-
-  return (
-    <div ref={containerRef} className={`relative overflow-hidden whitespace-nowrap ${className}`}>
-      <span
-        ref={contentRef}
-        className={`inline-block ${
-          isOverflowing
-            ? 'animate-ticker-marquee hover:[animation-play-state:paused] cursor-default'
-            : ''
-        }`}
-        style={
-          isOverflowing
-            ? ({
-                '--ticker-distance': `-${overflowDistance}px`,
-                '--ticker-duration': `${duration}s`,
-              } as React.CSSProperties)
-            : undefined
-        }
-      >
-        {text}
-      </span>
-    </div>
-  );
-};
 
 interface AchievementsViewProps {
   students: SantriRecord[];
@@ -176,6 +125,8 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
   // State for Delete Achievement Confirmation Modal
   const [deletingAchievement, setDeletingAchievement] = useState<FlattenedAchievement | null>(null);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+
+  useLenisModalLock(Boolean(isNewModalOpen) || Boolean(editingAchievement) || Boolean(deletingAchievement));
 
   // Monthly Automation Schedule Status
   const scheduleInfo = useMemo(() => getNextMonthlyPPSchedule(), []);
@@ -507,7 +458,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
     setIsSubmitting(true);
     try {
       const newEntry: StudentAchievementEntry = {
-        id: `ach-man-${Date.now()}`,
+        id: createLocalId('ach_man'),
         title: newTitle.trim(),
         category: newCategory,
         rank: newRank.trim(),
@@ -886,45 +837,51 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
         </>
       )}
 
-      {/* MODAL 1: CATAT PRESTASI MANUAL */}
+      {/* MODAL 1: CATAT PRESTASI MANUAL — Mobile: Bottom Sheet, Desktop: Full-Page Right-to-Left Slide-In Panel */}
       <AnimatePresence>
         {isNewModalOpen && (
-          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
-            {/* Backdrop */}
+          <>
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              onClick={() => setIsNewModalOpen(false)}
-              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
-            />
-
-            {/* Sheet Panel (Spring Animation) */}
-            <motion.div
-              initial={{ y: '100%', opacity: 0.8 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: '100%', opacity: 0 }}
-              transition={{
-                type: 'spring',
-                damping: 30,
-                stiffness: 320,
-                mass: 0.8,
-              }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative bg-white w-full max-w-lg max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
+              key="catat-prestasi-panel"
+              data-lenis-prevent
+              initial={isMobile ? { y: '100%', x: 0 } : { x: '100%', y: 0 }}
+              animate={{ x: 0, y: 0 }}
+              exit={isMobile ? { y: '100%', x: 0 } : { x: '100%', y: 0 }}
+              transition={
+                isMobile
+                  ? { type: 'spring', damping: 30, stiffness: 320, mass: 0.8 }
+                  : { duration: 0.65, ease: [0.4, 0, 0.2, 1] }
+              }
+              className={
+                isMobile
+                  ? "fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl bg-white max-h-[88dvh] shadow-[0_-10px_40px_rgba(15,23,42,0.18)] border-t border-[#E2E8F0] overflow-hidden"
+                  : "fixed inset-x-0 bottom-0 top-16 lg:top-14 lg:left-[220px] z-40 bg-[#F8FAFC] overflow-y-auto overscroll-contain"
+              }
             >
               {/* Mobile Top Drag Handle */}
-              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className={`${isMobile ? 'flex' : 'hidden'} pt-3 pb-1 justify-center shrink-0 bg-[#F8FAFC]`}>
                 <div className="w-10 h-1 bg-slate-300 rounded-full" />
               </div>
 
-              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-                <h3 className="text-base font-bold text-[#0F172A] font-headline">Catat Rekam Jejak Prestasi Baru</h3>
-                <p className="text-xs text-[#64748B] mt-0.5 font-body">Input penghargaan santri dan alokasi Poin Prestasi (PP)</p>
+              {/* Header (Clean Flat, Icon-Only Back Button Top-Left) */}
+              <div className={`${isMobile ? 'px-6 py-3.5' : 'px-6 sm:px-10 py-4 sm:py-5'} border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0 flex items-center gap-3 sm:gap-4`}>
+                <button
+                  type="button"
+                  onClick={() => setIsNewModalOpen(false)}
+                  aria-label="Tutup Catat Prestasi"
+                  title="Tutup Catat Prestasi"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-md bg-[#0F172A] text-white hover:bg-[#1E293B] active:scale-95 transition-all shadow-xs cursor-pointer flex items-center justify-center shrink-0"
+                >
+                  <X className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                </button>
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A] truncate">Catat Rekam Jejak Prestasi Baru</h3>
+                  <p className="text-xs text-[#64748B] mt-0.5 font-body truncate">Input penghargaan santri dan alokasi Poin Prestasi (PP)</p>
+                </div>
               </div>
 
-              <form onSubmit={handleSubmitNewAchievement} className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0">
+              <form onSubmit={handleSubmitNewAchievement} className="flex flex-col flex-1 min-h-0">
+                <div className={`flex-1 min-h-0 overflow-y-auto overscroll-contain space-y-4 text-xs ${isMobile ? 'p-5 sm:p-6 pb-8' : 'max-w-3xl w-full mx-auto p-5 sm:p-8'}`}>
                 {/* Searchable Combobox Santri (Nama, Kamar, NIS, Kelas) */}
                 <div ref={studentComboRef} className="relative">
                   <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
@@ -1097,81 +1054,78 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-2.5 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setIsNewModalOpen(false)}
-                  >
-                    Batal
-                  </Button>
+                </div>
+                <div data-sheet-actions className="bg-[#F8FAFC] px-6 pt-4 pb-8 sm:pb-4 border-t border-[#E2E8F0] shrink-0 space-y-1.5">
                   <Button
                     type="submit"
                     variant="primary"
-                    size="sm"
+                    size="lg"
                     disabled={isSubmitting}
-                    className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
+                    className="w-full"
                   >
-                    {isSubmitting ? 'Menyimpan...' : 'Simpan Prestasi (+PP)'}
+                    {isSubmitting ? 'MENYIMPAN...' : 'SIMPAN'}
                   </Button>
+                  <button
+                    type="button"
+                    onClick={() => setIsNewModalOpen(false)}
+                    className="w-full h-10 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
+                  >
+                    BATAL
+                  </button>
                 </div>
               </form>
             </motion.div>
-          </div>
+          </>
         )}
       </AnimatePresence>
 
-      {/* MODAL 2: EDIT PRESTASI */}
+      {/* MODAL 2: EDIT PRESTASI — Mobile: Bottom Sheet, Desktop: Full-Page Right-to-Left Slide-In Panel */}
       <AnimatePresence>
         {editingAchievement && (
-          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
-            {/* Backdrop */}
+          <>
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              onClick={() => setEditingAchievement(null)}
-              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
-            />
-
-            {/* Sheet Panel (Spring Animation) */}
-            <motion.div
-              initial={{ y: '100%', opacity: 0.8 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: '100%', opacity: 0 }}
-              transition={{
-                type: 'spring',
-                damping: 30,
-                stiffness: 320,
-                mass: 0.8,
-              }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative bg-white w-full max-w-lg max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
+              key="edit-prestasi-panel"
+              data-lenis-prevent
+              initial={isMobile ? { y: '100%', x: 0 } : { x: '100%', y: 0 }}
+              animate={{ x: 0, y: 0 }}
+              exit={isMobile ? { y: '100%', x: 0 } : { x: '100%', y: 0 }}
+              transition={
+                isMobile
+                  ? { type: 'spring', damping: 30, stiffness: 320, mass: 0.8 }
+                  : { duration: 0.65, ease: [0.4, 0, 0.2, 1] }
+              }
+              className={
+                isMobile
+                  ? "fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl bg-white max-h-[88dvh] shadow-[0_-10px_40px_rgba(15,23,42,0.18)] border-t border-[#E2E8F0] overflow-hidden"
+                  : "fixed inset-x-0 bottom-0 top-16 lg:top-14 lg:left-[220px] z-40 bg-[#F8FAFC] overflow-y-auto overscroll-contain"
+              }
             >
               {/* Mobile Top Drag Handle */}
-              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className={`${isMobile ? 'flex' : 'hidden'} pt-3 pb-1 justify-center shrink-0 bg-[#F8FAFC]`}>
                 <div className="w-10 h-1 bg-slate-300 rounded-full" />
               </div>
 
-              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0 flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-bold text-[#0F172A] font-headline">Edit Rekam Jejak Prestasi</h3>
-                  <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                    Santri: <strong>{editingAchievement.studentName}</strong> ({editingAchievement.kamar})
-                  </p>
-                </div>
+              {/* Header (Clean Flat, Icon-Only Back Button Top-Left) */}
+              <div className={`${isMobile ? 'px-6 py-3.5' : 'px-6 sm:px-10 py-4 sm:py-5'} border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0 flex items-center gap-3 sm:gap-4`}>
                 <button
                   type="button"
                   onClick={() => setEditingAchievement(null)}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                  aria-label="Tutup Edit Prestasi"
+                  title="Tutup Edit Prestasi"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-md bg-[#0F172A] text-white hover:bg-[#1E293B] active:scale-95 transition-all shadow-xs cursor-pointer flex items-center justify-center shrink-0"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                 </button>
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A] truncate">Edit Rekam Jejak Prestasi</h3>
+                  <p className="text-xs text-[#64748B] mt-0.5 font-body truncate">
+                    Santri: <strong>{editingAchievement.studentName}</strong> ({editingAchievement.kamar})
+                  </p>
+                </div>
               </div>
 
-              <form onSubmit={handleSaveEdit} className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0">
+              <form onSubmit={handleSaveEdit} className="flex flex-col flex-1 min-h-0">
+                <div className={`flex-1 min-h-0 overflow-y-auto overscroll-contain space-y-4 text-xs ${isMobile ? 'p-5 sm:p-6 pb-8' : 'max-w-3xl w-full mx-auto p-5 sm:p-8'}`}>
                 <div>
                   <label className="block text-xs font-semibold text-[#0F172A] mb-1 font-headline">
                     Nama Prestasi / Kejuaraan *
@@ -1275,28 +1229,28 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-2.5 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setEditingAchievement(null)}
-                  >
-                    Batal
-                  </Button>
+                </div>
+                <div data-sheet-actions className="bg-[#F8FAFC] px-6 pt-4 pb-8 sm:pb-4 border-t border-[#E2E8F0] shrink-0 space-y-1.5">
                   <Button
                     type="submit"
                     variant="primary"
-                    size="sm"
+                    size="lg"
                     disabled={isSavingEdit}
-                    className="bg-[#0F172A] text-white hover:bg-[#1E293B]"
+                    className="w-full"
                   >
-                    {isSavingEdit ? 'Menyimpan...' : 'Simpan Perubahan'}
+                    {isSavingEdit ? 'MENYIMPAN...' : 'SIMPAN'}
                   </Button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingAchievement(null)}
+                    className="w-full h-10 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
+                  >
+                    BATAL
+                  </button>
                 </div>
               </form>
             </motion.div>
-          </div>
+          </>
         )}
       </AnimatePresence>
 
@@ -1335,7 +1289,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
 
               <div className="p-6 space-y-4">
                 <div className="flex items-start gap-3.5">
-                  <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-200">
+                  <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
                     <AlertTriangle className="w-5 h-5" />
                   </div>
                   <div className="space-y-1">
@@ -1388,49 +1342,56 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
       </AnimatePresence>
 
       {/* MODAL 4: PREVIEW & EKSEKUSI OTOMASI PP BULANAN (21:00 WIB) */}
+      {/* MODAL 5: OTOMASI POIN PRESTASI AKHIR BULAN — Mobile: Bottom Sheet, Desktop: Full-Page Right-to-Left Slide-In Panel */}
       <AnimatePresence>
         {isAutoPreviewOpen && (
-          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
-            {/* Backdrop */}
+          <>
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              onClick={() => setIsAutoPreviewOpen(false)}
-              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
-            />
-
-            {/* Sheet Panel (Spring Animation) */}
-            <motion.div
-              initial={{ y: '100%', opacity: 0.8 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: '100%', opacity: 0 }}
-              transition={{
-                type: 'spring',
-                damping: 30,
-                stiffness: 320,
-                mass: 0.8,
-              }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative bg-white w-full max-w-2xl max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
+              key="otomasi-pp-panel"
+              data-lenis-prevent
+              initial={isMobile ? { y: '100%', x: 0 } : { x: '100%', y: 0 }}
+              animate={{ x: 0, y: 0 }}
+              exit={isMobile ? { y: '100%', x: 0 } : { x: '100%', y: 0 }}
+              transition={
+                isMobile
+                  ? { type: 'spring', damping: 30, stiffness: 320, mass: 0.8 }
+                  : { duration: 0.65, ease: [0.4, 0, 0.2, 1] }
+              }
+              className={
+                isMobile
+                  ? "fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl bg-white max-h-[88dvh] shadow-[0_-10px_40px_rgba(15,23,42,0.18)] border-t border-[#E2E8F0] overflow-hidden"
+                  : "fixed inset-x-0 bottom-0 top-16 lg:top-14 lg:left-[220px] z-40 bg-[#F8FAFC] overflow-y-auto overscroll-contain"
+              }
             >
               {/* Mobile Top Drag Handle */}
-              <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+              <div className={`${isMobile ? 'flex' : 'hidden'} pt-3 pb-1 justify-center shrink-0 bg-[#F8FAFC]`}>
                 <div className="w-10 h-1 bg-slate-300 rounded-full" />
               </div>
 
-              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-                <h3 className="text-base font-bold text-[#0F172A] font-headline">Otomasi Poin Prestasi Akhir Bulan</h3>
-                <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                  Jadwal Otomasi Resmi: <strong>{scheduleInfo.formattedSchedule}</strong> (Pukul 21:00 WIB)
-                </p>
+              {/* Header (Clean Flat, Icon-Only Back Button Top-Left) */}
+              <div className={`${isMobile ? 'px-6 py-3.5' : 'px-6 sm:px-10 py-4 sm:py-5'} border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0 flex items-center gap-3 sm:gap-4`}>
+                <button
+                  type="button"
+                  onClick={() => setIsAutoPreviewOpen(false)}
+                  aria-label="Tutup Otomasi Poin Prestasi"
+                  title="Tutup Otomasi Poin Prestasi"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-md bg-[#0F172A] text-white hover:bg-[#1E293B] active:scale-95 transition-all shadow-xs cursor-pointer flex items-center justify-center shrink-0"
+                >
+                  <X className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                </button>
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A] truncate">Otomasi Poin Prestasi Akhir Bulan</h3>
+                  <p className="text-xs text-[#64748B] mt-0.5 font-body truncate">
+                    Jadwal Otomasi Resmi: <strong>{scheduleInfo.formattedSchedule}</strong> (Pukul 21:00 WIB)
+                  </p>
+                </div>
               </div>
 
-              <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1 min-h-0">
-                <div className="p-3.5 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] space-y-2">
-                  <p className="font-bold text-[#0F172A]">Ketentuan Sistem Poin Otomatis:</p>
-                  <ul className="list-disc list-inside text-[#64748B] space-y-1 text-[11px]">
+              <div className={`flex-1 min-h-0 overflow-y-auto overscroll-contain space-y-6 text-xs ${isMobile ? 'p-5 sm:p-6 pb-8' : 'max-w-4xl w-full mx-auto p-5 sm:p-8'}`}>
+                {/* Ketentuan Sistem (Flat with Dividers) */}
+                <div className="border-b border-[#E2E8F0] pb-6">
+                  <p className="font-bold text-[#0F172A] mb-2">Ketentuan Sistem Poin Otomatis:</p>
+                  <ul className="list-disc list-inside text-[#64748B] space-y-1.5 text-[11px]">
                     <li><strong>Santri Teladan:</strong> Top 5 santri (0 PK + hafalan tertinggi) mendapat <strong>+25</strong> (Juara 1) dan <strong>+20</strong> (Juara 2-5).</li>
                     <li><strong>Hafalan Terbanyak:</strong> Top 5 hafalan juz tertinggi bagi santri proses aktif (&lt; 30 Juz, santri 30 Juz/Huffazh dikecualikan) mendapat <strong>+20</strong>.</li>
                     <li><strong>Setoran Terbanyak Bulan Ini:</strong> Top 5 rekam setoran baru bulan ini mendapat <strong>+15</strong>.</li>
@@ -1439,48 +1400,46 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                 </div>
 
                 <div>
-                  <p className="font-bold text-xs text-[#0F172A] mb-2 font-headline">
+                  <p className="font-bold text-xs text-[#0F172A] mb-3 font-headline">
                     Daftar Santri Calon Penerima Bulan Ini ({monthlyPreviewAwards.length} Predikat):
                   </p>
 
-                  <div className="border border-[#E2E8F0] rounded-lg overflow-hidden">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0] text-[10px] font-bold text-[#64748B] uppercase">
+                  <table className="w-full text-left text-xs">
+                    <thead className="text-[10px] font-bold text-[#64748B] uppercase">
+                      <tr className="border-b border-[#E2E8F0]">
+                        <th className="py-2.5 pr-3">Santri</th>
+                        <th className="py-2.5 pr-3">Kategori Predikat</th>
+                        <th className="py-2.5 pr-3">Peringkat</th>
+                        <th className="py-2.5 text-right">Alokasi Poin</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#E2E8F0]">
+                      {monthlyPreviewAwards.length === 0 ? (
                         <tr>
-                          <th className="p-2.5">Santri</th>
-                          <th className="p-2.5">Kategori Predikat</th>
-                          <th className="p-2.5">Peringkat</th>
-                          <th className="p-2.5 text-right">Alokasi Poin</th>
+                          <td colSpan={4} className="py-4 text-center text-[#64748B]">
+                            Belum ada santri yang memenuhi kriteria predikat bulan ini.
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#E2E8F0]">
-                        {monthlyPreviewAwards.length === 0 ? (
-                          <tr>
-                            <td colSpan={4} className="p-4 text-center text-[#64748B]">
-                              Belum ada santri yang memenuhi kriteria predikat bulan ini.
+                      ) : (
+                        monthlyPreviewAwards.map((a, i) => (
+                          <tr key={i} className="hover:bg-slate-50">
+                            <td className="py-2.5 pr-3 font-semibold text-[#0F172A]">{a.studentName}</td>
+                            <td className="py-2.5 pr-3 text-[#64748B]">{a.category}</td>
+                            <td className="py-2.5 pr-3 text-[#64748B]">{a.rank}</td>
+                            <td className="py-2.5 text-right font-bold text-[#059669] font-mono">
+                              <span className="inline-flex items-center gap-1">
+                                <span>+{a.points}</span>
+                                <PPIcon className="w-3.5 h-3.5" />
+                              </span>
                             </td>
                           </tr>
-                        ) : (
-                          monthlyPreviewAwards.map((a, i) => (
-                            <tr key={i} className="hover:bg-slate-50">
-                              <td className="p-2.5 font-semibold text-[#0F172A]">{a.studentName}</td>
-                              <td className="p-2.5 text-[#64748B]">{a.category}</td>
-                              <td className="p-2.5 text-[#64748B]">{a.rank}</td>
-                              <td className="p-2.5 text-right font-bold text-[#059669] font-mono">
-                                <span className="inline-flex items-center gap-1">
-                                  <span>+{a.points}</span>
-                                  <PPIcon className="w-3.5 h-3.5" />
-                                </span>
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
                 </div>
 
-                <div className="flex items-center justify-between pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
+                <div className="flex items-center justify-between pt-4 border-t border-[#E2E8F0]">
                   <p className="text-[11px] text-[#64748B]">
                     {executionStatus.lastExecutedDate ? `Terakhir dieksekusi: ${new Date(executionStatus.lastExecutedDate).toLocaleDateString('id-ID')}` : 'Belum dieksekusi untuk bulan ini.'}
                   </p>
@@ -1508,7 +1467,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                 </div>
               </div>
             </motion.div>
-          </div>
+          </>
         )}
       </AnimatePresence>
     </div>

@@ -4,12 +4,7 @@
  */
 
 import { UserProfile, ViolationRecord, WorkProgram, MudirDirective } from '../types';
-import { 
-  mockViolations, 
-  mockWorkPrograms, 
-  mockMudirDirectives, 
-  OFFICIAL_ACCOUNTS 
-} from '../data/mockData';
+import { OFFICIAL_ACCOUNTS } from '../data/mockData';
 import type { SchoolClass, Dormitory, DormitoryRoom, SantriRecord } from '../types';
 import { OFFICIAL_CLASSES, OFFICIAL_DORMITORIES, ALL_OFFICIAL_ROOMS } from './constants';
 
@@ -81,18 +76,18 @@ export function initializeOfflineStorage(): void {
     // 3. Violations Records
     if (!localStorage.getItem(OFFLINE_KEYS.VIOLATIONS)) {
       const onlineCache = localStorage.getItem('ostifak_local_violations');
-      const baseViolations = onlineCache ? JSON.parse(onlineCache) : mockViolations;
+      const baseViolations = onlineCache ? JSON.parse(onlineCache) : [];
       localStorage.setItem(OFFLINE_KEYS.VIOLATIONS, JSON.stringify(baseViolations));
     }
 
     // 4. Work Programs
     if (!localStorage.getItem(OFFLINE_KEYS.PROGRAMS)) {
-      localStorage.setItem(OFFLINE_KEYS.PROGRAMS, JSON.stringify(mockWorkPrograms));
+      localStorage.setItem(OFFLINE_KEYS.PROGRAMS, JSON.stringify([]));
     }
 
     // 5. Mudir Directives
     if (!localStorage.getItem(OFFLINE_KEYS.DIRECTIVES)) {
-      localStorage.setItem(OFFLINE_KEYS.DIRECTIVES, JSON.stringify(mockMudirDirectives));
+      localStorage.setItem(OFFLINE_KEYS.DIRECTIVES, JSON.stringify([]));
     }
 
     // 6. Dormitories & Rooms
@@ -150,7 +145,12 @@ export function disableOfflineMode(): void {
 export function getOfflineStudents(): SantriRecord[] {
   try {
     const raw = localStorage.getItem(OFFLINE_KEYS.SANTRI);
-    if (raw) return JSON.parse(raw);
+    if (raw) return JSON.parse(raw).map((student: SantriRecord) => {
+      const history = student.violationsHistory || [];
+      return history.length
+        ? { ...student, poinPelanggaran: history.reduce((sum, entry) => sum + (Number(entry.points) || 0), 0) }
+        : student;
+    });
   } catch (e) {
     console.error('Error reading offline students:', e);
   }
@@ -174,7 +174,7 @@ export function getOfflineViolations(): ViolationRecord[] {
   } catch (e) {
     console.error('Error reading offline violations:', e);
   }
-  return mockViolations as unknown as ViolationRecord[];
+  return [];
 }
 
 export function saveOfflineViolations(violations: ViolationRecord[]): void {
@@ -194,7 +194,7 @@ export function getOfflinePrograms(): WorkProgram[] {
   } catch (e) {
     console.error('Error reading offline programs:', e);
   }
-  return mockWorkPrograms as unknown as WorkProgram[];
+  return [];
 }
 
 export function saveOfflinePrograms(programs: WorkProgram[]): void {
@@ -214,7 +214,7 @@ export function getOfflineDirectives(): MudirDirective[] {
   } catch (e) {
     console.error('Error reading offline directives:', e);
   }
-  return mockMudirDirectives as unknown as MudirDirective[];
+  return [];
 }
 
 export function saveOfflineDirectives(directives: MudirDirective[]): void {

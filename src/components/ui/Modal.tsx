@@ -76,6 +76,7 @@ export const Modal: React.FC<ModalProps> = ({
               mass: 0.8,
             }}
             onClick={(e) => e.stopPropagation()}
+            data-bottom-sheet
             className={`relative w-full ${maxWidth} bg-[#FFFFFF] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_8px_32px_rgba(15,23,42,0.10)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col max-h-[88dvh] sm:max-h-[90vh] z-10`}
           >
             {/* Mobile Top Drag Handle */}

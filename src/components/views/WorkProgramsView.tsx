@@ -313,7 +313,7 @@ export const WorkProgramsView: React.FC<WorkProgramsViewProps> = ({
 
       {/* Cards Grid */}
       {filteredPrograms.length === 0 ? (
-        <div className="p-8 text-center bg-white border border-dashed border-[#E2E8F0] rounded-xl space-y-1.5">
+        <div className="py-14 text-center space-y-1.5">
           <h3 className="text-sm font-bold text-[#0F172A] font-headline">Belum Ada Proposal Terdaftar</h3>
           <p className="text-xs text-[#64748B] font-body">
             Klik "Ajukan Proposal Baru" untuk mengajukan rencana program kegiatan.

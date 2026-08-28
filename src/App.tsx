@@ -35,6 +35,7 @@ import {
   OFFICIAL_DORMITORIES,
   ALL_OFFICIAL_ROOMS,
   addPelanggaranRecord, 
+  reconcileSantriViolationTotals,
   addProposalRecord,
   updateSantriRecord,
   deriveViolationsFromSantri,
@@ -166,6 +167,16 @@ export default function App() {
   const [violations, setViolations] = useState<ViolationRecord[]>([]);
   const [workPrograms, setWorkPrograms] = useState<WorkProgram[]>([]);
   const [students, setStudents] = useState<SantriRecord[]>([]);
+
+  useEffect(() => {
+    if (!students.length || !violations.length) return;
+    setStudents((current) => {
+      const next = reconcileSantriViolationTotals(current, violations);
+      return next.every((student, index) => student.poinPelanggaran === current[index]?.poinPelanggaran)
+        ? current
+        : next;
+    });
+  }, [students, violations]);
   const [dormitories, setDormitories] = useState<Dormitory[]>(OFFICIAL_DORMITORIES);
   const [rooms, setRooms] = useState<DormitoryRoom[]>(ALL_OFFICIAL_ROOMS);
   const [classes, setClasses] = useState<SchoolClass[]>(OFFICIAL_CLASSES);
@@ -560,14 +571,14 @@ export default function App() {
 
   // Add violation handler (mirrors case into the santri record to keep points in sync)
   const handleAddViolation = async (record: Omit<ViolationRecord, 'id'>) => {
-    await addPelanggaranRecord(record);
+    const target = students.find(
+      (s) => s.nis === record.nis || s.studentName.trim().toLowerCase() === record.studentName.trim().toLowerCase()
+    );
+    await addPelanggaranRecord({ ...record, studentId: target?.id });
     recordSessionAction(
       'Kedisiplinan & Mahkamah',
       'Pencatatan Pelanggaran',
       `Mencatat pelanggaran santri ${record.studentName} (+${record.points} PK): ${record.violation}`
-    );
-    const target = students.find(
-      (s) => s.studentName.trim().toLowerCase() === record.studentName.trim().toLowerCase()
     );
     if (target) {
       const entry = {

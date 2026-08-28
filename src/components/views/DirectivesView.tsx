@@ -4,66 +4,16 @@ import { ScrollText, Plus, Send, X } from 'lucide-react';
 import { MudirDirective } from '../../types';
 import { Button } from '../ui/Button';
 import { subscribeToDirectives, addDirectiveRecord } from '../../lib/firestoreService';
+import { useLenisModalLock } from '../../lib/lenis';
 import { gooeyToast } from '../../lib/toast';
+import { RunningText } from '../ui/RunningText';
 
-const RunningText: React.FC<{
-  text: string;
-  className?: string;
-}> = ({ text, className = '' }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLSpanElement>(null);
-  const [isOverflowing, setIsOverflowing] = useState(false);
-  const [overflowDistance, setOverflowDistance] = useState(0);
-
-  useEffect(() => {
-    const checkOverflow = () => {
-      if (containerRef.current && contentRef.current) {
-        const containerWidth = containerRef.current.clientWidth;
-        const contentWidth = contentRef.current.scrollWidth;
-        if (contentWidth > containerWidth + 2) {
-          setIsOverflowing(true);
-          setOverflowDistance(contentWidth - containerWidth + 16);
-        } else {
-          setIsOverflowing(false);
-          setOverflowDistance(0);
-        }
-      }
-    };
-
-    checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
-  }, [text]);
-
-  const duration = Math.max(4, Math.min(12, overflowDistance / 15));
-
-  return (
-    <div
-      ref={containerRef}
-      className={`relative overflow-hidden whitespace-nowrap min-w-0 flex-1 ${className}`}
-      title={text}
-    >
-      <span
-        ref={contentRef}
-        style={
-          isOverflowing
-            ? ({
-                '--scroll-offset': `-${overflowDistance}px`,
-                animation: `running-ticker ${duration}s ease-in-out infinite alternate`,
-              } as React.CSSProperties)
-            : undefined
-        }
-        className={`inline-block whitespace-nowrap ${isOverflowing ? 'will-change-transform' : ''}`}
-      >
-        {text}
-      </span>
-    </div>
-  );
-};
 
 export const DirectivesView: React.FC = () => {
   const [directives, setDirectives] = useState<MudirDirective[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useLenisModalLock(isModalOpen);
   const [title, setTitle] = useState('');
   const [targetDivision, setTargetDivision] = useState('Semua Divisi');
   const [priority, setPriority] = useState<'tinggi' | 'sedang' | 'normal'>('tinggi');
@@ -219,6 +169,7 @@ export const DirectivesView: React.FC = () => {
                 mass: 0.8,
               }}
               onClick={(e) => e.stopPropagation()}
+              data-bottom-sheet
               className="relative w-full max-w-xl bg-white rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-2xl border-t sm:border border-slate-200 overflow-hidden flex flex-col max-h-[88dvh] sm:max-h-[90vh] z-10"
             >
               {/* Mobile Top Drag Handle */}
@@ -237,7 +188,8 @@ export const DirectivesView: React.FC = () => {
               </div>
 
               {/* Modal Form Content */}
-              <form onSubmit={handleCreateDirective} className="p-6 sm:p-7 space-y-5 overflow-y-auto text-xs flex-1 min-h-0">
+              <form onSubmit={handleCreateDirective} className="flex flex-col flex-1 min-h-0">
+                <div className="p-6 sm:p-7 space-y-5 overflow-y-auto text-xs flex-1 min-h-0">
                 <div>
                   <label className="block font-semibold mb-1.5 text-[#0F172A] font-headline">
                     Judul / Perihal Instruksi *
@@ -296,21 +248,22 @@ export const DirectivesView: React.FC = () => {
                   />
                 </div>
 
+                </div>
                 {/* Modal Actions Footer with Safe Bottom Padding */}
-                <div className="flex items-center justify-end gap-3 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-                  >
-                    Batal
-                  </button>
+                <div data-sheet-actions className="bg-[#F8FAFC] px-6 pt-4 pb-8 sm:pb-4 border-t border-[#E2E8F0] shrink-0 space-y-1.5">
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-5 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-2"
+                    className="w-full h-12 text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-sm transition-all cursor-pointer uppercase tracking-wider"
                   >
-                    {loading ? 'Menyimpan...' : 'Terbitkan Instruksi'}
+                    {loading ? 'MENYIMPAN...' : 'TERBITKAN'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="w-full h-10 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
+                  >
+                    BATAL
                   </button>
                 </div>
               </form>
@@ -321,8 +274,8 @@ export const DirectivesView: React.FC = () => {
 
       {/* Directives Grid List (2 Cards Per Row) */}
       {directives.length === 0 ? (
-        <div className="p-8 text-center bg-white rounded-lg border border-[#E2E8F0] space-y-2">
-          <ScrollText className="w-10 h-10 text-[#64748B] mx-auto" />
+        <div className="py-14 text-center space-y-2">
+          <ScrollText className="w-10 h-10 text-[#CBD5E1] mx-auto" />
           <h3 className="text-sm font-bold text-[#0F172A] font-headline">Belum Ada Instruksi Mudir</h3>
           <p className="text-xs text-[#64748B] font-body">
             Klik tombol "Terbitkan Arahan Mudir" di atas untuk menambahkan instruksi pertama.

@@ -6,3 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+*.jks
+*.keystore
+OSDIGI-signed.apk
+*.idsig
+src_latest.zip

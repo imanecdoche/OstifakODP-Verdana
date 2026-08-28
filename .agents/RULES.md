@@ -7,6 +7,24 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-28]**: Rekonstruksi UI Desktop — Standardisasi Full-Page Right-to-Left Slide-In Panel Tanpa Backdrop (Versi v1.1.0.75b):
+  - 1. KONVERSI POPUP/MODAL MENJADI PANEL FULL-PAGE SLIDE DARI KANAN (KHUSUS DESKTOP `md:`+):
+    * Mengubah 5 modul berikut dari bentuk popup/modal tengah menjadi panel penuh full-page yang meluncur masuk dari sisi kanan (`slide-in-from-right`) dan bergeser keluar ke kanan (`slide-out-to-right`) saat ditutup, menyamai struktur modul `studentView`:
+      - **Catat Rekam Jejak Prestasi Baru** (`AchievementsView.tsx` — modal `isNewModalOpen`)
+      - **Edit Rekam Jejak Prestasi** (`AchievementsView.tsx` — modal `editingAchievement`)
+      - **Otomasi Poin Prestasi Akhir Bulan** (`AchievementsView.tsx` — modal `isAutoPreviewOpen`)
+      - **Panel Detail Kamar** (`DormitoryView.tsx` — modal `selectedRoomModal`)
+      - **Panel Detail Kelas** (`ClassesView.tsx` — modal `selectedClassModal`)
+      - **Catat Pelanggaran Santri** (`NewViolationModal.tsx` — `isOpen`)
+    * Mekanisme transisi: desktop `initial={{ x: '100%', y: 0 }}` → `animate={{ x: 0 }}` → `exit={{ x: '100%' }}` dengan easing `duration: 0.65` & `cubic-bezier(0.4, 0, 0.2, 1)`; kontainer panel `fixed inset-x-0 bottom-0 top-16 lg:top-14 lg:left-[220px] z-40 bg-[#F8FAFC] overflow-y-auto overscroll-contain` (kecuali `NewViolationModal` yang full-width tanpa `lg:left-[220px]` karena dirender di root).
+    * Cakupan area = seluruh kontainer utama (main content container) di bawah header (`top-16`/`lg:top-14`) dan kanan sidebar (`lg:left-[220px]`), tanpa celah/gap di keempat tepi; sidebar navigasi & header utama tetap diam di posisinya.
+  - 2. PENGHILANGAN TOTAL EFEK BACKDROP (TANPA BLUR & TANPA GELAP):
+    * Seluruh overlay latar gelap (`bg-black/50`, `bg-[#0F172A]/50`, `backdrop-blur-xs`) pada panel side dihapus total; panel berdiri mandiri dengan latar solid bersih `bg-[#F8FAFC]` langsung di atas area kerja halaman utama.
+  - 3. ISOLASI RESPONSIVE (DESKTOP VS MOBILE):
+    * Layout Right-to-Left Slide-In Panel hanya untuk Desktop (`md:` ke atas / `useIsMobile(768)` false).
+    * Mobile tetap mempertahankan perilaku standar Bottom Sheet (muncul dari bawah, `rounded-t-2xl`, drag handle pill, animasi spring `type:'spring', damping:30, stiffness:320, mass:0.8`) tanpa backdrop.
+  - 4. KEPATUHAN PRINSIP DESAIN (ANTI-GRAVITY UI):
+    * Menghilangkan kotak/card pembungkus bertumpuk (matriks nilai kamar/kelas, daftar penghuni, rekam prestasi/pelanggaran, ketentuan otomasi, dan slider bobot poin) — seluruhnya flat di atas kanvas panel dengan garis pembatas tipis (*divider* `border-[#E2E8F0]`), tanpa bayangan kasar, dan tombol kembali icon-only minimalis di kiri-atas header.
 - **[2026-08-27]**: Peringkasan Lebar Sidebar, Pencegahan Wrapped Text, & Penyelarasan Judul Halaman (Versi v1.1.0.73b):
   - 1. PERINGKASAN LEBAR SIDEBAR & PENCEGAHAN WRAPPED TEXT (`Sidebar.tsx`, `index.css`):
     * Mengurangi lebar sidebar desktop menjadi `220px` (`lg:w-[220px]`, mobile `240px`), sehingga proporsional, ramping, dan tidak memakan terlalu banyak ruang horizontal.

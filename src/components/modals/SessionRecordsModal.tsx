@@ -266,7 +266,7 @@ export const SessionRecordsModal: React.FC<SessionRecordsModalProps> = ({
         bottomOffset="bottom-3"
       >
           {filteredRecords.length === 0 ? (
-            <div className="text-center py-16 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+            <div className="text-center py-16">
               <p className="text-sm font-bold text-slate-700">Belum ada riwayat sesi yang tercatat</p>
               <p className="text-xs text-slate-500 mt-1">Setiap kali login sukses dilakukan, sesi rill akan tercatat otomatis di sini.</p>
             </div>

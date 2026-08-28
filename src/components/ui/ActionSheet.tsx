@@ -79,6 +79,7 @@ export const ActionSheet: React.FC<ActionSheetProps> = ({
               mass: 0.8,
             }}
             onClick={(e) => e.stopPropagation()}
+            data-bottom-sheet
             className="relative w-full max-w-lg bg-white rounded-t-2xl sm:rounded-t-3xl border-t border-[#E2E8F0] shadow-[0_-10px_40px_rgba(15,23,42,0.18)] overflow-hidden z-10 max-h-[85vh] flex flex-col"
           >
             {/* Top Drag Handle Indicator */}
@@ -143,11 +144,11 @@ export const ActionSheet: React.FC<ActionSheetProps> = ({
             </div>
 
             {/* Bottom Cancel / Tutup Button with Extra Bottom Padding for Mobile Navbars */}
-            <div className="pt-3 pb-8 px-4 sm:pb-5 bg-[#F8FAFC] border-t border-[#E2E8F0] shrink-0">
+            <div data-sheet-actions className="pt-2 pb-8 px-4 sm:pb-5 bg-[#F8FAFC] border-t border-[#E2E8F0] shrink-0">
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full h-12 bg-white hover:bg-slate-50 active:bg-slate-100 border border-[#E2E8F0] rounded-xl text-xs font-bold text-slate-700 uppercase tracking-wider transition-colors cursor-pointer active:scale-[0.99]"
+                className="w-full h-10 text-xs font-bold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer uppercase tracking-wider"
               >
                 Batal
               </button>

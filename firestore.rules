@@ -1,8 +1,59 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
+    function signedIn() {
+      return request.auth != null;
+    }
+    function validString(field, maxLen) {
+      return field is string && field.size() <= maxLen;
+    }
+    function isOwnedStudent() {
+      return request.resource.data.studentId == null
+        || request.resource.data.studentId is string;
+    }
+    function isOwnedViolation() {
+      // Deletion may omit studentId on legacy rows; creation must never set it empty.
+      return request.resource.data.studentId is string
+        || request.resource.data.studentId == null;
+    }
+
+    // Strictly-owned entity collections.
+    match /santri/{studentId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && isOwnedStudent();
+      allow update: if signedIn() && isOwnedStudent();
+      allow delete: if signedIn();
+    }
+    match /pelanggaran/{violationId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && isOwnedViolation();
+      allow update: if signedIn() && isOwnedViolation();
+      allow delete: if signedIn();
+    }
+    match /asrama/{docId} {
+      allow read: if signedIn();
+      allow write: if signedIn();
+    }
+    match /kelas/{docId} {
+      allow read: if signedIn();
+      allow write: if signedIn();
+    }
+    match /proposal/{docId} {
+      allow read: if signedIn();
+      allow write: if signedIn();
+    }
+    match /directives/{docId} {
+      allow read: if signedIn();
+      allow write: if signedIn();
+    }
+    match /sessions/{docId} {
+      allow read: if signedIn();
+      allow write: if signedIn();
+    }
+
+    // Lock-down any schema not explicitly allowed above.
+    match /{collection=**} {
+      allow read, write: if false;
     }
   }
 }

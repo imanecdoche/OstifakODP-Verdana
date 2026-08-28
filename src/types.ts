@@ -52,6 +52,7 @@ export type PenaltyStatus = 'selesai' | 'dalam_proses' | 'belum_dihukum';
 
 export interface ViolationRecord {
   id: string;
+  studentId?: string;
   studentName: string;
   nis: string;
   kamar: string;
@@ -268,5 +269,4 @@ export interface SantriRecord {
   achievementsHistory?: StudentAchievementEntry[];
   permissionsHistory?: StudentPermissionEntry[];
 }
-
 

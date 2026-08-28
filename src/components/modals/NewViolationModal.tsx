@@ -10,6 +10,8 @@ import { getSeverityInfo, sliderFillPercent } from '../../lib/severityUtils';
 import { Button } from '../ui/Button';
 import { ScrollArea } from '../ui/ScrollArea';
 import { useLenisModalLock } from '../../lib/lenis';
+import { useIsMobile } from '../../lib/useIsMobile';
+import { X } from 'lucide-react';
 import { PKIcon } from '../ui/PointIcons';
 
 interface RollingDigitProps {
@@ -72,6 +74,7 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
   rooms = [],
   students = [],
 }) => {
+  const isMobile = useIsMobile(768);
   const [studentName, setStudentName] = useState('');
   const [studentQuery, setStudentQuery] = useState('');
   const [isStudentOpen, setIsStudentOpen] = useState(false);
@@ -179,40 +182,46 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+        <>
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
-            onClick={onClose}
-            className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
-          />
-
-          <motion.div
-            initial={{ y: '100%', opacity: 0.8 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: '100%', opacity: 0 }}
-            transition={{
-              type: 'spring',
-              damping: 30,
-              stiffness: 320,
-              mass: 0.8,
-            }}
-            onClick={(e) => e.stopPropagation()}
-            className="relative bg-white w-full max-w-2xl md:max-w-3xl rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden max-h-[88dvh] sm:max-h-[90vh] flex flex-col z-10"
+            key="catat-pelanggaran-panel"
+            data-lenis-prevent
+            initial={isMobile ? { y: '100%', x: 0 } : { x: '100%', y: 0 }}
+            animate={{ x: 0, y: 0 }}
+            exit={isMobile ? { y: '100%', x: 0 } : { x: '100%', y: 0 }}
+            transition={
+              isMobile
+                ? { type: 'spring', damping: 30, stiffness: 320, mass: 0.8 }
+                : { duration: 0.65, ease: [0.4, 0, 0.2, 1] }
+            }
+            className={
+              isMobile
+                ? "fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl bg-white max-h-[88dvh] shadow-[0_-10px_40px_rgba(15,23,42,0.18)] border-t border-[#E2E8F0] overflow-hidden"
+                : "fixed inset-x-0 bottom-0 top-16 z-40 bg-[#F8FAFC] overflow-y-auto overscroll-contain"
+            }
           >
-            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
+            <div className={`${isMobile ? 'flex' : 'hidden'} pt-3 pb-1 justify-center shrink-0 bg-[#F8FAFC]`}>
               <div className="w-10 h-1 bg-slate-300 rounded-full" />
             </div>
 
-            <div className="px-6 sm:px-8 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-              <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">Catat Pelanggaran Santri</h3>
-              <p className="text-xs text-[#64748B] font-body mt-0.5">Input berkas sidang & rekam poin kedisiplinan santri</p>
+            <div className={`${isMobile ? 'px-6 py-3.5' : 'px-6 sm:px-10 py-4 sm:py-5'} border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0 flex items-center gap-3 sm:gap-4`}>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Tutup Catat Pelanggaran"
+                title="Tutup Catat Pelanggaran"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-md bg-[#0F172A] text-white hover:bg-[#1E293B] active:scale-95 transition-all shadow-xs cursor-pointer flex items-center justify-center shrink-0"
+              >
+                <X className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+              </button>
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A] truncate">Catat Pelanggaran Santri</h3>
+                <p className="text-xs text-[#64748B] font-body mt-0.5 truncate">Input berkas sidang & rekam poin kedisiplinan santri</p>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-5 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-8">
-              
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+              <div className={`flex-1 min-h-0 overflow-y-auto overscroll-contain space-y-5 text-xs ${isMobile ? 'p-5 sm:p-6 pb-8' : 'max-w-3xl w-full mx-auto p-5 sm:p-8'}`}>
               <div ref={studentComboRef} className="relative">
                 <label className="block text-xs font-semibold text-[#0F172A] mb-1.5 font-headline">
                   Nama Lengkap Santri *
@@ -340,8 +349,8 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
             </div>
           </div>
 
-          {/* Row 4: Range Slider Bobot Poin & Kategori Plain Text */}
-          <div className="p-4 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] space-y-3">
+          {/* Row 4: Range Slider Bobot Poin & Kategori Plain Text (Flat with Dividers) */}
+          <div className="pt-4 border-t border-[#E2E8F0] space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-[#0F172A] font-headline">
                 Tingkat Keparahan Kasus & Bobot Poin
@@ -399,21 +408,25 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
             />
           </div>
 
-          {/* Modal Footer with Safe Mobile Padding */}
-          <div className="flex items-center justify-end gap-3 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
-            <Button type="button" variant="ghost" size="sm" onClick={onClose}>
-              Batal
+          {/* Modal Footer: Full-width SIMPAN + text BATAL, sticky below scroll */}
+          <div data-sheet-actions className="bg-[#F8FAFC] px-6 pt-4 pb-8 sm:pb-4 border-t border-[#E2E8F0] shrink-0 space-y-1.5">
+            <Button type="submit" variant="primary" size="lg" className="w-full">
+              SIMPAN
             </Button>
-            <Button type="submit" variant="primary" size="sm">
-              Simpan Berkas Pelanggaran
-            </Button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full h-10 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
+            >
+              BATAL
+            </button>
+          </div>
           </div>
             </form>
 
           </motion.div>
-        </div>
+        </>
       )}
     </AnimatePresence>
   );
 };
-

@@ -6,7 +6,9 @@ import {
   addKasTransaction, 
   deleteKasTransaction 
 } from '../../lib/firestoreService';
+import { useLenisModalLock } from '../../lib/lenis';
 import { mockDivisions } from '../../data/mockData';
+import { RunningText } from '../ui/RunningText';
 
 interface TreasuryViewProps {
   onBack?: () => void;
@@ -15,66 +17,14 @@ interface TreasuryViewProps {
 type TimeRangeFilter = 'this_month' | 'three_months' | 'all';
 
 // Running Text / Marquee Looping Component for Anti-Wrapping Table Cells
-const RunningText: React.FC<{
-  text: string;
-  className?: string;
-}> = ({ text, className = '' }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLSpanElement>(null);
-  const [isOverflowing, setIsOverflowing] = useState(false);
-  const [overflowDistance, setOverflowDistance] = useState(0);
-
-  useEffect(() => {
-    const checkOverflow = () => {
-      if (containerRef.current && contentRef.current) {
-        const containerWidth = containerRef.current.clientWidth;
-        const contentWidth = contentRef.current.scrollWidth;
-        if (contentWidth > containerWidth + 2) {
-          setIsOverflowing(true);
-          setOverflowDistance(contentWidth - containerWidth + 16);
-        } else {
-          setIsOverflowing(false);
-          setOverflowDistance(0);
-        }
-      }
-    };
-
-    checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
-  }, [text]);
-
-  const duration = Math.max(4, Math.min(14, overflowDistance / 14));
-
-  return (
-    <div
-      ref={containerRef}
-      className={`relative overflow-hidden whitespace-nowrap min-w-0 max-w-full ${className}`}
-      title={text}
-    >
-      <span
-        ref={contentRef}
-        style={
-          isOverflowing
-            ? ({
-                '--scroll-offset': `-${overflowDistance}px`,
-                animation: `running-ticker ${duration}s ease-in-out infinite alternate`,
-              } as React.CSSProperties)
-            : undefined
-        }
-        className={`inline-block whitespace-nowrap ${isOverflowing ? 'will-change-transform' : ''}`}
-      >
-        {text}
-      </span>
-    </div>
-  );
-};
 
 export const TreasuryView: React.FC<TreasuryViewProps> = () => {
   const [transactions, setTransactions] = useState<KasTransaction[]>([]);
   const [timeRange, setTimeRange] = useState<TimeRangeFilter>('this_month');
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useLenisModalLock(isModalOpen);
 
   // Form State
   const [inputDate, setInputDate] = useState('2026-08-26');
@@ -550,15 +500,16 @@ export const TreasuryView: React.FC<TreasuryViewProps> = () => {
                 mass: 0.8,
               }}
               onClick={(e) => e.stopPropagation()}
-              className="relative bg-[#FFFFFF] border-t sm:border border-[#E2E8F0] rounded-t-2xl sm:rounded-lg max-w-lg w-full p-6 space-y-6 shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-xl max-h-[88dvh] sm:max-h-[90vh] flex flex-col overflow-y-auto z-10"
+              data-bottom-sheet
+              className="relative bg-[#FFFFFF] border-t sm:border border-[#E2E8F0] rounded-t-2xl sm:rounded-lg max-w-lg w-full shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-xl max-h-[88dvh] sm:max-h-[90vh] flex flex-col overflow-hidden z-10"
             >
               {/* Mobile Top Drag Handle */}
-              <div className="sm:hidden -mt-2 mb-1 flex justify-center shrink-0">
+              <div className="sm:hidden pt-2 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
                 <div className="w-10 h-1 bg-slate-300 rounded-full" />
               </div>
 
               {/* Header Modal Bersih Tanpa Tombol Tutup */}
-              <div className="border-b border-[#E2E8F0] pb-4 shrink-0">
+              <div className="border-b border-[#E2E8F0] pb-4 px-6 pt-2 shrink-0">
                 <h3 className="text-lg font-bold text-[#0F172A] font-headline tracking-tight">
                   Pencatatan Transaksi Kas Baru
                 </h3>
@@ -567,7 +518,8 @@ export const TreasuryView: React.FC<TreasuryViewProps> = () => {
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-5 text-xs font-body flex-1 min-h-0">
+              <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+                <div className="px-6 py-5 space-y-5 text-xs font-body overflow-y-auto flex-1 min-h-0">
                 
                 {/* 1. Toggle Button Jenis Transaksi (MASUK vs KELUAR) */}
                 <div>
@@ -664,20 +616,21 @@ export const TreasuryView: React.FC<TreasuryViewProps> = () => {
                   />
                 </div>
 
+                </div>
                 {/* 6. Action Buttons with Mobile Safe Bottom Padding */}
-                <div className="flex items-center justify-end gap-3 pt-4 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
+                <div data-sheet-actions className="bg-[#F8FAFC] px-6 pt-4 pb-8 sm:pb-4 border-t border-[#E2E8F0] shrink-0 space-y-1.5">
+                  <button
+                    type="submit"
+                    className="w-full h-12 bg-[#0F172A] text-white text-sm font-bold uppercase tracking-wider rounded-xl hover:bg-[#1E293B] active:scale-[0.98] transition-all cursor-pointer"
+                  >
+                    SIMPAN
+                  </button>
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="h-9 px-4 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
+                    className="w-full h-10 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
                   >
-                    Batal
-                  </button>
-                  <button
-                    type="submit"
-                    className="h-9 px-5 bg-[#0F172A] text-white text-xs font-semibold rounded-md hover:bg-[#1E293B] active:scale-[0.98] transition-all cursor-pointer"
-                  >
-                    Simpan Transaksi
+                    BATAL
                   </button>
                 </div>
 

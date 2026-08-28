@@ -34,6 +34,7 @@ import { useIsMobile } from '../../lib/useIsMobile';
 import { ActionSheet } from '../ui/ActionSheet';
 import { PKIcon } from '../ui/PointIcons';
 import { CollectiveMahkamahView } from './CollectiveMahkamahView';
+import { RunningText } from '../ui/RunningText';
 
 interface ViolationsViewProps {
   violations: ViolationRecord[];
@@ -44,60 +45,6 @@ interface ViolationsViewProps {
 type ViolationFilter = 'all' | 'berat' | 'sedang' | 'ringan' | 'belum_dihukum';
 
 // Running Text / Marquee Looping Component for Anti-Wrapping Table Cells
-const RunningText: React.FC<{
-  text: string;
-  className?: string;
-}> = ({ text, className = '' }) => {
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const contentRef = React.useRef<HTMLSpanElement>(null);
-  const [isOverflowing, setIsOverflowing] = useState(false);
-  const [overflowDistance, setOverflowDistance] = useState(0);
-
-  useEffect(() => {
-    const checkOverflow = () => {
-      if (containerRef.current && contentRef.current) {
-        const containerWidth = containerRef.current.clientWidth;
-        const contentWidth = contentRef.current.scrollWidth;
-        if (contentWidth > containerWidth + 2) {
-          setIsOverflowing(true);
-          setOverflowDistance(contentWidth - containerWidth + 16);
-        } else {
-          setIsOverflowing(false);
-          setOverflowDistance(0);
-        }
-      }
-    };
-
-    checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
-  }, [text]);
-
-  const duration = Math.max(4, Math.min(14, overflowDistance / 14));
-
-  return (
-    <div
-      ref={containerRef}
-      className={`relative overflow-hidden whitespace-nowrap min-w-0 max-w-full ${className}`}
-      title={text}
-    >
-      <span
-        ref={contentRef}
-        style={
-          isOverflowing
-            ? ({
-                '--scroll-offset': `-${overflowDistance}px`,
-                animation: `running-ticker ${duration}s ease-in-out infinite alternate`,
-              } as React.CSSProperties)
-            : undefined
-        }
-        className={`inline-block whitespace-nowrap ${isOverflowing ? 'will-change-transform' : ''}`}
-      >
-        {text}
-      </span>
-    </div>
-  );
-};
 
 // Helper untuk memisahkan tanggal menjadi dua baris: Nama Hari dan Tanggal Lengkap
 const formatSplitDate = (dateStr: string): { dayName: string; formattedDate: string } => {
@@ -789,7 +736,8 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
                 mass: 0.8,
               }}
               onClick={(e) => e.stopPropagation()}
-              className="relative bg-white w-full max-w-2xl max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
+            data-bottom-sheet
+            className="relative bg-white w-full max-w-2xl max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
             >
               {/* Mobile Top Drag Handle */}
               <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
@@ -805,7 +753,8 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
               </div>
 
               {/* Edit Form */}
-              <form onSubmit={handleSaveEdit} className="p-6 sm:p-8 space-y-4 text-xs overflow-y-auto flex-1 min-h-0 pb-12 sm:pb-8">
+              <form onSubmit={handleSaveEdit} className="flex flex-col flex-1 min-h-0">
+                <div className="p-6 sm:p-8 space-y-4 text-xs overflow-y-auto flex-1 min-h-0 pb-8">
                 
                 {/* Row 1: Tindakan & Kategori */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -909,14 +858,19 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
                   />
                 </div>
 
+                </div>
                 {/* Modal Footer with Mobile Safe Bottom Padding */}
-                <div className="flex items-center justify-end gap-3 pt-3 pb-8 sm:pb-0 border-t border-[#E2E8F0]">
-                  <Button type="button" variant="ghost" size="sm" onClick={() => setEditingViolation(null)}>
-                    Batal
+                <div data-sheet-actions className="bg-[#F8FAFC] px-6 pt-4 pb-8 sm:pb-4 border-t border-[#E2E8F0] shrink-0 space-y-1.5">
+                  <Button type="submit" variant="primary" size="lg" disabled={isSavingEdit} className="w-full">
+                    {isSavingEdit ? 'MENYIMPAN...' : 'SIMPAN'}
                   </Button>
-                  <Button type="submit" variant="primary" size="sm" disabled={isSavingEdit}>
-                    {isSavingEdit ? 'Menyimpan...' : 'Simpan Perubahan'}
-                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingViolation(null)}
+                    className="w-full h-10 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
+                  >
+                    BATAL
+                  </button>
                 </div>
               </form>
 

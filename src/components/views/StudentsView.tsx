@@ -43,6 +43,7 @@ import {
   subscribeToSantri, 
   addSantriRecord, 
   updateSantriRecord,
+  createLocalId,
   deleteSantriRecord,
   SantriRecord, 
   StudentViolationEntry,
@@ -728,7 +729,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
     const surahDisplay = `QS. ${selectedSurah.name} (Ayat ${fromA}-${toA})`;
 
     const newHafalanEntry: StudentHafalanEntry = {
-      id: `haf_${Date.now()}`,
+      id: createLocalId('haf'),
       surah: surahDisplay,
       juz: `Juz ${setoranJuz}`,
       date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
@@ -780,7 +781,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
     setIsSubmittingIzin(true);
 
     const newEntry: StudentPermissionEntry = {
-      id: `iz_${Date.now()}`,
+      id: createLocalId('iz'),
       type: izinType,
       reason: izinReason.trim(),
       startDate: izinStartDate,
@@ -936,7 +937,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
   const handleAddNewAddViolation = () => {
     if (!newAddVioTitle.trim()) return;
     const entry: StudentViolationEntry = {
-      id: `vio-${Date.now()}`,
+      id: createLocalId('vio'),
       title: newAddVioTitle.trim(),
       date: newAddVioDate,
       points: Number(newAddVioPoints) || 0,
@@ -980,7 +981,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
   const handleAddNewViolationToHistory = () => {
     if (!newVioTitle.trim()) return;
     const newEntry: StudentViolationEntry = {
-      id: `vio-${Date.now()}`,
+      id: createLocalId('vio'),
       title: newVioTitle.trim(),
       date: newVioDate,
       points: Number(newVioPoints) || 0,
@@ -1484,8 +1485,8 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
       
       {/* Student Cards Grid */}
       {filteredStudents.length === 0 ? (
-        <Card variant="default" className="p-8 text-center bg-white border border-[#E2E8F0] space-y-2">
-          <Users className="w-10 h-10 text-[#64748B] mx-auto" />
+        <div className="py-14 text-center space-y-2">
+          <Users className="w-10 h-10 text-[#CBD5E1] mx-auto" />
           <h3 className="text-sm font-bold text-[#0F172A] font-headline">
             {students.length === 0 ? 'Belum Ada Santri Terdaftar' : 'Tidak Ada Santri yang Sesuai Filter'}
           </h3>
@@ -1501,7 +1502,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               </Button>
             </div>
           )}
-        </Card>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredStudents.map((st) => (
@@ -1687,6 +1688,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 mass: 0.8,
               }}
               onClick={(e) => e.stopPropagation()}
+              data-bottom-sheet
               className="relative w-[800px] max-w-full max-h-[88dvh] sm:max-h-[90vh] bg-white rounded-t-2xl sm:rounded-lg shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_12px_40px_rgba(15,23,42,0.22)] border-t sm:border border-[#E2E8F0] flex flex-col overflow-hidden z-10"
             >
               {/* Mobile Top Drag Handle */}
@@ -1866,35 +1868,32 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               </form>
             </ScrollArea>
 
-            {/* 3. Modal Fixed Footer with Mobile Safe Bottom Padding (Height: 64px) */}
-            <div className="h-16 shrink-0 bg-[#F8FAFC] border-t border-[#E2E8F0] px-6 pb-8 sm:pb-0 flex items-center justify-between">
-              <p className="text-[11px] text-[#64748B]">
+            {/* 3. Modal Fixed Footer with Mobile Safe Bottom Padding */}
+            <div data-sheet-actions className="shrink-0 bg-[#F8FAFC] border-t border-[#E2E8F0] px-6 pt-4 pb-8 sm:pb-4 space-y-1.5">
+              <p className="text-[11px] text-[#64748B] text-center mb-1">
                 * Kolom bertanda bintang wajib diisi
               </p>
-              
-              <div className="flex items-center gap-3">
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setIsAdding(false)}
-                >
-                  Batal
-                </Button>
-                <Button 
-                  type="submit" 
-                  form="add-student-form"
-                  variant="primary" 
-                  size="sm" 
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
-                  ) : (
-                    'Daftarkan Santri Baru'
-                  )}
-                </Button>
-              </div>
+              <Button
+                type="submit"
+                form="add-student-form"
+                variant="primary"
+                size="lg"
+                disabled={loading}
+                className="w-full"
+              >
+                {loading ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                ) : (
+                  'SIMPAN'
+                )}
+              </Button>
+              <button
+                type="button"
+                onClick={() => setIsAdding(false)}
+                className="w-full h-10 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
+              >
+                BATAL
+              </button>
             </div>
 
           </motion.div>
@@ -1930,6 +1929,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 mass: 0.8,
               }}
               onClick={(e) => e.stopPropagation()}
+              data-bottom-sheet
               className="relative w-[800px] max-w-full max-h-[88dvh] sm:h-[620px] sm:max-h-[90vh] bg-white rounded-t-2xl sm:rounded-lg shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_12px_40px_rgba(15,23,42,0.22)] border-t sm:border border-[#E2E8F0] flex flex-col overflow-hidden z-10"
             >
               {/* Mobile Top Drag Handle */}
@@ -2332,39 +2332,36 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               </form>
             </ScrollArea>
 
-            {/* 4. Modal Fixed Footer with Mobile Safe Bottom Padding (Height: 64px) */}
-            <div className="h-16 shrink-0 bg-[#F8FAFC] border-t border-[#E2E8F0] px-6 pb-8 sm:pb-0 flex items-center justify-between">
+            {/* 4. Modal Fixed Footer with Mobile Safe Bottom Padding */}
+            <div data-sheet-actions className="shrink-0 bg-[#F8FAFC] border-t border-[#E2E8F0] px-6 pt-4 pb-8 sm:pb-4 space-y-1.5">
               <button
                 type="button"
                 onClick={() => setStudentToDelete(editingStudent)}
-                className="text-xs text-[#EF4444] hover:text-[#DC2626] font-semibold flex items-center gap-1.5 hover:underline cursor-pointer"
+                className="w-full text-center text-xs text-[#EF4444] hover:text-[#DC2626] font-semibold flex items-center justify-center gap-1.5 hover:underline cursor-pointer py-0.5"
               >
                 <Trash2 className="w-3.5 h-3.5" /> Hapus Profil Santri
               </button>
-              
-              <div className="flex items-center gap-3">
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setEditingStudent(null)}
-                >
-                  Batal
-                </Button>
-                <Button 
-                  type="submit" 
-                  form="edit-student-form"
-                  variant="primary" 
-                  size="sm" 
-                  disabled={isSavingEdit}
-                >
-                  {isSavingEdit ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
-                  ) : (
-                    'Simpan Perubahan Data'
-                  )}
-                </Button>
-              </div>
+              <Button
+                type="submit"
+                form="edit-student-form"
+                variant="primary"
+                size="lg"
+                disabled={isSavingEdit}
+                className="w-full"
+              >
+                {isSavingEdit ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                ) : (
+                  'SIMPAN'
+                )}
+              </Button>
+              <button
+                type="button"
+                onClick={() => setEditingStudent(null)}
+                className="w-full h-10 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
+              >
+                BATAL
+              </button>
             </div>
 
           </motion.div>
