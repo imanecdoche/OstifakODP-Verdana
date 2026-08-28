@@ -154,7 +154,7 @@ export const DirectivesView: React.FC = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setIsModalOpen(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-default"
+              className="fixed inset-0 z-40 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}

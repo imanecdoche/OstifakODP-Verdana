@@ -287,13 +287,31 @@ export async function executeMonthlyPPAward(
 
     if (newEntries.length > 0) {
       const mergedAchievements = [...newEntries, ...existingAchievements];
-      // Recalculate total poinPrestasi
       const currentPP = student.poinPrestasi || existingAchievements.reduce((acc, a) => acc + (a.points || 10), 0);
       const updatedTotalPP = currentPP + additionalPP;
+      const lifetimePP = (student.lifetimePP || 0) + additionalPP;
+
+      // Add monthly archive snapshot for current month
+      const targetMonth = `${year}-${String(month).padStart(2, '0')}`;
+      const existingArchives = student.monthlyArchives || [];
+      const updatedArchives = [
+        { month: targetMonth, totalPP: updatedTotalPP, recordedAt: now.toISOString() },
+        ...existingArchives.filter(m => m.month !== targetMonth)
+      ];
 
       await updateSantriRecord(student.id, {
+        achievementHistory: mergedAchievements.map(a => ({
+          id: a.id,
+          date: a.date,
+          title: a.title,
+          category: a.category,
+          points: a.points || 10,
+        })),
         achievementsHistory: mergedAchievements,
+        activePP: updatedTotalPP,
         poinPrestasi: updatedTotalPP,
+        lifetimePP: lifetimePP,
+        monthlyArchives: updatedArchives,
       });
       totalUpdated++;
     }

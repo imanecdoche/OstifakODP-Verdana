@@ -60,6 +60,7 @@ import {
 import { useLenisModalLock } from '../../lib/lenis';
 import { useIsMobile } from '../../lib/useIsMobile';
 import { gooeyToast } from '../../lib/toast';
+import { calculateDecay } from '../../utils/disciplineCalculator';
 
 interface StudentsViewProps {
   dormitories?: Dormitory[];
@@ -1244,9 +1245,9 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
       </div>
 
       {/* 4 Summary Metrics (Unboxed 1-Row on Desktop, Symmetrical 2x2 Grid on Mobile with Dividers) */}
-      <div className="grid grid-cols-2 md:grid-cols-4 border-y border-[#E2E8F0] overflow-hidden">
+      <div className="grid grid-cols-2 md:grid-cols-4 bg-white border-y border-neutral-300 overflow-hidden">
         {/* Metric 1 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 border-r border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 border-r border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Total Santri Terdaftar
           </p>
@@ -1259,7 +1260,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
         </div>
 
         {/* Metric 2 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 md:border-r border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 md:border-r border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Lulus Tahsin Al-Qur'an
           </p>
@@ -1272,7 +1273,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
         </div>
 
         {/* Metric 3 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-r border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-r border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Bebas Pelanggaran (0 PK)
           </p>
@@ -1285,7 +1286,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
         </div>
 
         {/* Metric 4 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Rata-rata Hafalan
           </p>
@@ -1586,41 +1587,62 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                   </div>
                 </div>
 
-                {/* Symmetrical 3-Column Metrics (Hafalan | Prestasi | Pelanggaran) with Thin Dividers */}
-                <div className="grid grid-cols-3 divide-x divide-[#E2E8F0] pt-3 border-t border-[#E2E8F0] text-xs">
-                  <div className="pr-2">
-                    <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Hafalan</p>
-                    <p className="text-sm font-bold text-[#0F172A] mt-0.5 truncate font-headline">{st.hafalan}</p>
-                  </div>
+                {/* Symmetrical 3-Column Metrics (Hafalan | Prestasi | Pelanggaran Aktif) with Thin Dividers */}
+                {(() => {
+                  const decayInfo = calculateDecay(st);
+                  const activePPVal = st.activePP !== undefined ? st.activePP : getStudentPP(st);
+                  const activePKVal = decayInfo.activePK;
+                  return (
+                    <>
+                      <div className="grid grid-cols-3 divide-x divide-[#E2E8F0] pt-3 border-t border-[#E2E8F0] text-xs">
+                        <div className="pr-2">
+                          <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Hafalan</p>
+                          <p className="text-sm font-bold text-[#0F172A] mt-0.5 truncate font-headline">{st.hafalan}</p>
+                        </div>
 
-                  <div className="px-2">
-                    <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Prestasi</p>
-                    <p className="text-sm font-bold text-[#059669] mt-0.5 truncate font-headline font-mono flex items-center gap-1">
-                      <span>{getStudentPP(st)}</span>
-                      <PPIcon className="w-3.5 h-3.5" />
-                    </p>
-                  </div>
+                        <div className="px-2">
+                          <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Prestasi (Active)</p>
+                          <p className="text-sm font-bold text-[#059669] mt-0.5 truncate font-headline font-mono flex items-center gap-1">
+                            <span>+{activePPVal}</span>
+                            <PPIcon className="w-3.5 h-3.5" />
+                          </p>
+                        </div>
 
-                  <div className="pl-2">
-                    <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Pelanggaran</p>
-                    <p className={`text-sm font-bold mt-0.5 truncate font-headline font-mono flex items-center gap-1 ${st.poinPelanggaran > 0 ? 'text-[#EF4444]' : 'text-[#16A34A]'}`}>
-                      <span>{st.poinPelanggaran || 0}</span>
-                      <PKIcon className="w-3.5 h-3.5" />
-                    </p>
-                  </div>
-                </div>
+                        <div className="pl-2">
+                          <p className="text-[10px] text-[#64748B] uppercase font-semibold font-headline tracking-wide truncate">Pelanggaran (Active)</p>
+                          <p className={`text-sm font-bold mt-0.5 truncate font-headline font-mono flex items-center gap-1 ${activePKVal > 0 ? 'text-[#EF4444]' : 'text-[#16A34A]'}`}>
+                            <span>{activePKVal}</span>
+                            <PKIcon className="w-3.5 h-3.5" />
+                          </p>
+                        </div>
+                      </div>
 
-                <div className="flex items-center justify-between text-xs text-[#64748B] pt-1 font-body">
-                  <div className="flex items-center gap-2">
-                    <UserCheck className="w-4 h-4 text-[#059669] shrink-0" />
-                    <span>Presensi: <strong className="text-[#0F172A]">{st.statusIbadah}</strong></span>
-                  </div>
-                  {st.isTahsinPassed !== undefined && (
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${st.isTahsinPassed ? 'text-[#059669] bg-[#ECFDF5]' : 'text-[#D97706] bg-[#FFFBEB]'}`}>
-                      {st.isTahsinPassed ? 'Lulus Tahsin' : 'Bimbingan Tahsin'}
-                    </span>
-                  )}
-                </div>
+                      {/* Decay Status Indicator & Presensi Status */}
+                      <div className="flex items-center justify-between text-xs text-[#64748B] pt-1 font-body">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <UserCheck className="w-4 h-4 text-[#059669] shrink-0" />
+                          <span className="truncate">Presensi: <strong className="text-[#0F172A]">{st.statusIbadah}</strong></span>
+                        </div>
+                        
+                        {/* Decay Status Label */}
+                        <div className="text-[10px] font-semibold text-right shrink-0">
+                          {decayInfo.decayStatus === 'locked' && (
+                            <span className="text-amber-600 font-bold">Perlu Sidang Mahkamah</span>
+                          )}
+                          {decayInfo.decayStatus === 'grace_period' && (
+                            <span className="text-slate-500 font-medium">{decayInfo.statusLabel}</span>
+                          )}
+                          {decayInfo.decayStatus === 'decaying' && (
+                            <span className="text-emerald-600 font-semibold">{decayInfo.statusLabel}</span>
+                          )}
+                          {decayInfo.decayStatus === 'clean' && (
+                            <span className="text-emerald-600 font-medium">Bersih (0 PK)</span>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           ))}
@@ -1661,26 +1683,26 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
       </AnimatePresence>
 
       {/* ========================================================================= */}
-      {/* FIXED-DIMENSION ADD STUDENT POPUP MODAL (Dynamic Mobile Keyboard Height)  */}
+      {/* ADD STUDENT RIGHT SLIDE-IN SIDE PANEL (DESKTOP) / BOTTOM SHEET (MOBILE)   */}
       {/* ========================================================================= */}
       <AnimatePresence>
         {isAdding && (
-          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
-            {/* Backdrop */}
+          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-stretch sm:justify-end overflow-hidden pointer-events-auto font-body">
+            {/* Backdrop Layer */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setIsAdding(false)}
-              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+              className="fixed inset-0 z-40 bg-black/50 cursor-default"
             />
 
-            {/* Sheet Panel (Spring Animation) */}
+            {/* Slide-in Panel (Right Drawer on Desktop, Spring Sheet on Mobile) */}
             <motion.div
-              initial={{ y: '100%', opacity: 0.8 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: '100%', opacity: 0 }}
+              initial={isMobile ? { y: '100%', opacity: 0.8 } : { x: '100%' }}
+              animate={isMobile ? { y: 0, opacity: 1 } : { x: 0 }}
+              exit={isMobile ? { y: '100%', opacity: 0 } : { x: '100%' }}
               transition={{
                 type: 'spring',
                 damping: 30,
@@ -1689,21 +1711,34 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               }}
               onClick={(e) => e.stopPropagation()}
               data-bottom-sheet
-              className="relative w-[800px] max-w-full max-h-[88dvh] sm:max-h-[90vh] bg-white rounded-t-2xl sm:rounded-lg shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_12px_40px_rgba(15,23,42,0.22)] border-t sm:border border-[#E2E8F0] flex flex-col overflow-hidden z-10"
+              className="relative w-full sm:w-[560px] lg:w-[640px] max-w-full h-auto sm:h-full max-h-[88dvh] sm:max-h-full bg-white rounded-t-2xl sm:rounded-none sm:border-l border-t sm:border-t-0 border-[#E2E8F0] shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-2xl flex flex-col overflow-hidden z-50"
             >
               {/* Mobile Top Drag Handle */}
               <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
                 <div className="w-10 h-1 bg-slate-300 rounded-full" />
               </div>
               
-              {/* 1. Modal Fixed Header (Clean Flat Header, Zero Icon Policy) */}
-              <div className="px-6 py-3.5 sm:py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
-                <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A]">
-                  Tambah Profil Santri Baru
-                </h3>
-                <p className="text-xs text-[#64748B] mt-0.5 font-body">
-                  Lengkapi biodata santri, alokasi kelas, kamar, dan target hafalan
-                </p>
+              {/* 1. Header (Clean Flat Header with Minimalist Black Close Button) */}
+              <div className="px-6 py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-between gap-4 shrink-0">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base sm:text-lg font-bold font-headline tracking-tight text-[#0F172A] truncate">
+                    Tambah Profil Santri Baru
+                  </h3>
+                  <p className="text-xs text-[#64748B] mt-0.5 font-body truncate">
+                    Lengkapi biodata santri, alokasi kelas, kamar, dan target hafalan
+                  </p>
+                </div>
+
+                {/* Unified Minimalist Black Close Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsAdding(false)}
+                  aria-label="Tutup Form Tambah Santri"
+                  title="Tutup Form Tambah Santri"
+                  className="w-9 h-9 rounded-md bg-[#0F172A] text-white hover:bg-[#1E293B] active:scale-95 transition-all shadow-xs cursor-pointer flex items-center justify-center shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
 
             {/* 2. Modal Scrollable Content Body (Fixed Area) */}
@@ -1914,7 +1949,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setEditingStudent(null)}
-              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+              className="fixed inset-0 z-40 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}
@@ -2380,7 +2415,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setStudentToDelete(null)}
-              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+              className="fixed inset-0 z-40 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}

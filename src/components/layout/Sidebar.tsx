@@ -17,7 +17,8 @@ import {
   LogOut,
   ShieldCheck,
   GraduationCap,
-  Trophy
+  Trophy,
+  FileSpreadsheet
 } from 'lucide-react';
 import { UserProfile, DivisionId } from '../../types';
 import { mockDivisions } from '../../data/mockData';
@@ -67,6 +68,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'violations', label: 'Pelanggaran & Mahkamah', icon: <ShieldAlert className="w-4 h-4" /> },
     { id: 'programs', label: 'Program Kerja Divisi', icon: <CalendarCheck className="w-4 h-4" /> },
     { id: 'directives', label: 'Instruksi Mudir', icon: <ScrollText className="w-4 h-4" /> },
+    { id: 'reports', label: 'Laporan Multidivisi', icon: <FileSpreadsheet className="w-4 h-4" /> },
   ];
 
   // Gesture Swipe Left to close Mobile Sidebar
@@ -99,7 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile Backdrop */}
       {isOpenMobile && (
         <div
-          className="fixed inset-0 z-40 bg-[#0F172A]/40 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={onCloseMobile}
         />
       )}

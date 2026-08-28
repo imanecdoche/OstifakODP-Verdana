@@ -34,6 +34,10 @@ import { useIsMobile } from '../../lib/useIsMobile';
 import { ActionSheet } from '../ui/ActionSheet';
 import { PKIcon } from '../ui/PointIcons';
 import { CollectiveMahkamahView } from './CollectiveMahkamahView';
+import { 
+  computeFloatingMenuPositionFromPoint, 
+  computeFloatingMenuPositionFromRect 
+} from '../../lib/floatingMenuPosition';
 import { RunningText } from '../ui/RunningText';
 
 interface ViolationsViewProps {
@@ -341,19 +345,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
       return;
     }
     const rect = e.currentTarget.getBoundingClientRect();
-    const menuWidth = 220;
-    const menuHeight = 160;
-    
-    let x = rect.right - menuWidth;
-    if (x < 16) x = 16;
-    if (x + menuWidth > window.innerWidth - 16) {
-      x = window.innerWidth - menuWidth - 16;
-    }
-
-    let y = rect.bottom + 6;
-    if (y + menuHeight > window.innerHeight - 16) {
-      y = rect.top - menuHeight - 6;
-    }
+    const { x, y } = computeFloatingMenuPositionFromRect(rect, 220, 160);
 
     setActiveMenu({
       x,
@@ -366,18 +358,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
   // Right-Click Context Menu Trigger with Viewport Boundary Guard
   const handleRowContextMenu = (e: React.MouseEvent, record: ViolationRecord) => {
     e.preventDefault();
-    const menuWidth = 220;
-    const menuHeight = 160;
-
-    let x = e.clientX;
-    if (x + menuWidth > window.innerWidth - 16) {
-      x = window.innerWidth - menuWidth - 16;
-    }
-
-    let y = e.clientY;
-    if (y + menuHeight > window.innerHeight - 16) {
-      y = e.clientY - menuHeight;
-    }
+    const { x, y } = computeFloatingMenuPositionFromPoint(e.clientX, e.clientY, 220, 160);
 
     setActiveMenu({
       x,
@@ -431,9 +412,9 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
       </div>
 
       {/* 4 Summary Metrics (Unboxed 1-Row on Desktop, Symmetrical 2x2 Grid on Mobile with Dividers) */}
-      <div className="grid grid-cols-2 md:grid-cols-4 border-y border-[#E2E8F0] overflow-hidden">
+      <div className="grid grid-cols-2 md:grid-cols-4 bg-white border-y border-neutral-300 overflow-hidden">
         {/* Metric 1 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 border-r border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 border-r border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Total Kasus
           </p>
@@ -445,7 +426,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
         </div>
 
         {/* Metric 2 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 md:border-r border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 md:border-r border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Sidang Mahkamah (Berat)
           </p>
@@ -460,7 +441,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
         </div>
 
         {/* Metric 3 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-r border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-r border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Pelanggaran Sedang
           </p>
@@ -472,7 +453,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
         </div>
 
         {/* Metric 4 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Belum Eksekusi
           </p>
@@ -721,7 +702,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setEditingViolation(null)}
-              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+              className="fixed inset-0 z-40 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}
@@ -890,7 +871,7 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setDeletingViolation(null)}
-              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+              className="fixed inset-0 z-40 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}

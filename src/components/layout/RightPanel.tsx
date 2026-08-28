@@ -329,7 +329,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
             onClick={onClose}
-            className="fixed inset-0 z-40 bg-[#0F172A]/40 backdrop-blur-xs"
+            className="fixed inset-0 z-40 bg-black/50"
           />
 
           {/* Overlay Slide-over Drawer Panel */}

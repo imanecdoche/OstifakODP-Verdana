@@ -20,6 +20,11 @@ import {
 } from 'firebase/auth';
 import { db, auth } from './firebase';
 import { 
+  Student,
+  PortfolioViolationRecord,
+  PortfolioAchievementRecord,
+  MonthlyArchiveRecord,
+  ViolationCategory,
   ViolationRecord, 
   WorkProgram, 
   MudirDirective, 
@@ -44,6 +49,11 @@ import {
 } from '../types';
 
 export type {
+  Student,
+  PortfolioViolationRecord,
+  PortfolioAchievementRecord,
+  MonthlyArchiveRecord,
+  ViolationCategory,
   Dormitory,
   DormitoryRoom,
   SchoolClass,
@@ -58,6 +68,9 @@ export type {
   StudentPermissionEntry,
   StudentMahkamahEntry
 };
+
+import { migrateStudentPortfolio, createNewDefaultStudent } from './studentPortfolioMigration';
+export { migrateStudentPortfolio, createNewDefaultStudent };
 
 import { OFFICIAL_DORMITORIES, ALL_OFFICIAL_ROOMS, OFFICIAL_CLASSES } from './constants';
 export { OFFICIAL_DORMITORIES, ALL_OFFICIAL_ROOMS, OFFICIAL_CLASSES };
@@ -93,20 +106,8 @@ export function createLocalId(prefix: string): string {
   return `${prefix}_${unique}`;
 }
 
-export function normalizeSantriRecord(student: SantriRecord): SantriRecord {
-  const violations = student.violationsHistory || [];
-  const achievements = student.achievementsHistory || [];
-  return {
-    ...student,
-    violationsHistory: violations,
-    achievementsHistory: achievements,
-    poinPelanggaran: violations.length
-      ? violations.reduce((sum, entry) => sum + (Number(entry.points) || 0), 0)
-      : Number(student.poinPelanggaran) || 0,
-    poinPrestasi: achievements.length
-      ? achievements.reduce((sum, entry) => sum + (Number(entry.points) || 0), 0)
-      : Number(student.poinPrestasi) || 0,
-  };
+export function normalizeSantriRecord(student: any): SantriRecord {
+  return migrateStudentPortfolio(student);
 }
 
 export function reconcileSantriViolationTotals(students: SantriRecord[], violations: ViolationRecord[]): SantriRecord[] {
@@ -990,12 +991,15 @@ export function subscribeToSantri(callback: (santri: SantriRecord[]) => void) {
       .filter((docSnap) => !docSnap.data().isDeleted)
       .map((docSnap) => {
         const data = docSnap.data();
-        return {
+        return normalizeSantriRecord({
           id: docSnap.id,
-          studentName: data.studentName || 'Santri',
+          studentName: data.studentName || data.name || 'Santri',
+          name: data.name || data.studentName || 'Santri',
           nis: data.nis || '-',
-          kamar: data.kamar || '-',
-          kelas: data.kelas || '-',
+          kamar: data.kamar || data.dormitoryId || '-',
+          dormitoryId: data.dormitoryId || data.kamar || '-',
+          kelas: data.kelas || data.classId || '-',
+          classId: data.classId || data.kelas || '-',
           hafalan: data.hafalan || '-',
           poinPelanggaran: data.poinPelanggaran || 0,
           statusIbadah: data.statusIbadah || '100% Berjamaah',
@@ -1010,7 +1014,8 @@ export function subscribeToSantri(callback: (santri: SantriRecord[]) => void) {
           hafalanHistory: data.hafalanHistory || [],
           achievementsHistory: data.achievementsHistory || [],
           permissionsHistory: data.permissionsHistory || [],
-        };
+          ...data,
+        });
       });
     emit();
   }, (error) => {
@@ -1101,23 +1106,27 @@ export async function deleteSantriRecord(id: string, student?: SantriRecord) {
   }
 }
 
-export async function addSantriRecord(santri: Omit<SantriRecord, 'id'>) {
+export async function addSantriRecord(santri: Partial<SantriRecord> & Record<string, any>) {
   if (isOfflineModeActive()) {
     const current = getOfflineStudents();
     const localId = createLocalId('off_santri');
-    const fullRecord: SantriRecord = {
+    const fullRecord: SantriRecord = createNewDefaultStudent({
       id: localId,
       ...santri,
-    };
+      nis: santri.nis || '',
+      name: santri.name || santri.studentName || 'Santri Baru',
+    });
     saveOfflineStudents([...current, fullRecord]);
     return { id: localId };
   }
 
   const localId = createLocalId('santri');
-  const fullRecord: SantriRecord = {
+  const fullRecord: SantriRecord = createNewDefaultStudent({
     id: localId,
     ...santri,
-  };
+    nis: santri.nis || '',
+    name: santri.name || santri.studentName || 'Santri Baru',
+  });
   
   // 1. Instantly write to local persistent custom list
   saveCustomSantri(fullRecord);
@@ -1127,7 +1136,7 @@ export async function addSantriRecord(santri: Omit<SantriRecord, 'id'>) {
   try {
     const colRef = collection(db, 'santri');
     const docRef = await addDoc(colRef, {
-      ...santri,
+      ...fullRecord,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });

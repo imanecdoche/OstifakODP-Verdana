@@ -115,7 +115,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
             onClick={onClose}
-            className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+            className="fixed inset-0 z-40 bg-black/50 cursor-default"
           />
 
           {/* 2. Sheet Panel (Spring Entry & Spring Exit Animation) */}

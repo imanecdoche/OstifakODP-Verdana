@@ -247,15 +247,71 @@ export interface StudentMahkamahEntry {
   createdAt?: string;
 }
 
-export interface SantriRecord {
+export type ViolationCategory = 'ringan' | 'sedang' | 'berat';
+
+export interface PortfolioViolationRecord {
   id: string;
-  studentName: string;
+  date: string;
+  title: string;
+  category: ViolationCategory;
+  points: number;
+  notes?: string;
+  resolved: boolean;
+}
+
+export interface PortfolioAchievementRecord {
+  id: string;
+  date: string;
+  title: string;
+  category: string;
+  points: number;
+  proofUrl?: string;
+}
+
+export interface MonthlyArchiveRecord {
+  month: string; // YYYY-MM
+  totalPP: number;
+  rank?: number;
+  recordedAt?: string;
+}
+
+export interface RedemptionRecord {
+  id: string;
+  date: string;
+  ppUsed: number;
+  pkDeducted: number;
+  reason: string;
+}
+
+export interface Student {
+  id: string;
   nis: string;
+  name: string;
+  dormitoryId: string;
+  classId: string;
+  createdAt: string;
+
+  // Portofolio Kedisiplinan (Pelanggaran / PK)
+  violationHistory: PortfolioViolationRecord[];
+  redemptionHistory?: RedemptionRecord[];
+  lifetimePK: number;
+  activePK: number;
+  lastViolationDate: string | null;
+  hasDecayLock: boolean;
+
+  // Portofolio Prestasi (PP)
+  achievementHistory: PortfolioAchievementRecord[];
+  lifetimePP: number;
+  activePP: number;
+  monthlyArchives: MonthlyArchiveRecord[];
+
+  // Compatibility & Legacy Aliases
+  studentName: string;
   kamar: string;
   kelas: string;
   hafalan: string;
   poinPelanggaran: number;
-  poinPrestasi?: number; // Akumulasi Poin Prestasi (PP)
+  poinPrestasi?: number;
   statusIbadah: string;
   birthDate?: string;
   domicile?: string;
@@ -269,4 +325,7 @@ export interface SantriRecord {
   achievementsHistory?: StudentAchievementEntry[];
   permissionsHistory?: StudentPermissionEntry[];
 }
+
+export type SantriRecord = Student;
+
 

@@ -24,6 +24,10 @@ import { useIsMobile } from '../../lib/useIsMobile';
 import { ActionSheet } from '../ui/ActionSheet';
 import { PPIcon } from '../ui/PointIcons';
 import { ScrollArea } from '../ui/ScrollArea';
+import { 
+  computeFloatingMenuPositionFromPoint, 
+  computeFloatingMenuPositionFromRect 
+} from '../../lib/floatingMenuPosition';
 import { RunningText } from '../ui/RunningText';
 
 
@@ -278,19 +282,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
       return;
     }
     const rect = e.currentTarget.getBoundingClientRect();
-    const menuWidth = 180;
-    const menuHeight = 110;
-
-    let x = rect.right - menuWidth;
-    if (x < 16) x = 16;
-    if (x + menuWidth > window.innerWidth - 16) {
-      x = window.innerWidth - menuWidth - 16;
-    }
-
-    let y = rect.bottom + 6;
-    if (y + menuHeight > window.innerHeight - 16) {
-      y = rect.top - menuHeight - 6;
-    }
+    const { x, y } = computeFloatingMenuPositionFromRect(rect, 180, 110);
 
     setActiveMenu({
       x,
@@ -303,18 +295,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
   // Open Right-Click Context Menu with boundary guards
   const handleRowContextMenu = (e: React.MouseEvent, record: FlattenedAchievement) => {
     e.preventDefault();
-    const menuWidth = 180;
-    const menuHeight = 110;
-
-    let x = e.clientX;
-    if (x + menuWidth > window.innerWidth - 16) {
-      x = window.innerWidth - menuWidth - 16;
-    }
-
-    let y = e.clientY;
-    if (y + menuHeight > window.innerHeight - 16) {
-      y = e.clientY - menuHeight;
-    }
+    const { x, y } = computeFloatingMenuPositionFromPoint(e.clientX, e.clientY, 180, 110);
 
     setActiveMenu({
       x,
@@ -841,6 +822,16 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
       <AnimatePresence>
         {isNewModalOpen && (
           <>
+            {isMobile && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                onClick={() => setIsNewModalOpen(false)}
+                className="fixed inset-0 z-40 bg-black/50 cursor-default"
+              />
+            )}
             <motion.div
               key="catat-prestasi-panel"
               data-lenis-prevent
@@ -1083,6 +1074,16 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
       <AnimatePresence>
         {editingAchievement && (
           <>
+            {isMobile && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                onClick={() => setEditingAchievement(null)}
+                className="fixed inset-0 z-40 bg-black/50 cursor-default"
+              />
+            )}
             <motion.div
               key="edit-prestasi-panel"
               data-lenis-prevent
@@ -1096,7 +1097,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
               }
               className={
                 isMobile
-                  ? "fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl bg-white max-h-[88dvh] shadow-[0_-10px_40px_rgba(15,23,42,0.18)] border-t border-[#E2E8F0] overflow-hidden"
+                  ? "fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl bg-[#FFFFFF] max-h-[88dvh] shadow-[0_-10px_40px_rgba(15,23,42,0.18)] border-t border-[#E2E8F0] overflow-hidden"
                   : "fixed inset-x-0 bottom-0 top-16 lg:top-14 lg:left-[220px] z-40 bg-[#F8FAFC] overflow-y-auto overscroll-contain"
               }
             >
@@ -1265,7 +1266,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setDeletingAchievement(null)}
-              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+              className="fixed inset-0 z-40 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}

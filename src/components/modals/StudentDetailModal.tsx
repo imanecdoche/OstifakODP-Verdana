@@ -62,7 +62,15 @@ import { Button } from '../ui/Button';
 import { useLenisModalLock } from '../../lib/lenis';
 import { useIsMobile } from '../../lib/useIsMobile';
 import { ActionSheet } from '../ui/ActionSheet';
+import { 
+  computeFloatingMenuPositionFromPoint 
+} from '../../lib/floatingMenuPosition';
 import { PPIcon, PKIcon } from '../ui/PointIcons';
+import { 
+  calculateDecay, 
+  resolveViolationForStudent, 
+  redeemPointsForDiscipline 
+} from '../../utils/disciplineCalculator';
 
 export interface SetoranSplitAnalysis {
   murojaahRange: { from: number; to: number } | null;
@@ -268,6 +276,75 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   const [isMoveKelasModalOpen, setIsMoveKelasModalOpen] = useState(false);
   const [isSetoranModalOpen, setIsSetoranModalOpen] = useState(false);
   const [isHafalanChartModalOpen, setIsHafalanChartModalOpen] = useState(false);
+
+  // Tebus Poin Restoratif State
+  const [isRedeemModalOpen, setIsRedeemModalOpen] = useState(false);
+  const [redeemPPInput, setRedeemPPInput] = useState<number | ''>(2);
+  const [redeemReasonInput, setRedeemReasonInput] = useState('');
+  const [isSubmittingRedeem, setIsSubmittingRedeem] = useState(false);
+
+  const currentDecay = useMemo(() => {
+    if (!currentStudent) return null;
+    return calculateDecay(currentStudent);
+  }, [currentStudent]);
+
+  const handleResolveViolation = async (violationId: string) => {
+    if (!currentStudent) return;
+    const updatedStudent = resolveViolationForStudent(currentStudent, violationId);
+    setCurrentStudent(updatedStudent);
+    if (onStudentUpdated) onStudentUpdated(updatedStudent);
+    gooeyToast.success('Sidang Mahkamah Selesai', {
+      description: 'Status pelanggaran berhasil diproses dan peluruhan poin aktif kembali.',
+    });
+
+    try {
+      await updateSantriRecord(currentStudent.id, {
+        violationHistory: updatedStudent.violationHistory,
+        hasDecayLock: updatedStudent.hasDecayLock,
+        activePK: updatedStudent.activePK,
+        poinPelanggaran: updatedStudent.activePK,
+      });
+    } catch (err) {
+      console.error('Error updating resolved violation:', err);
+    }
+  };
+
+  const handleExecuteRedeem = async () => {
+    if (!currentStudent) return;
+    const ppToRedeem = Number(redeemPPInput) || 0;
+    if (!redeemReasonInput.trim()) {
+      gooeyToast.error('Harap isi alasan / kegiatan penebusan poin!');
+      return;
+    }
+
+    const result = redeemPointsForDiscipline(currentStudent, ppToRedeem, redeemReasonInput.trim());
+    if (!result.success) {
+      gooeyToast.error(result.message);
+      return;
+    }
+
+    setIsSubmittingRedeem(true);
+    try {
+      const updated = result.student;
+      setCurrentStudent(updated);
+      if (onStudentUpdated) onStudentUpdated(updated);
+      setIsRedeemModalOpen(false);
+      setRedeemReasonInput('');
+      gooeyToast.success('Penebusan Poin Berhasil', { description: result.message });
+
+      await updateSantriRecord(currentStudent.id, {
+        redemptionHistory: updated.redemptionHistory,
+        activePP: updated.activePP,
+        poinPrestasi: updated.activePP,
+        activePK: updated.activePK,
+        poinPelanggaran: updated.activePK,
+      });
+    } catch (err) {
+      console.error('Error saving redemption:', err);
+    } finally {
+      setIsSubmittingRedeem(false);
+    }
+  };
 
   // Close on Escape shortcut
   useEffect(() => {
@@ -1106,12 +1183,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   const handleSetoranContextMenu = (e: React.MouseEvent, record: StudentHafalanEntry) => {
     e.preventDefault();
     e.stopPropagation();
-    const clickX = e.clientX;
-    const clickY = e.clientY;
-    const menuWidth = 170;
-    const menuHeight = 110;
-    const x = Math.min(window.innerWidth - menuWidth - 10, Math.max(10, clickX));
-    const y = Math.min(window.innerHeight - menuHeight - 10, Math.max(10, clickY));
+    const { x, y } = computeFloatingMenuPositionFromPoint(e.clientX, e.clientY, 170, 110);
     setSetoranContextMenu({ record, x, y });
   };
 
@@ -2110,66 +2182,148 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 </div>
               )}
 
-              {/* TAB 3: PELANGGARAN */}
+              {/* TAB 3: PELANGGARAN & BUKU SAKU */}
               {detailActiveTab === 'pelanggaran' && (
-                <div className="space-y-4 animate-in fade-in duration-150">
-                  {/* Unboxed Poin Pelanggaran & Plain Text Status */}
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                        Akumulasi Poin Pelanggaran
-                      </p>
-                      <p className="text-2xl font-bold text-red-600 mt-0.5 font-headline">
-                        {currentStudent.poinPelanggaran} <span className="text-xs font-semibold text-slate-500 font-body">PK</span>
-                      </p>
+                <div className="space-y-5 animate-in fade-in duration-150">
+                  {/* Dual-Metric Summary & Decay Status */}
+                  <div className="pb-4 border-b border-slate-200/80 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-headline">
+                          Poin Pelanggaran Aktif vs Lifetime
+                        </p>
+                        <div className="flex items-baseline gap-2 mt-0.5 font-headline">
+                          <span className="text-2xl font-bold text-red-600">
+                            {currentDecay?.activePK ?? currentStudent.activePK ?? currentStudent.poinPelanggaran} <span className="text-xs font-semibold text-slate-500 font-body">PK Aktif</span>
+                          </span>
+                          <span className="text-slate-300">•</span>
+                          <span className="text-xs font-medium text-slate-500 font-body">
+                            Total Lifetime: <strong>{currentStudent.lifetimePK || 0} PK</strong>
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Tebus Poin Action Button */}
+                      {(currentStudent.activePP || 0) > 0 && (currentDecay?.activePK || 0) > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setIsRedeemModalOpen(true)}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-md shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>Tebus Poin Restoratif</span>
+                        </button>
+                      )}
                     </div>
-                    <div className="text-right">
-                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Status Disiplin</p>
-                      <p className={`text-xs font-bold mt-0.5 ${
-                        currentStudent.poinPelanggaran === 0
-                          ? 'text-emerald-600'
-                          : currentStudent.poinPelanggaran < 30
-                          ? 'text-amber-600'
-                          : 'text-red-600'
-                      }`}>
-                        {currentStudent.poinPelanggaran === 0 ? 'Bersih / Taat' : currentStudent.poinPelanggaran < 30 ? 'Peringatan Ringan' : 'Pembinaan Khusus'}
-                      </p>
+
+                    {/* Decay Status Bar */}
+                    <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100">
+                      <span className="text-slate-500 font-medium">Status Peluruhan (Daily Decay):</span>
+                      <div className="font-bold">
+                        {currentDecay?.decayStatus === 'locked' && (
+                          <span className="text-amber-600">⚠️ Perlu Sidang Mahkamah (Peluruhan Terkunci)</span>
+                        )}
+                        {currentDecay?.decayStatus === 'grace_period' && (
+                          <span className="text-slate-600">{currentDecay.statusLabel}</span>
+                        )}
+                        {currentDecay?.decayStatus === 'decaying' && (
+                          <span className="text-emerald-600">⚡ {currentDecay.statusLabel}</span>
+                        )}
+                        {currentDecay?.decayStatus === 'clean' && (
+                          <span className="text-emerald-600">✓ Bersih (0 PK)</span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="space-y-2.5">
+                  {/* Rekam Pelanggaran Permanen (Flat Row Table) */}
+                  <div className="space-y-3">
                     <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">
-                      REKAM KASUS & TINDAKAN DISIPLIN
+                      BUKU SAKU PERMANEN & REKAM KASUS DISIPLIN
                     </h4>
                     {(() => {
-                      const list = currentStudent.violationsHistory || (currentStudent as any).violationHistory || [];
+                      const list = currentStudent.violationHistory && currentStudent.violationHistory.length > 0
+                        ? currentStudent.violationHistory
+                        : (currentStudent.violationsHistory || []);
                       return list.length > 0 ? (
-                        <div className="space-y-2">
-                          {list.map((v: any) => (
-                            <div key={v.id} className="p-3.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs flex items-start justify-between gap-3">
-                              <div className="space-y-1">
-                                <p className="font-semibold text-xs text-slate-900">{v.title || v.violation}</p>
-                                <p className="text-[11px] text-slate-500">Sanksi: <span className="font-medium text-slate-700">{v.penalty || v.penaltyDescription || '-'}</span></p>
+                        <div className="divide-y divide-slate-200/80 border-t border-b border-slate-200/80">
+                          {list.map((v: any) => {
+                            const isHeavy = v.category === 'berat' || (v.points || 0) >= 50;
+                            const isUnresolvedHeavy = isHeavy && !v.resolved;
+                            return (
+                              <div key={v.id} className="py-3.5 flex items-center justify-between gap-3 hover:bg-slate-50/60 px-1 rounded transition-colors">
+                                <div className="space-y-0.5 min-w-0 flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-bold text-xs text-slate-900 truncate font-headline">{v.title || v.violation}</p>
+                                    <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.2 rounded ${
+                                      v.category === 'berat' ? 'bg-red-100 text-red-700' : v.category === 'sedang' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'
+                                    }`}>
+                                      {v.category || 'ringan'}
+                                    </span>
+                                    {v.resolved && (
+                                      <span className="text-[10px] font-medium text-emerald-600">✓ Sidang Selesai</span>
+                                    )}
+                                  </div>
+                                  <p className="text-[11px] text-slate-500 truncate">
+                                    Sanksi/Catatan: <span className="font-medium text-slate-700">{v.notes || v.penalty || v.penaltyDescription || '-'}</span>
+                                  </p>
+                                </div>
+
+                                <div className="flex items-center gap-3 shrink-0">
+                                  <div className="text-right">
+                                    <span className="text-xs font-bold text-red-600 font-mono inline-flex items-center gap-1">
+                                      <span>+{v.points || 0}</span>
+                                      <PKIcon className="w-3.5 h-3.5" />
+                                    </span>
+                                    <p className="text-[10px] text-slate-400 mt-0.5">{formatDateDDMMMMYY(v.date)}</p>
+                                  </div>
+
+                                  {isUnresolvedHeavy && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleResolveViolation(v.id)}
+                                      className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white font-medium text-[11px] rounded transition-colors cursor-pointer"
+                                      title="Tandai Sidang Selesai untuk membuka peluruhan"
+                                    >
+                                      Sidang Selesai
+                                    </button>
+                                  )}
+                                </div>
                               </div>
-                              <div className="text-right shrink-0">
-                                <span className="text-[11px] font-bold text-[#EF4444] inline-flex items-center gap-1">
-                                  <span>+{v.points || 0}</span>
-                                  <PKIcon className="w-3 h-3" />
-                                </span>
-                                <p className="text-[10px] text-slate-400 mt-1">{formatDateDDMMMMYY(v.date)}</p>
-                              </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       ) : (
                         <div className="py-12 text-center text-slate-500 space-y-1.5">
                           <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto" />
-                          <p className="font-semibold text-slate-800">Catatan Pelanggaran Bersih</p>
+                          <p className="font-semibold text-slate-800">Buku Saku Bersih</p>
                           <p className="text-[11px] text-slate-400">Santri ini belum memiliki catatan pelanggaran tata tertib.</p>
                         </div>
                       );
                     })()}
                   </div>
+
+                  {/* Audit Trail Penebusan Poin Restoratif */}
+                  {currentStudent.redemptionHistory && currentStudent.redemptionHistory.length > 0 && (
+                    <div className="space-y-2 pt-3 border-t border-slate-200/80">
+                      <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">
+                        RIWAYAT PENEBUSAN POIN RESTORATIF
+                      </h4>
+                      <div className="divide-y divide-slate-100 text-xs">
+                        {currentStudent.redemptionHistory.map((r) => (
+                          <div key={r.id} className="py-2.5 flex items-center justify-between gap-3">
+                            <div>
+                              <p className="font-medium text-slate-800">{r.reason}</p>
+                              <p className="text-[10px] text-slate-400">{formatDateDDMMMMYY(r.date)}</p>
+                            </div>
+                            <div className="text-right font-mono font-semibold text-emerald-600">
+                              <span>-{r.ppUsed} PP</span> → <span className="text-red-500">-{r.pkDeducted} PK</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -2280,53 +2434,60 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 </div>
               )}
 
-              {/* TAB 4: PRESTASI & POIN PP */}
+              {/* TAB 4: PRESTASI & POIN PP (PORTOFOLIO PERMANEN & BULANAN) */}
               {detailActiveTab === 'prestasi' && (
-                <div className="space-y-4 animate-in fade-in duration-150">
-                  {/* Unboxed Poin Prestasi & Plain Text Summary */}
+                <div className="space-y-5 animate-in fade-in duration-150">
+                  {/* Unboxed Dual-Metric Summary Poin Prestasi */}
                   <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
                     <div>
                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                        Akumulasi Poin Prestasi (PP)
+                        Poin Prestasi Aktif (Bulan Ini) vs Lifetime
                       </p>
-                      <p className="text-2xl font-bold text-[#059669] mt-0.5 font-headline inline-flex items-center gap-1.5">
-                        <span>+{currentStudent.poinPrestasi || (currentStudent.achievementsHistory || []).filter((a: any) => (a.points !== undefined ? a.points : 10) > 0).reduce((acc, a) => acc + (a.points || 10), 0)}</span>
-                        <PPIcon className="w-5 h-5" />
-                      </p>
+                      <div className="flex items-baseline gap-2 mt-0.5 font-headline">
+                        <span className="text-2xl font-bold text-[#059669] inline-flex items-center gap-1">
+                          <span>+{currentStudent.activePP ?? currentStudent.poinPrestasi ?? 0}</span>
+                          <PPIcon className="w-5 h-5" />
+                        </span>
+                        <span className="text-slate-300">•</span>
+                        <span className="text-xs font-medium text-slate-500 font-body">
+                          Lifetime: <strong>+{currentStudent.lifetimePP || 0} PP</strong>
+                        </span>
+                      </div>
                     </div>
                     <div className="text-right">
                       <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Penghargaan</p>
                       <p className="text-xs font-bold text-[#0F172A] mt-0.5 font-headline">
-                        {(currentStudent.achievementsHistory || (currentStudent as any).achievementHistory || []).filter((a: any) => (a.points !== undefined ? a.points : 10) > 0).length} Rekam Terbit
+                        {(currentStudent.achievementHistory || currentStudent.achievementsHistory || []).length} Rekam Terbit
                       </p>
                     </div>
                   </div>
 
-                  <div className="space-y-2.5">
+                  {/* List Rekam Prestasi (Flat Rows) */}
+                  <div className="space-y-3">
                     <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">
-                      DAFTAR PENGHARGAAN & PRESTASI SANTRI
+                      PORTOFOLIO PRESTASI & PENGHARGAAN PERMANEN
                     </h4>
                     {(() => {
-                      const achList = (currentStudent.achievementsHistory || (currentStudent as any).achievementHistory || []).filter((a: any) => (a.points !== undefined ? a.points : 10) > 0);
+                      const achList = currentStudent.achievementHistory && currentStudent.achievementHistory.length > 0
+                        ? currentStudent.achievementHistory
+                        : (currentStudent.achievementsHistory || []);
                       return achList.length > 0 ? (
-                        <div className="space-y-2">
+                        <div className="divide-y divide-slate-200/80 border-t border-b border-slate-200/80">
                           {achList.map((a: any) => (
-                            <div key={a.id} className="p-3.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs flex items-start justify-between gap-3">
-                              <div className="space-y-1">
-                                <p className="font-bold text-xs text-[#0F172A]">{a.title}</p>
-                                <p className="text-[11px] text-[#64748B]">
+                            <div key={a.id} className="py-3.5 flex items-center justify-between gap-3 hover:bg-slate-50/60 px-1 rounded transition-colors">
+                              <div className="space-y-0.5 min-w-0 flex-1">
+                                <p className="font-bold text-xs text-[#0F172A] truncate font-headline">{a.title}</p>
+                                <p className="text-[11px] text-[#64748B] truncate">
                                   Kategori: <strong className="text-[#0F172A]">{a.category}</strong> {a.rank ? `• Peringkat: ${a.rank}` : ''}
+                                  {a.organizer && ` • ${a.organizer}`}
                                 </p>
-                                {a.organizer && (
-                                  <p className="text-[10px] text-[#94A3B8]">Penyelenggara: {a.organizer}</p>
-                                )}
                               </div>
                               <div className="text-right shrink-0">
-                                <span className="text-[11px] font-bold text-[#059669] font-mono inline-flex items-center gap-1">
-                                  <span>+{a.points !== undefined ? a.points : 10}</span>
-                                  <PPIcon className="w-3 h-3" />
+                                <span className="text-xs font-bold text-[#059669] font-mono inline-flex items-center gap-1">
+                                  <span>+{a.points || 0}</span>
+                                  <PPIcon className="w-3.5 h-3.5" />
                                 </span>
-                                <p className="text-[10px] text-[#64748B] mt-1">{a.date}</p>
+                                <p className="text-[10px] text-[#64748B] mt-0.5">{formatDateDDMMMMYY(a.date)}</p>
                               </div>
                             </div>
                           ))}
@@ -2340,6 +2501,23 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                       );
                     })()}
                   </div>
+
+                  {/* Arsip Poin Bulanan (Monthly Archives) */}
+                  {currentStudent.monthlyArchives && currentStudent.monthlyArchives.length > 0 && (
+                    <div className="space-y-2 pt-3 border-t border-slate-200/80">
+                      <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">
+                        ARSIP POIN PRESTASI BULANAN (MONTHLY SNAPSHOTS)
+                      </h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                        {currentStudent.monthlyArchives.map((m) => (
+                          <div key={m.month} className="p-3 bg-slate-50 border border-slate-200/70 rounded-lg">
+                            <p className="text-[10px] font-bold text-slate-500 uppercase">{m.month}</p>
+                            <p className="text-base font-bold text-emerald-600 font-mono mt-0.5">+{m.totalPP} PP</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -2393,7 +2571,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setIsIzinModalOpen(false)}
-              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+              className="fixed inset-0 z-40 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}
@@ -2509,7 +2687,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setIsMoveKamarModalOpen(false)}
-              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+              className="fixed inset-0 z-40 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}
@@ -2598,7 +2776,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setIsMoveKelasModalOpen(false)}
-              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+              className="fixed inset-0 z-40 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}
@@ -2688,7 +2866,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 setIsSetoranModalOpen(false);
                 setEditingSetoranId(null);
               }}
-              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+              className="fixed inset-0 z-40 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}
@@ -3093,7 +3271,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setIsHafalanChartModalOpen(false)}
-              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+              className="fixed inset-0 z-40 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}
@@ -3492,7 +3670,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                     })()}
 
                     {!hafalanChartData.hasData && (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 backdrop-blur-2xs rounded-lg p-4 text-center pointer-events-none">
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/90 rounded-lg p-4 text-center pointer-events-none">
                         <BookOpen className="w-7 h-7 text-slate-400 mb-1" />
                         <p className="font-bold text-xs text-slate-700">Belum Ada Setoran Pada Periode Ini</p>
                         <p className="text-[11px] text-slate-500 max-w-xs mt-0.5">
@@ -3619,7 +3797,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setSetoranToDelete(null)}
-              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs cursor-default"
+              className="fixed inset-0 z-40 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}
@@ -3667,6 +3845,94 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                   className="bg-rose-600 text-white hover:bg-rose-700 font-semibold"
                 >
                   Hapus Setoran
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 9. NESTED MODAL: TEBUS POIN RESTORATIF */}
+      <AnimatePresence>
+        {isRedeemModalOpen && currentStudent && (
+          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsRedeemModalOpen(false)}
+              className="fixed inset-0 z-40 bg-black/50 cursor-default"
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 320, mass: 0.8 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-lg bg-white rounded-t-2xl sm:rounded-xl shadow-xl overflow-hidden z-10 p-5 space-y-4 border border-slate-200"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-emerald-600" />
+                  <h3 className="font-bold text-sm text-slate-900 font-headline">Tebus Poin Restoratif (Restorative Justice)</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsRedeemModalOpen(false)}
+                  className="w-7 h-7 rounded-md bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Status Summary */}
+              <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs">
+                <div>
+                  <span className="text-[#64748B] block text-[10px]">Saldo PP Aktif</span>
+                  <span className="font-bold text-emerald-600 text-base font-mono">+{currentStudent.activePP || 0} PP</span>
+                </div>
+                <div>
+                  <span className="text-[#64748B] block text-[10px]">PK Aktif Saat Ini</span>
+                  <span className="font-bold text-red-600 text-base font-mono">{currentDecay?.activePK || 0} PK</span>
+                </div>
+              </div>
+
+              {/* Form Input */}
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Jumlah PP yang Akan Ditebus (Rasio 2 PP = 1 PK)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={currentStudent.activePP || 0}
+                    value={redeemPPInput}
+                    onChange={(e) => setRedeemPPInput(e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value, 10) || 0))}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono focus:outline-none focus:border-emerald-600"
+                  />
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Estimasi pemulihan: <strong className="text-red-600">-{Math.floor((Number(redeemPPInput) || 0) / 2)} PK</strong>
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Alasan / Kegiatan Penebusan</label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: Setoran Hafalan Tambahan / Piket Kebersihan"
+                    value={redeemReasonInput}
+                    onChange={(e) => setRedeemReasonInput(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-600"
+                  />
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
+                <Button variant="secondary" size="sm" onClick={() => setIsRedeemModalOpen(false)}>
+                  Batal
+                </Button>
+                <Button variant="emerald" size="sm" loading={isSubmittingRedeem} onClick={handleExecuteRedeem}>
+                  Eksekusi Penebusan
                 </Button>
               </div>
             </motion.div>

@@ -246,9 +246,9 @@ export const TreasuryView: React.FC<TreasuryViewProps> = () => {
       </div>
 
       {/* 2. Metrik Finansial Murni Tipografi (Unboxed 1-Row on Desktop, Symmetrical 2x2 Grid on Mobile with Dividers) */}
-      <div className="grid grid-cols-2 md:grid-cols-4 border-y border-[#E2E8F0] overflow-hidden">
+      <div className="grid grid-cols-2 md:grid-cols-4 bg-white border-y border-neutral-300 overflow-hidden">
         {/* Metric 1 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 border-r border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 border-r border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Saldo Kas Saat Ini
           </p>
@@ -263,7 +263,7 @@ export const TreasuryView: React.FC<TreasuryViewProps> = () => {
         </div>
 
         {/* Metric 2 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 md:border-r border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 md:border-r border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Pemasukan Bulan Ini
           </p>
@@ -278,7 +278,7 @@ export const TreasuryView: React.FC<TreasuryViewProps> = () => {
         </div>
 
         {/* Metric 3 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-r border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-r border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Pengeluaran Bulan Ini
           </p>
@@ -293,7 +293,7 @@ export const TreasuryView: React.FC<TreasuryViewProps> = () => {
         </div>
 
         {/* Metric 4 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Kas Belum Tertagih
           </p>
@@ -485,7 +485,7 @@ export const TreasuryView: React.FC<TreasuryViewProps> = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setIsModalOpen(false)}
-              className="fixed inset-0 bg-[#0F172A]/40 backdrop-blur-xs cursor-default"
+              className="fixed inset-0 z-40 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}

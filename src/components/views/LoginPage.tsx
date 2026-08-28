@@ -248,14 +248,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
           {/* Status Alerts */}
           {errorMessage && (
-            <div className="w-full mb-4 p-3 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-200 text-xs flex items-center gap-2.5 backdrop-blur-md">
+            <div className="w-full mb-4 p-3 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-200 text-xs flex items-center gap-2.5">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
               <span>{errorMessage}</span>
             </div>
           )}
 
           {successMessage && (
-            <div className="w-full mb-4 p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-200 text-xs flex items-center gap-2.5 backdrop-blur-md">
+            <div className="w-full mb-4 p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-200 text-xs flex items-center gap-2.5">
               <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
               <span>{successMessage}</span>
             </div>
@@ -374,14 +374,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
           {/* Alerts in Fullscreen Mode */}
           {errorMessage && (
-            <div className="w-full max-w-4xl mx-auto mb-4 p-3 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-200 text-xs flex items-center gap-2.5 backdrop-blur-md">
+            <div className="w-full max-w-4xl mx-auto mb-4 p-3 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-200 text-xs flex items-center gap-2.5">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
               <span>{errorMessage}</span>
             </div>
           )}
 
           {successMessage && (
-            <div className="w-full max-w-4xl mx-auto mb-4 p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-200 text-xs flex items-center gap-2.5 backdrop-blur-md">
+            <div className="w-full max-w-4xl mx-auto mb-4 p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-200 text-xs flex items-center gap-2.5">
               <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
               <span>{successMessage}</span>
             </div>
@@ -429,7 +429,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         <button
           type="button"
           onClick={() => setIsOfflineDialogOpen(true)}
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-30 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white/70 hover:text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all cursor-pointer shadow-lg active:scale-95 group"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-30 w-11 h-11 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white/70 hover:text-white border border-white/20 flex items-center justify-center transition-all cursor-pointer shadow-lg active:scale-95 group"
           title="Masuk Mode Offline (Isolasi Lokal 100 MB)"
           aria-label="Mode Offline"
         >

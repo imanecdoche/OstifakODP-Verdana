@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   KPIMetric, 
   ViolationRecord, 
@@ -11,7 +11,9 @@ import {
   SantriRecord, 
   Dormitory, 
   DormitoryRoom, 
-  ALL_OFFICIAL_ROOMS 
+  ALL_OFFICIAL_ROOMS,
+  KasTransaction,
+  subscribeToKasTransactions
 } from '../../lib/firestoreService';
 import { 
   formatBudgetRatio, 
@@ -129,6 +131,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   roomsCount = 0,
   onSelectView,
 }) => {
+  // Live Kas Transactions subscription directly from store
+  const [kasTransactions, setKasTransactions] = useState<KasTransaction[]>([]);
+
+  useEffect(() => {
+    const unsub = subscribeToKasTransactions((list) => {
+      setKasTransactions(list);
+    });
+    return () => unsub();
+  }, []);
+
+  // Total Saldo Kas Bersih (Exclude piutang / hanya kas riil)
+  const kasBalanceFormatted = useMemo(() => {
+    const totalIncome = kasTransactions
+      .filter(t => t.type === 'masuk' && !t.isReceivable)
+      .reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+    const totalExpense = kasTransactions
+      .filter(t => t.type === 'keluar' && !t.isReceivable)
+      .reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+    const balance = totalIncome - totalExpense;
+    return new Intl.NumberFormat('id-ID').format(balance);
+  }, [kasTransactions]);
+
   // Helper konversi teks hafalan ke numerik juz
   const parseHafalanNumber = (hafalanStr: string): number => {
     if (!hafalanStr) return 0;
@@ -389,9 +413,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* 2. Executive KPI Stats (Unboxed 1-Row on Desktop, Clean Symmetrical Grid on Mobile with Dividers) */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 border-y border-[#E2E8F0] overflow-hidden">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 bg-[#FFFFFF] border-y border-neutral-300 overflow-hidden">
         {/* Metric 1 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 border-r border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 border-r border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Total Santri Aktif
           </p>
@@ -404,7 +428,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Metric 2 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 md:border-r border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 md:border-r border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Master Asrama & Kamar
           </p>
@@ -421,7 +445,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Metric 3 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-r md:border-r-0 lg:border-r border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t-0 border-r md:border-r-0 lg:border-r border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Pelanggaran Pekan Ini
           </p>
@@ -434,7 +458,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Metric 4 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t lg:border-t-0 md:border-r border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t lg:border-t-0 md:border-r border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Proposal & Program
           </p>
@@ -447,13 +471,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Metric 5 */}
-        <div className="p-3.5 sm:px-5 sm:py-4 col-span-2 md:col-span-1 border-t md:border-t lg:border-t-0 border-[#E2E8F0]">
+        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t lg:border-t-0 border-r md:border-r-0 lg:border-r border-neutral-300">
           <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
             Rata-rata Hafalan
           </p>
           <div className="flex items-baseline gap-1.5 mt-0.5">
-            <span className="text-xl sm:text-2xl font-bold text-[#059669] tracking-tight font-headline">
+            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
               {averageHafalan}
+            </span>
+          </div>
+        </div>
+
+        {/* Metric 6: KAS OSTIFAK */}
+        <div className="p-3.5 sm:px-5 sm:py-4 border-t md:border-t lg:border-t-0 border-neutral-300">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#64748B] uppercase tracking-[0.5px] truncate">
+            Kas Ostifak
+          </p>
+          <div className="flex items-baseline gap-1 mt-0.5">
+            <span className="text-[11px] font-normal text-slate-400 font-mono select-none">Rp</span>
+            <span className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight font-headline">
+              {kasBalanceFormatted}
             </span>
           </div>
         </div>
@@ -461,12 +498,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* 3. STRUKTUR TOP LIST & STATISTIK REAL DATABASE */}
 
-      {/* BARIS 1: Top 5 Santri Teladan & Top 5 Kamar Terbaik */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+      {/* BARIS 1: Top 5 Santri Teladan & Top 5 Kamar Terbaik (Kontainer Terpisah) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Kolom 1: Top 5 Santri Teladan */}
-        <div className="space-y-4">
-          <div>
+        <div className="bg-white p-5 sm:p-6 border border-neutral-300 rounded-lg space-y-4">
+          <div className="border-b border-neutral-300 pb-3">
             <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
               Top 5 Santri Teladan
             </h2>
@@ -475,7 +512,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </p>
           </div>
 
-          <div className="divide-y divide-[#E2E8F0]">
+          <div className="divide-y divide-neutral-300">
             {topSantriTeladan.length === 0 ? (
               <p className="text-xs text-[#64748B] py-4">Belum ada santri dengan akumulasi Poin Prestasi (PP).</p>
             ) : (
@@ -490,7 +527,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         {s.studentName}
                       </p>
                       <p className="text-xs text-[#64748B] font-body truncate">
-                        NIS: {s.nis} • {s.kelas} • {s.kamar}
+                        {s.kelas} • {s.kamar}
                       </p>
                     </div>
                   </div>
@@ -514,8 +551,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Kolom 2: Top 5 Kamar Terbaik */}
-        <div className="space-y-4">
-          <div>
+        <div className="bg-white p-5 sm:p-6 border border-neutral-300 rounded-lg space-y-4">
+          <div className="border-b border-neutral-300 pb-3">
             <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
               Top 5 Kamar Terbaik
             </h2>
@@ -524,7 +561,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </p>
           </div>
 
-          <div className="divide-y divide-[#E2E8F0]">
+          <div className="divide-y divide-neutral-300">
             {topKamarTerbaik.length === 0 ? (
               <p className="text-xs text-[#64748B] py-4">Belum ada kamar dengan akumulasi Poin Prestasi (PP).</p>
             ) : (
@@ -561,11 +598,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* BARIS 2: Para Huffazh (30 Juz) & Top 5 Hafalan Terbanyak */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 border-t border-[#E2E8F0] pt-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Kolom 1: Para Huffazh (30 Juz) */}
-        <div className="space-y-4">
-          <div>
+        <div className="bg-white p-5 sm:p-6 border border-neutral-300 rounded-lg space-y-4">
+          <div className="border-b border-neutral-300 pb-3">
             <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
               Para Huffazh
             </h2>
@@ -574,7 +611,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </p>
           </div>
 
-          <div className="divide-y divide-[#E2E8F0]">
+          <div className="divide-y divide-neutral-300">
             {paraHuffazh.length === 0 ? (
               <p className="text-xs text-[#64748B] py-4">
                 Belum ada santri yang tuntas 30 Juz di database.
@@ -591,7 +628,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         {s.studentName}
                       </p>
                       <p className="text-xs text-[#64748B] font-body truncate">
-                        NIS: {s.nis} • {s.kelas} • {s.kamar}
+                        {s.kelas} • {s.kamar}
                       </p>
                     </div>
                   </div>
@@ -610,8 +647,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Kolom 2: Top 5 Hafalan Terbanyak */}
-        <div className="space-y-4">
-          <div>
+        <div className="bg-white p-5 sm:p-6 border border-neutral-300 rounded-lg space-y-4">
+          <div className="border-b border-neutral-300 pb-3">
             <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
               Top 5 Hafalan Terbanyak
             </h2>
@@ -620,7 +657,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </p>
           </div>
 
-          <div className="divide-y divide-[#E2E8F0]">
+          <div className="divide-y divide-neutral-300">
             {topHafalanTerbanyak.length === 0 ? (
               <p className="text-xs text-[#64748B] py-4">Belum ada data santri terdaftar.</p>
             ) : (
@@ -635,7 +672,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         {s.studentName}
                       </p>
                       <p className="text-xs text-[#64748B] font-body truncate">
-                        NIS: {s.nis} • {s.kelas} • {s.kamar}
+                        {s.kelas} • {s.kamar}
                       </p>
                     </div>
                   </div>
@@ -653,187 +690,191 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       </div>
 
-      {/* BARIS 3: Top 5 Setoran Terbanyak & Top 5 Murojaah Terbanyak Bulan Ini */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 border-t border-[#E2E8F0] pt-10">
-        
-        {/* Kolom 1: Top 5 Setoran Terbanyak Bulan Ini */}
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
-              Top 5 Setoran Terbanyak Bulan Ini
-            </h2>
-            <p className="text-xs text-[#64748B] mt-0.5 font-body">
-              Aktivitas penambahan hafalan baru paling produktif bulan ini
-            </p>
-          </div>
+      {/* BARIS 3: KONTAINER ZIYADAH (Ziyadah Bulan Kemarin & Ziyadah Bulan Ini) */}
+      <div className="bg-white p-5 sm:p-6 border border-neutral-300 rounded-lg">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:divide-x lg:divide-neutral-300">
+          
+          {/* Kolom Kiri: Top 5 Ziyadah Terbanyak Bulan Kemarin */}
+          <div className="space-y-4 lg:pr-6">
+            <div className="border-b border-neutral-300 pb-3">
+              <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
+                Top 5 Ziyadah Terbanyak Bulan Kemarin
+              </h2>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                Akumulasi penambahan hafalan baru santri periode bulan lalu
+              </p>
+            </div>
 
-          <div className="divide-y divide-[#E2E8F0]">
-            {topSetoranBulanIni.length === 0 ? (
-              <p className="text-xs text-[#64748B] py-4">Belum ada data setoran bulan ini.</p>
-            ) : (
-              topSetoranBulanIni.map((item, idx) => (
-                <div key={item.student.id} className="py-3.5 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <span className="text-xs font-mono font-bold text-[#64748B] w-6 shrink-0">
-                      0{idx + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="font-bold text-sm text-[#0F172A] font-headline truncate">
-                        {item.student.studentName}
+            <div className="divide-y divide-neutral-300">
+              {topZiyadahBulanKemarin.length === 0 ? (
+                <p className="text-xs text-[#64748B] py-4">Belum ada data ziyadah bulan kemarin.</p>
+              ) : (
+                topZiyadahBulanKemarin.map((item, idx) => (
+                  <div key={item.student.id} className="py-3.5 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <span className="text-xs font-mono font-bold text-[#64748B] w-6 shrink-0">
+                        0{idx + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-bold text-sm text-[#0F172A] font-headline truncate">
+                          {item.student.studentName}
+                        </p>
+                        <p className="text-xs text-[#64748B] font-body truncate">
+                          {item.student.kelas} • {item.student.kamar}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-bold text-[#059669] font-body">
+                        {item.count} Kali Setoran
                       </p>
-                      <p className="text-xs text-[#64748B] font-body truncate">
-                        NIS: {item.student.nis} • {item.student.kelas} • {item.student.kamar}
-                      </p>
+                      <RenderJuzLbrHal pages={item.totalPages} />
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-xs font-bold text-[#059669] font-body">
-                      {item.count} Kali Setoran
-                    </p>
-                    <RenderJuzLbrHal pages={item.totalPages} />
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Kolom 2: Top 5 Murojaah Terbanyak Bulan Ini */}
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
-              Top 5 Murojaah Terbanyak Bulan Ini
-            </h2>
-            <p className="text-xs text-[#64748B] mt-0.5 font-body">
-              Pengulangan hafalan mutqin tertinggi periode berjalan
-            </p>
+                ))
+              )}
+            </div>
           </div>
 
-          <div className="divide-y divide-[#E2E8F0]">
-            {topMurojaahBulanIni.length === 0 ? (
-              <p className="text-xs text-[#64748B] py-4">Belum ada data murojaah bulan ini.</p>
-            ) : (
-              topMurojaahBulanIni.map((item, idx) => (
-                <div key={item.student.id} className="py-3.5 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <span className="text-xs font-mono font-bold text-[#64748B] w-6 shrink-0">
-                      0{idx + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="font-bold text-sm text-[#0F172A] font-headline truncate">
-                        {item.student.studentName}
+          {/* Kolom Kanan: Top 5 Setoran Terbanyak Bulan Ini */}
+          <div className="space-y-4 pt-6 lg:pt-0 lg:pl-6 border-t lg:border-t-0 border-neutral-300">
+            <div className="border-b border-neutral-300 pb-3">
+              <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
+                Top 5 Setoran Terbanyak Bulan Ini
+              </h2>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                Aktivitas penambahan hafalan baru paling produktif bulan ini
+              </p>
+            </div>
+
+            <div className="divide-y divide-neutral-300">
+              {topSetoranBulanIni.length === 0 ? (
+                <p className="text-xs text-[#64748B] py-4">Belum ada data setoran bulan ini.</p>
+              ) : (
+                topSetoranBulanIni.map((item, idx) => (
+                  <div key={item.student.id} className="py-3.5 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <span className="text-xs font-mono font-bold text-[#64748B] w-6 shrink-0">
+                        0{idx + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-bold text-sm text-[#0F172A] font-headline truncate">
+                          {item.student.studentName}
+                        </p>
+                        <p className="text-xs text-[#64748B] font-body truncate">
+                          {item.student.kelas} • {item.student.kamar}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-bold text-[#059669] font-body">
+                        {item.count} Kali Setoran
                       </p>
-                      <p className="text-xs text-[#64748B] font-body truncate">
-                        NIS: {item.student.nis} • {item.student.kelas} • {item.student.kamar}
-                      </p>
+                      <RenderJuzLbrHal pages={item.totalPages} />
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-xs font-bold text-[#059669] font-body">
-                      {item.count} Sesi Murojaah
-                    </p>
-                    <RenderJuzLbrHal pages={item.totalPages} />
-                  </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
-        </div>
 
+        </div>
       </div>
 
-      {/* BARIS 4: Top 5 Ziyadah Terbanyak Bulan Kemarin & Top 5 Muroja'ah Terbanyak Bulan Kemarin */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 border-t border-[#E2E8F0] pt-10">
-        
-        {/* Kolom 1: Top 5 Ziyadah Terbanyak Bulan Kemarin */}
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
-              Top 5 Ziyadah Terbanyak Bulan Kemarin
-            </h2>
-            <p className="text-xs text-[#64748B] mt-0.5 font-body">
-              Akumulasi penambahan hafalan baru santri periode bulan lalu
-            </p>
-          </div>
+      {/* BARIS 4: KONTAINER MUROJA'AH (Muroja'ah Bulan Kemarin & Muroja'ah Bulan Ini) */}
+      <div className="bg-white p-5 sm:p-6 border border-neutral-300 rounded-lg">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:divide-x lg:divide-neutral-300">
+          
+          {/* Kolom Kiri: Top 5 Muroja'ah Terbanyak Bulan Kemarin */}
+          <div className="space-y-4 lg:pr-6">
+            <div className="border-b border-neutral-300 pb-3">
+              <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
+                Top 5 Muroja'ah Terbanyak Bulan Kemarin
+              </h2>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                Pengulangan hafalan mutqin tertinggi santri periode bulan lalu
+              </p>
+            </div>
 
-          <div className="divide-y divide-[#E2E8F0]">
-            {topZiyadahBulanKemarin.length === 0 ? (
-              <p className="text-xs text-[#64748B] py-4">Belum ada data ziyadah bulan kemarin.</p>
-            ) : (
-              topZiyadahBulanKemarin.map((item, idx) => (
-                <div key={item.student.id} className="py-3.5 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <span className="text-xs font-mono font-bold text-[#64748B] w-6 shrink-0">
-                      0{idx + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="font-bold text-sm text-[#0F172A] font-headline truncate">
-                        {item.student.studentName}
+            <div className="divide-y divide-neutral-300">
+              {topMurojaahBulanKemarin.length === 0 ? (
+                <p className="text-xs text-[#64748B] py-4">Belum ada data murojaah bulan kemarin.</p>
+              ) : (
+                topMurojaahBulanKemarin.map((item, idx) => (
+                  <div key={item.student.id} className="py-3.5 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <span className="text-xs font-mono font-bold text-[#64748B] w-6 shrink-0">
+                        0{idx + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-bold text-sm text-[#0F172A] font-headline truncate">
+                          {item.student.studentName}
+                        </p>
+                        <p className="text-xs text-[#64748B] font-body truncate">
+                          {item.student.kelas} • {item.student.kamar}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-bold text-[#059669] font-body">
+                        {item.count} Sesi Murojaah
                       </p>
-                      <p className="text-xs text-[#64748B] font-body truncate">
-                        NIS: {item.student.nis} • {item.student.kelas} • {item.student.kamar}
-                      </p>
+                      <RenderJuzLbrHal pages={item.totalPages} />
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-xs font-bold text-[#059669] font-body">
-                      {item.count} Kali Setoran
-                    </p>
-                    <RenderJuzLbrHal pages={item.totalPages} />
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Kolom 2: Top 5 Muroja'ah Terbanyak Bulan Kemarin */}
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
-              Top 5 Muroja'ah Terbanyak Bulan Kemarin
-            </h2>
-            <p className="text-xs text-[#64748B] mt-0.5 font-body">
-              Pengulangan hafalan mutqin tertinggi santri periode bulan lalu
-            </p>
+                ))
+              )}
+            </div>
           </div>
 
-          <div className="divide-y divide-[#E2E8F0]">
-            {topMurojaahBulanKemarin.length === 0 ? (
-              <p className="text-xs text-[#64748B] py-4">Belum ada data murojaah bulan kemarin.</p>
-            ) : (
-              topMurojaahBulanKemarin.map((item, idx) => (
-                <div key={item.student.id} className="py-3.5 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <span className="text-xs font-mono font-bold text-[#64748B] w-6 shrink-0">
-                      0{idx + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="font-bold text-sm text-[#0F172A] font-headline truncate">
-                        {item.student.studentName}
+          {/* Kolom Kanan: Top 5 Murojaah Terbanyak Bulan Ini */}
+          <div className="space-y-4 pt-6 lg:pt-0 lg:pl-6 border-t lg:border-t-0 border-neutral-300">
+            <div className="border-b border-neutral-300 pb-3">
+              <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
+                Top 5 Murojaah Terbanyak Bulan Ini
+              </h2>
+              <p className="text-xs text-[#64748B] mt-0.5 font-body">
+                Pengulangan hafalan mutqin tertinggi periode berjalan
+              </p>
+            </div>
+
+            <div className="divide-y divide-neutral-300">
+              {topMurojaahBulanIni.length === 0 ? (
+                <p className="text-xs text-[#64748B] py-4">Belum ada data murojaah bulan ini.</p>
+              ) : (
+                topMurojaahBulanIni.map((item, idx) => (
+                  <div key={item.student.id} className="py-3.5 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <span className="text-xs font-mono font-bold text-[#64748B] w-6 shrink-0">
+                        0{idx + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-bold text-sm text-[#0F172A] font-headline truncate">
+                          {item.student.studentName}
+                        </p>
+                        <p className="text-xs text-[#64748B] font-body truncate">
+                          {item.student.kelas} • {item.student.kamar}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-bold text-[#059669] font-body">
+                        {item.count} Sesi Murojaah
                       </p>
-                      <p className="text-xs text-[#64748B] font-body truncate">
-                        NIS: {item.student.nis} • {item.student.kelas} • {item.student.kamar}
-                      </p>
+                      <RenderJuzLbrHal pages={item.totalPages} />
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-xs font-bold text-[#059669] font-body">
-                      {item.count} Sesi Murojaah
-                    </p>
-                    <RenderJuzLbrHal pages={item.totalPages} />
-                  </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
-        </div>
 
+        </div>
       </div>
 
       {/* 4. REKAPITULASI PELANGGARAN SANTRI TERBARU (LANGSUNG TAMPIL TANPA SEGMENTED BUTTON) */}
-      <div className="space-y-4 border-t border-[#E2E8F0] pt-10">
-        <div className="flex items-center justify-between">
+      <div className="bg-white p-5 sm:p-6 border border-neutral-300 rounded-lg space-y-4">
+        <div className="flex items-center justify-between border-b border-neutral-300 pb-3">
           <div>
             <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
               Rekapitulasi Pelanggaran Santri Terbaru
@@ -853,7 +894,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#F8FAFC] text-[#64748B] font-semibold border-b border-[#E2E8F0] font-headline uppercase tracking-[0.5px]">
+            <thead className="bg-[#F8FAFC] text-[#64748B] font-semibold border-b border-neutral-300 font-headline uppercase tracking-[0.5px]">
               <tr>
                 <th className="p-3.5 w-32 min-w-[120px] max-w-[130px] whitespace-nowrap">TANGGAL</th>
                 <th className="p-3.5 w-44 min-w-[140px] max-w-[180px] whitespace-nowrap">SANTRI & KAMAR</th>
@@ -863,7 +904,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <th className="p-3.5 w-24 min-w-[70px] max-w-[90px] text-center whitespace-nowrap">STATUS</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E2E8F0]">
+            <tbody className="divide-y divide-neutral-300">
               {violations.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-[#64748B] font-body">
@@ -888,7 +929,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       {/* 2. Santri & Kamar */}
                       <td className="p-3.5 w-44 min-w-[140px] max-w-[180px] align-middle overflow-hidden">
                         <RunningText text={v.studentName} className="font-bold text-[#0F172A] font-headline" />
-                        <RunningText text={`NIS: ${v.nis} • ${v.kamar}`} className="text-[11px] text-[#64748B] mt-0.5" />
+                        <RunningText text={v.kamar} className="text-[11px] text-[#64748B] mt-0.5" />
                       </td>
 
                       {/* 3. Kasus Pelanggaran */}
@@ -930,8 +971,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* 5. PROGRAM KERJA OSTIFAK (TOP 5 PROGRESS DENGAN ELEMEN KARTU PROGRAM KERJA) */}
-      <div className="space-y-4 border-t border-[#E2E8F0] pt-10">
-        <div className="flex items-center justify-between">
+      <div className="bg-white p-5 sm:p-6 border border-neutral-300 rounded-lg space-y-4">
+        <div className="flex items-center justify-between border-b border-neutral-300 pb-3">
           <div>
             <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] font-headline tracking-tight">
               Program Kerja OSTIFAK
@@ -954,7 +995,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <Card 
                 key={p.id} 
                 variant="default" 
-                className="p-5 space-y-4 hoverable bg-white border border-[#E2E8F0] rounded-xl relative transition-all duration-200"
+                className="p-5 space-y-4 hoverable bg-white border border-neutral-300 rounded-xl relative transition-all duration-200"
               >
                 {/* 1. Header Card: Nama Program di atas & Nama Divisi di bawah + Ikon Status Tunggal */}
                 <div className="flex items-start justify-between gap-3">

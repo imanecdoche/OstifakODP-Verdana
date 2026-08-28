@@ -335,6 +335,16 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
       <AnimatePresence>
         {selectedClassModal && !selectedDetailStudent && (
           <>
+            {isMobile && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                onClick={() => setSelectedClassModal(null)}
+                className="fixed inset-0 z-40 bg-black/50 cursor-default"
+              />
+            )}
             <motion.div
               key={`class-detail-${selectedClassModal.id}`}
               data-lenis-prevent

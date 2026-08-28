@@ -14,6 +14,7 @@ import { ClassesView } from './components/views/ClassesView';
 import { DirectivesView } from './components/views/DirectivesView';
 import { WhoAmIView } from './components/views/WhoAmIView';
 import { TreasuryView } from './components/views/TreasuryView';
+import { ReportsView } from './components/views/ReportsView';
 import { DivisionDetailView } from './components/views/DivisionDetailView';
 import { FirestoreStatsView } from './components/views/FirestoreStatsView';
 import { LoginPage } from './components/views/LoginPage';
@@ -888,6 +889,15 @@ export default function App() {
             ) : activeView === 'directives' ? (
               <PageTransition key="directives">
                 <DirectivesView />
+              </PageTransition>
+            ) : activeView === 'reports' ? (
+              <PageTransition key="reports">
+                <ReportsView
+                  students={students}
+                  dormitories={dormitories}
+                  classes={classes}
+                  onSelectStudent={() => setActiveView('students')}
+                />
               </PageTransition>
             ) : activeView === 'whoami' ? (
               <PageTransition key="whoami">

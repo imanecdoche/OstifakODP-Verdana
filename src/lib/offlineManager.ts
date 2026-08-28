@@ -142,15 +142,12 @@ export function disableOfflineMode(): void {
 // OFFLINE STORAGE GETTERS & SETTERS (Strictly Isolated LocalStorage)
 // -------------------------------------------------------------
 
+import { migrateStudentPortfolio } from './studentPortfolioMigration';
+
 export function getOfflineStudents(): SantriRecord[] {
   try {
     const raw = localStorage.getItem(OFFLINE_KEYS.SANTRI);
-    if (raw) return JSON.parse(raw).map((student: SantriRecord) => {
-      const history = student.violationsHistory || [];
-      return history.length
-        ? { ...student, poinPelanggaran: history.reduce((sum, entry) => sum + (Number(entry.points) || 0), 0) }
-        : student;
-    });
+    if (raw) return JSON.parse(raw).map((student: any) => migrateStudentPortfolio(student));
   } catch (e) {
     console.error('Error reading offline students:', e);
   }

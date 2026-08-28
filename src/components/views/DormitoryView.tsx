@@ -448,7 +448,7 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -16, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-            className="fixed top-20 lg:top-[60px] left-6 lg:left-[224px] z-40 bg-white/95 backdrop-blur-md border border-slate-200 shadow-lg rounded-full p-1.5 flex items-center gap-2 max-w-[calc(100vw-3rem)] lg:max-w-[calc(100vw-264px)]"
+            className="fixed top-20 lg:top-[60px] left-6 lg:left-[224px] z-40 bg-white border border-slate-200 shadow-lg rounded-full p-1.5 flex items-center gap-2 max-w-[calc(100vw-3rem)] lg:max-w-[calc(100vw-264px)]"
           >
             <PillTabs
               tabs={filterTabs}
@@ -504,6 +504,16 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
       <AnimatePresence>
         {selectedRoomModal && !selectedDetailStudent && (
           <>
+            {isMobile && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                onClick={() => setSelectedRoomModal(null)}
+                className="fixed inset-0 z-40 bg-black/50 cursor-default"
+              />
+            )}
             <motion.div
               key={`room-detail-${selectedRoomModal.id}`}
               data-lenis-prevent

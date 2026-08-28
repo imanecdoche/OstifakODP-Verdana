@@ -7,6 +7,62 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-28]**: Mandatory System Audit: Laporan Multidivisi, Logika Peak Metrics, Searchable Combobox, & Standar Print Layout:
+  - 1. AUDIT KALKULASI RENTANG WAKTU & METRIK PUNCAK (PEAK PERFORMANCE ADAPTABILITY):
+    * Fungsi agregasi analitik (`reportAnalytics.ts`) wajib mengadaptasi metrik dan label titik puncak secara dinamis:
+      - Filter Mingguan (`weekly`): label "Hari Puncak Produktivitas" (nama hari spesifik: Senin, Selasa, dst.).
+      - Filter Bulanan (`monthly`): label "Pekan Puncak Produktivitas" (pekan spesifik: Pekan 1, Pekan 2, dst.).
+      - Filter Tahunan (`yearly`): label "Bulan Puncak Produktivitas" (bulan spesifik: Januari, Februari, dst.).
+      - Filter Kustom (`custom`): deteksi otomatis berdasarkan rentang span (hari vs pekan vs bulan).
+    * Tidak boleh ada hardcoded string atau tanggal statis; seluruhnya ditarik dari timestamp riwayat santri.
+  - 2. AUDIT PENCARIAN SANTRI (SEARCHABLE COMBOBOX & SSOT):
+    * Filter individu santri pada modul laporan wajib menggunakan *interactive searchable combobox*.
+    * Data pilihan ditarik 100% dinamis dari array entitas `STUDENT` SSOT yang valid tanpa mock/dummy data.
+  - 3. AUDIT TATA LETAK CETAK & ATURAN IKON/TOMBOL (UI/UX PURITY):
+    * Tombol aksi DILARANG keras menggunakan format *icon-only* yang membingungkan; wajib menggunakan label teks jelas atau *leading icon* berlabel teks rapi.
+    * Seluruh elemen navigasi, filter bar, dan tombol aksi wajib 100% tersembunyi saat `@media print` aktif.
+- **[2026-08-28]**: Task Briefing & Planning Phase: Modul Laporan Multidivisi, Analitik SSOT, & Mesin Ekspor PDF Editorial:
+  - 1. PERANCANGAN ROADMAP / RENCANA KERJA TERSTRUKTUR:
+    * Dibuat dokumen rencana kerja bertahap `REPORT_DEVELOPMENT_PLAN.md` di root direktori proyek.
+    * Tidak menulis/mengeksekusi kode implementasi apa pun sampai rencana disepakati dan dibahas bersama user.
+  - 2. MESIN ANALITIK & AGREGASI SSOT:
+    * Perhitungan rentang waktu fleksibel: Mingguan (7 hari), Bulanan (1-31), Tahunan, Kustom (date range).
+    * Agregasi Divisi Tahfizh (Ziyadah vs Murojaah, fluency status distribution, peak productivity detection).
+    * Agregasi Divisi Keamanan/Kedisiplinan (Active vs Lifetime PK, per-kategori pelanggaran, status mahkamah, daily decay trend).
+    * Laporan Gabungan (Komparasi rasio PP vs PK, Indeks Kedisiplinan & Prestasi Kolektif Santri).
+  - 3. VISUALISASI DATA MINIMALIS (FLAT VECTOR):
+    * Grafik garis tren waktu vektor datar (*flat vector line chart*) tanpa efek gradien glossy berlebihan.
+    * Progress bar monokrom bertumpuk (*stacked progress bar*) & visual statistik berdensitas tinggi tanpa ikon dekoratif tidak perlu.
+  - 4. STANDAR DESAIN & EKSPOR PDF (ANTI-GRAVITY PRINT):
+    * Format cetak murni berorientasi editorial (*strict no-card container*, *no-icon*, garis pembatas hairline `border-b border-[#E2E8F0]`).
+    * Tabel data rapat berdensitas tinggi, header resmi pondok, dan blok tanda tangan pengesahan pimpinan/pengasuh.
+- **[2026-08-28]**: Mesin Peluruhan (Decay Engine), UI Dual-Metric, & Restorative Justice (Tahap 2, 3, 4):
+  - 1. KALKULATOR PELURUHAN (DECAY ENGINE) & DECAY LOCK:
+    * `calculateDecay(student)` menghitung `activePK` secara real-time: Masa tenang (Grace Period) 14 hari pasca pelanggaran terakhir (`lastViolationDate`).
+    * Setelah 14 hari tanpa pelanggaran baru (`cleanDays = daysSinceLastViolation - 14`), `activePK` meluruh -1 PK/hari (`activePK = Math.max(0, baseActivePK - cleanDays)`).
+    * `hasDecayLock = true` (pelanggaran berat unresolved) membekukan peluruhan otomatis hingga sidang diselesaikan via `resolveViolationRecord`.
+  - 2. HANDLER MUTASI DATA & REAKSI SSOT:
+    * `addViolationRecord`: menambah `violationHistory`, `lifetimePK`, update `lastViolationDate`, set `hasDecayLock = true` jika kategori berat/poin >= 50, dan hitung ulang `activePK`.
+    * `resolveViolationRecord`: menandai `resolved = true`, membuka `hasDecayLock = false` jika tidak ada kasus berat aktif tersisa.
+    * `addAchievementRecord`: menambah `achievementHistory`, `lifetimePP`, dan `activePP`.
+    * Seluruh pembacaan data santri (`normalizeSantriRecord`) melewati kalkulator decay ini secara atomik (real-time, zero-lag).
+  - 3. UI/UX DUAL-METRIC & TAB PORTOFOLIO BUKU SAKU:
+    * Kartu Santri & Panel Detail menampilkan metrik aktif `activePK` dan `activePP` tanpa kontainer/kapsul kaku, disertai indikator teks peluruhan ("Masa Tenang: N hari lagi", "Memulihkan (-1 PK/hari)", "Perlu Sidang Mahkamah").
+    * Tab Buku Saku (Portofolio Disiplin & Prestasi) dirender dalam format *flat row* dengan divider garis tipis (`border-b border-[#E2E8F0]`) tanpa kotak kartu bertumpuk (*unboxed*).
+  - 4. TEBUS POIN RESTORATIF & OTOMASI ARSIP BULANAN:
+    * `redeemPointsForDiscipline`: konversi PP aktif untuk pengurangan PK aktif (rasio 2 PP = 1 PK) dengan pencatatan audit trail `redemptionHistory`.
+    * `archiveMonthlyAchievements`: otomasi rollover akhir bulan yang mensnapshot `activePP` ke `monthlyArchives` dan mereset `activePP = 0` (dengan `lifetimePP` tetap utuh).
+- **[2026-08-28]**: Arsitektur Skema Data Portofolio Santri & Dual-Metric SSOT (Tahap 1):
+  - 1. STRUKTURISASI SKEMA DATA ENTITAS STUDENT / SANTRI:
+    * Interface Student & SantriRecord diperbarui untuk mendukung sistem Portofolio Permanen dan Poin Dinamis (Active vs Lifetime Balance).
+    * Identitas & Dasar: `id`, `nis`, `name` / `studentName`, `dormitoryId` / `kamar`, `classId` / `kelas`, `createdAt`.
+    * Portofolio Kedisiplinan (PK): `violationHistory` (buku saku permanen), `lifetimePK` (total akumulasi seumur hidup), `activePK` (poin aktif berjalan setelah decay), `lastViolationDate` (ISO string | null), `hasDecayLock` (boolean lock jika ada pelanggaran berat unresolved).
+    * Portofolio Prestasi (PP): `achievementHistory` (rekam jejak permanen), `lifetimePP` (total akumulasi seumur hidup), `activePP` (poin prestasi aktif kompetisi berjalan), `monthlyArchives` (`[{ month: 'YYYY-MM', totalPP: number, rank?: number }]`).
+  - 2. FUNGSI MIGRATION & BACKWARD COMPATIBILITY:
+    * Dibuat utilitas migrasi `migrateStudentPortfolio` / `normalizeSantriRecord` yang secara otomatis mengonversi data santri lama di localStorage/Firestore (lapisan `points` / `poinPelanggaran` / `poinPrestasi` tunggal) ke struktur dual-metric baru tanpa kehilangan data historis.
+    * Nilai default santri baru: `activePK = 0`, `activePP = 0`, `lifetimePK = 0`, `lifetimePP = 0`, `hasDecayLock = false`, `lastViolationDate = null`, `violationHistory = []`, `achievementHistory = []`, `monthlyArchives = []`.
+  - 3. INTEGRITAS SSOT & NO DUMMY DATA:
+    * Setiap pembuatan santri baru wajib menghasilkan objek portofolio kosong yang valid tanpa menyuntikkan dummy/mock data ke dalam riwayat.
 - **[2026-08-28]**: Rekonstruksi UI Desktop — Standardisasi Full-Page Right-to-Left Slide-In Panel Tanpa Backdrop (Versi v1.1.0.75b):
   - 1. KONVERSI POPUP/MODAL MENJADI PANEL FULL-PAGE SLIDE DARI KANAN (KHUSUS DESKTOP `md:`+):
     * Mengubah 5 modul berikut dari bentuk popup/modal tengah menjadi panel penuh full-page yang meluncur masuk dari sisi kanan (`slide-in-from-right`) dan bergeser keluar ke kanan (`slide-out-to-right`) saat ditutup, menyamai struktur modul `studentView`:
