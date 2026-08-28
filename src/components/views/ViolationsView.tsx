@@ -28,6 +28,7 @@ import {
 } from '../../lib/firestoreService';
 import { gooeyToast } from '../../lib/toast';
 import { useLenisModalLock } from '../../lib/lenis';
+import { panelStack } from '../../lib/panelStackManager';
 import { RollingNumber } from '../modals/NewViolationModal';
 import { getSeverityInfo, sliderFillPercent } from '../../lib/severityUtils';
 import { useIsMobile } from '../../lib/useIsMobile';
@@ -167,37 +168,27 @@ export const ViolationsView: React.FC<ViolationsViewProps> = ({
   }, [activeMenu]);
 
   // Global Escape Key Listener for ViolationsView
+  // Register into global panelStack
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (activeMenu) {
-          setActiveMenu(null);
-          return;
-        }
-        if (editingViolation) {
-          setEditingViolation(null);
-          return;
-        }
-        if (deletingViolation) {
-          setDeletingViolation(null);
-          return;
-        }
-      }
-    };
+    if (editingViolation) {
+      const unregister = panelStack.push(`edit-violation-${editingViolation.id}`, () => setEditingViolation(null));
+      return () => unregister();
+    }
+  }, [editingViolation]);
 
-    const handleCustomEscape = () => {
-      setActiveMenu(null);
-      setEditingViolation(null);
-      setDeletingViolation(null);
-    };
+  useEffect(() => {
+    if (deletingViolation) {
+      const unregister = panelStack.push(`delete-violation-${deletingViolation.id}`, () => setDeletingViolation(null));
+      return () => unregister();
+    }
+  }, [deletingViolation]);
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('ostifak-escape-pressed', handleCustomEscape);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('ostifak-escape-pressed', handleCustomEscape);
-    };
-  }, [activeMenu, editingViolation, deletingViolation]);
+  useEffect(() => {
+    if (activeMenu) {
+      const unregister = panelStack.push(`violation-menu-${activeMenu.id}`, () => setActiveMenu(null));
+      return () => unregister();
+    }
+  }, [activeMenu]);
 
   // Filter out permanently & optimistically deleted items
   const visibleViolations = violations.filter(

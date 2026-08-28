@@ -259,22 +259,24 @@ html.lenis, html.lenis body {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 12mm 15mm;
+    margin: 10mm 12mm;
   }
 
   html, body {
     zoom: 1 !important;
     background: #FFFFFF !important;
     color: #0F172A !important;
-    font-size: 10pt !important;
-    line-height: 1.4 !important;
+    font-size: 9.5pt !important;
+    line-height: 1.35 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     padding: 0 !important;
     margin: 0 !important;
+    width: 100% !important;
+    min-width: 100% !important;
   }
 
-  /* Hide Non-Print Elements (Sidebar, Header, RightPanel, Toast, Modals, Filter Controls) */
+  /* Hide Non-Print Elements */
   header,
   aside,
   nav,
@@ -300,14 +302,17 @@ html.lenis, html.lenis body {
     overflow: visible !important;
   }
 
-  /* Printable Report Container */
-  #printable-report-area {
+  /* Printable Report Container: Enforce full desktop-width print layout */
+  #printable-report-area,
+  .laporan-multidivisi-print {
+    display: block !important;
     border: none !important;
     box-shadow: none !important;
     background: #FFFFFF !important;
     padding: 0 !important;
     margin: 0 !important;
     width: 100% !important;
+    max-width: none !important;
   }
 
   /* Hairline Dividers & High-Density Tables */
@@ -323,12 +328,12 @@ html.lenis, html.lenis body {
 
   th, td {
     border-bottom: 1px solid #E2E8F0 !important;
-    padding: 4pt 6pt !important;
+    padding: 3.5pt 5pt !important;
   }
 
   /* Prevent Signature Block and Important Sections from Splitting */
   .print-avoid-break,
-  .grid-cols-3,
+  .print-avoid-break-card,
   h4 {
     page-break-inside: avoid !important;
     break-inside: avoid !important;

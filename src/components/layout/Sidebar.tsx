@@ -24,6 +24,7 @@ import { UserProfile, DivisionId } from '../../types';
 import { mockDivisions } from '../../data/mockData';
 import { ScrollArea } from '../ui/ScrollArea';
 import { APP_VERSION_INFO } from '../../config/version';
+import { panelStack } from '../../lib/panelStackManager';
 
 interface SidebarProps {
   currentUser: UserProfile;
@@ -46,6 +47,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isOpenMobile,
   onCloseMobile,
 }) => {
+  // Register into global stacked panel manager when mobile sidebar opens
+  React.useEffect(() => {
+    if (isOpenMobile) {
+      const unregister = panelStack.push('mobile-sidebar', onCloseMobile);
+      return () => unregister();
+    }
+  }, [isOpenMobile, onCloseMobile]);
+
   const getDivisionIcon = (iconName: string) => {
     switch (iconName) {
       case 'ShieldAlert': return <ShieldAlert className="w-4 h-4" />;

@@ -21,6 +21,7 @@ import {
 } from '../../lib/firestoreService';
 import { useLenisModalLock } from '../../lib/lenis';
 import { useIsMobile } from '../../lib/useIsMobile';
+import { panelStack } from '../../lib/panelStackManager';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { PillTabs, TabOption } from '../ui/PillTabs';
@@ -73,32 +74,20 @@ export const ClassesView: React.FC<ClassesViewProps> = ({
   }, [propStudents]);
 
   // Global Escape Key Listener for ClassesView
+  // Register panels into global panelStack
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (selectedDetailStudent) {
-          setSelectedDetailStudent(null);
-          return;
-        }
-        if (selectedClassModal) {
-          setSelectedClassModal(null);
-          return;
-        }
-      }
-    };
+    if (selectedClassModal) {
+      const unregister = panelStack.push(`class-modal-${selectedClassModal.id}`, () => setSelectedClassModal(null));
+      return () => unregister();
+    }
+  }, [selectedClassModal]);
 
-    const handleCustomEscape = () => {
-      setSelectedDetailStudent(null);
-      setSelectedClassModal(null);
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('ostifak-escape-pressed', handleCustomEscape);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('ostifak-escape-pressed', handleCustomEscape);
-    };
-  }, [selectedDetailStudent, selectedClassModal]);
+  useEffect(() => {
+    if (selectedDetailStudent) {
+      const unregister = panelStack.push(`class-student-detail-${selectedDetailStudent.id}`, () => setSelectedDetailStudent(null));
+      return () => unregister();
+    }
+  }, [selectedDetailStudent]);
 
   const activeStudents = propStudents && propStudents.length > 0 ? propStudents : localStudents;
 

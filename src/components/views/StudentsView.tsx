@@ -39,6 +39,7 @@ import { ScrollArea } from '../ui/ScrollArea';
 import { StudentDetailModal } from '../modals/StudentDetailModal';
 import { PPIcon, PKIcon } from '../ui/PointIcons';
 import { QURAN_SURAHS, calculateQuranPages, QuranSurah } from '../../data/quranSurahs';
+import { panelStack } from '../../lib/panelStackManager';
 import { 
   subscribeToSantri, 
   addSantriRecord, 
@@ -237,48 +238,34 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
     return () => document.removeEventListener('mousedown', handler);
   }, [isSurahDropdownOpen]);
 
-  // Global Escape Key Listener for StudentsView popups
+  // Register open panels into global panelStack
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (isSurahDropdownOpen) {
-          setIsSurahDropdownOpen(false);
-          return;
-        }
-        if (isAdding) {
-          setIsAdding(false);
-          return;
-        }
-        if (editingStudent) {
-          setEditingStudent(null);
-          return;
-        }
-        if (studentToDelete) {
-          setStudentToDelete(null);
-          return;
-        }
-        if (selectedDetailStudent) {
-          setSelectedDetailStudent(null);
-          return;
-        }
-      }
-    };
+    if (selectedDetailStudent) {
+      const unregister = panelStack.push(`student-detail-${selectedDetailStudent.id}`, () => setSelectedDetailStudent(null));
+      return () => unregister();
+    }
+  }, [selectedDetailStudent]);
 
-    const handleCustomEscape = () => {
-      setIsSurahDropdownOpen(false);
-      setIsAdding(false);
-      setEditingStudent(null);
-      setStudentToDelete(null);
-      setSelectedDetailStudent(null);
-    };
+  useEffect(() => {
+    if (isAdding) {
+      const unregister = panelStack.push('add-student-panel', () => setIsAdding(false));
+      return () => unregister();
+    }
+  }, [isAdding]);
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('ostifak-escape-pressed', handleCustomEscape);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('ostifak-escape-pressed', handleCustomEscape);
-    };
-  }, [isSurahDropdownOpen, isAdding, editingStudent, studentToDelete, selectedDetailStudent]);
+  useEffect(() => {
+    if (editingStudent) {
+      const unregister = panelStack.push(`edit-student-${editingStudent.id}`, () => setEditingStudent(null));
+      return () => unregister();
+    }
+  }, [editingStudent]);
+
+  useEffect(() => {
+    if (studentToDelete) {
+      const unregister = panelStack.push(`delete-student-${studentToDelete.id}`, () => setStudentToDelete(null));
+      return () => unregister();
+    }
+  }, [studentToDelete]);
 
   const filteredSurahs = useMemo(() => {
     const q = surahQuery.trim().toLowerCase();
@@ -2407,7 +2394,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
       {/* Delete Student Confirmation Dialog */}
       <AnimatePresence>
         {studentToDelete && (
-          <div data-lenis-prevent className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+          <div data-lenis-prevent className="fixed inset-0 z-70 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -2415,7 +2402,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setStudentToDelete(null)}
-              className="fixed inset-0 z-40 bg-black/50 cursor-default"
+              className="fixed inset-0 z-60 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}
@@ -2430,7 +2417,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 mass: 0.8,
               }}
               onClick={(e) => e.stopPropagation()}
-              className="relative bg-white w-full max-w-md max-h-[88dvh] sm:max-h-[90vh] overflow-hidden rounded-t-2xl sm:rounded-lg shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_12px_40px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] flex flex-col z-10"
+              className="relative bg-white w-full max-w-md max-h-[88dvh] sm:max-h-[90vh] overflow-hidden rounded-t-2xl sm:rounded-lg shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_12px_40px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] flex flex-col z-70"
             >
               {/* Mobile Top Drag Handle */}
               <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">

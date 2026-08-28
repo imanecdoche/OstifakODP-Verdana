@@ -880,7 +880,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               Rekapitulasi Pelanggaran Santri Terbaru
             </h2>
             <p className="text-xs text-[#64748B] mt-0.5 font-body">
-              Pencatatan kasus kedisiplinan berbobot poin oleh Divisi Keamanan
+              Pencatatan kasus kedisiplinan berbobot poin oleh Div. Keamanan
             </p>
           </div>
           <Button

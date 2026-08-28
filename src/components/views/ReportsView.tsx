@@ -115,6 +115,54 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
     return getPresetDateBounds(filterOptions.dateRange);
   }, [filterOptions.dateRange]);
 
+  // Individual Tahfizh Data for Selected Student (filtered by dateBounds if applicable)
+  const individualTahfizhLogs = useMemo(() => {
+    if (!selectedStudent || !selectedStudent.hafalanHistory) return [];
+    const start = new Date(dateBounds.startDate).getTime();
+    const end = new Date(dateBounds.endDate).setHours(23, 59, 59, 999);
+
+    return [...selectedStudent.hafalanHistory]
+      .filter((h) => {
+        if (!h.date && !h.timestamp) return true;
+        const entryTime = h.timestamp || new Date(h.date).getTime();
+        return entryTime >= start && entryTime <= end;
+      })
+      .sort((a, b) => {
+        const timeA = a.timestamp || new Date(a.date).getTime() || 0;
+        const timeB = b.timestamp || new Date(b.date).getTime() || 0;
+        return timeB - timeA;
+      });
+  }, [selectedStudent, dateBounds]);
+
+  const individualTahfizhMetrics = useMemo(() => {
+    if (!selectedStudent) {
+      return { totalZiyadahPages: 0, totalMurojaahPages: 0, juzCount: 0, tahsinStatus: '-' };
+    }
+    const logs = individualTahfizhLogs;
+    let totalZiyadahPages = 0;
+    let totalMurojaahPages = 0;
+
+    logs.forEach((h) => {
+      const pCount = h.pageCount || (h.pageTo && h.pageFrom ? Math.max(1, h.pageTo - h.pageFrom + 1) : 1);
+      const isZiyadah = h.category === 'Hafalan Baru' || !h.category;
+      if (isZiyadah) {
+        totalZiyadahPages += pCount;
+      } else {
+        totalMurojaahPages += pCount;
+      }
+    });
+
+    const parsedHafalan = selectedStudent.hafalan ? parseInt(selectedStudent.hafalan.replace(/\D/g, ''), 10) || 0 : 0;
+    const tahsinStatus = selectedStudent.isTahsinPassed ? 'Lulus Tahsin' : 'Bimbingan Tahsin';
+
+    return {
+      totalZiyadahPages,
+      totalMurojaahPages,
+      juzCount: parsedHafalan,
+      tahsinStatus,
+    };
+  }, [selectedStudent, individualTahfizhLogs]);
+
   // Print Handler
   const handlePrint = () => {
     const originalTitle = document.title;
@@ -175,8 +223,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#E2E8F0]">
           <div className="flex items-center gap-1 bg-[#F1F5F9] p-1 rounded-md">
             {[
-              { id: 'tahfizh', label: 'Divisi Tahfizh', icon: <BookOpen className="w-3.5 h-3.5" /> },
-              { id: 'keamanan', label: 'Divisi Keamanan / Disiplin', icon: <ShieldAlert className="w-3.5 h-3.5" /> },
+              { id: 'tahfizh', label: 'Div. Tahfizh', icon: <BookOpen className="w-3.5 h-3.5" /> },
+              { id: 'keamanan', label: 'Div. Keamanan / Disiplin', icon: <ShieldAlert className="w-3.5 h-3.5" /> },
               { id: 'gabungan', label: 'Laporan Gabungan (Eksekutif)', icon: <Layers className="w-3.5 h-3.5" /> },
             ].map((tab) => {
               const isActive = activeDivision === tab.id;
@@ -396,9 +444,12 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       </div>
 
       {/* 3. LIVE PRINT-PREVIEW CANVAS AREA (ANTI-GRAVITY EDITORIAL CANVAS) */}
-      <div id="printable-report-area" className="bg-white border border-[#E2E8F0] shadow-sm rounded-lg p-6 sm:p-8 space-y-6 print:border-none print:p-0 print:shadow-none">
+      <div 
+        id="printable-report-area" 
+        className="laporan-multidivisi-print bg-white border border-[#E2E8F0] shadow-sm rounded-lg p-6 sm:p-8 space-y-6 print:border-none print:p-0 print:shadow-none w-full"
+      >
         {/* Kop Resmi Pesantren / Header Document */}
-        <div className="border-b-2 border-[#0F172A] pb-4 space-y-1 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="border-b-2 border-[#0F172A] pb-4 space-y-1 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-4 print:!flex-row print:!items-center print:!justify-between print:!text-left">
           <div>
             <span className="text-[10px] font-bold text-[#059669] uppercase tracking-widest font-headline">PONDOK PESANTREN FAJRUL KARIM • OSTIFAK</span>
             <h2 className="text-xl font-bold font-headline tracking-tight text-[#0F172A]">
@@ -406,8 +457,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                 `LAPORAN PORTOFOLIO INDIVIDUAL SANTRI: ${(selectedStudent.name || selectedStudent.studentName || '').toUpperCase()}`
               ) : (
                 <>
-                  {activeDivision === 'tahfizh' && 'LAPORAN AGREGASI & PRODUKTIVITAS DIVISI TAHFIZH'}
-                  {activeDivision === 'keamanan' && 'LAPORAN KEDISIPLINAN & BUKU SAKU DIVISI KEAMANAN'}
+                  {activeDivision === 'tahfizh' && 'LAPORAN AGREGASI & PRODUKTIVITAS DIV. TAHFIZH'}
+                  {activeDivision === 'keamanan' && 'LAPORAN KEDISIPLINAN & BUKU SAKU DIV. KEAMANAN'}
                   {activeDivision === 'gabungan' && 'LAPORAN GABUNGAN EKSEKUTIF OPERASIONAL SANTRI'}
                 </>
               )}
@@ -417,7 +468,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               {selectedStudent && ` • NIS: ${selectedStudent.nis || '-'} • Asrama: ${selectedStudent.dormitoryId || selectedStudent.kamar || '-'} • Kelas: ${selectedStudent.classId || selectedStudent.kelas || '-'}`}
             </p>
           </div>
-          <div className="text-right text-xs font-mono text-[#64748B] border-l sm:border-l-0 sm:pl-0 pl-3">
+          <div className="text-right text-xs font-mono text-[#64748B] border-l sm:border-l-0 sm:pl-0 pl-3 print:!border-l-0 print:!pl-0 print:!text-right">
             <p>Dicetak: {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
             <p className="text-[10px] text-[#94A3B8]">Status Data: SSOT Real-time</p>
           </div>
@@ -427,7 +478,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         {activeDivision === 'tahfizh' && (
           <div className="space-y-6">
             {/* Executive Metrics Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs divide-x divide-[#E2E8F0] border-b border-[#E2E8F0] pb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 print:!grid-cols-4 gap-4 text-xs divide-x divide-[#E2E8F0] border-b border-[#E2E8F0] pb-4 print-avoid-break-card">
               <div className="pr-2">
                 <span className="text-[10px] text-[#64748B] uppercase font-semibold font-headline">Total Ziyadah</span>
                 <p className="text-xl font-bold text-[#059669] mt-0.5 font-mono">{analytics.tahfizh.totalPagesZiyadah} <span className="text-xs font-normal">Hal</span></p>
@@ -451,7 +502,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             </div>
 
             {/* Ratio Progress Bar & Fluency Breakdown */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 print:!grid-cols-2 gap-6 print-avoid-break-card">
               <div className="space-y-2">
                 <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">DISTRIBUSI KATEGORI SETORAN</h4>
                 <RatioProgressBar
@@ -477,7 +528,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             </div>
 
             {/* Trend Chart */}
-            <div className="space-y-2 pt-2">
+            <div className="space-y-2 pt-2 print-avoid-break-card">
               <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">TREN VOLUME SETORAN HARIAN (HALAMAN)</h4>
               <MinimalLineChart
                 dataPoints={analytics.tahfizh.dailyTrends}
@@ -488,21 +539,185 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               />
             </div>
 
-            {/* High Density Table Top Performers */}
-            <div className="space-y-3 pt-2">
-              <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">REKAPITULASI SANTRI TERPRODUKTIF TAHFIZH</h4>
-              <HighDensityTable
-                data={analytics.tahfizh.topPerformers}
-                keyExtractor={(item: any) => item.studentId}
-                columns={[
-                  { key: 'rank', header: 'No', render: (_, idx) => <span className="font-mono">{idx + 1}</span> },
-                  { key: 'name', header: 'Nama Santri', render: (item: any) => <span className="font-bold text-[#0F172A]">{item.name}</span> },
-                  { key: 'kamar', header: 'Asrama / Kelas', render: (item: any) => <span>{item.kamar} • {item.kelas}</span> },
-                  { key: 'ziyadah', header: 'Ziyadah', render: (item: any) => <span className="font-mono font-bold text-[#059669]">+{item.totalZiyadahPages} Hal</span> },
-                  { key: 'murojaah', header: 'Murojaah', render: (item: any) => <span className="font-mono font-bold text-[#0F172A]">{item.totalMurojaahPages} Hal</span> },
-                ]}
-              />
-            </div>
+            {/* Dual-Table Side-by-Side (Kolektif) ATAU Rekapitulasi & Log Histori Individual (Santri Terpilih) */}
+            {selectedStudent ? (
+              <div className="space-y-4 pt-2">
+                {/* 1. Kartu Ringkasan Metrik Pribadi */}
+                <div className="space-y-2 print-avoid-break-card">
+                  <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">
+                    RINGKASAN METRIK TAHFIZH INDIVIDUAL: {(selectedStudent.name || selectedStudent.studentName || '').toUpperCase()}
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 print:!grid-cols-4 gap-3 p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg">
+                    <div>
+                      <span className="text-[10px] text-[#64748B] uppercase font-semibold font-headline">Akumulasi Hafalan</span>
+                      <p className="text-lg font-bold text-[#0F172A] mt-0.5 font-headline">{selectedStudent.hafalan || `${individualTahfizhMetrics.juzCount} Juz`}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-[#64748B] uppercase font-semibold font-headline">Ziyadah Periode Ini</span>
+                      <p className="text-lg font-bold text-[#059669] mt-0.5 font-mono">+{individualTahfizhMetrics.totalZiyadahPages} <span className="text-xs font-normal">Hal</span></p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-[#64748B] uppercase font-semibold font-headline">Muraja'ah Periode Ini</span>
+                      <p className="text-lg font-bold text-[#0F172A] mt-0.5 font-mono">{individualTahfizhMetrics.totalMurojaahPages} <span className="text-xs font-normal">Hal</span></p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-[#64748B] uppercase font-semibold font-headline">Status Uji Tahsin</span>
+                      <p className={`text-lg font-bold mt-0.5 font-headline ${selectedStudent.isTahsinPassed ? 'text-[#059669]' : 'text-[#D97706]'}`}>
+                        {individualTahfizhMetrics.tahsinStatus}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Tabel Log Setoran Detail Individual */}
+                <div className="space-y-2 print-avoid-break-card">
+                  <div className="flex items-center justify-between pb-1 border-b border-[#0F172A]">
+                    <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">
+                      LOG HISTORI SETORAN DETAIL ({individualTahfizhLogs.length} Entri)
+                    </h4>
+                  </div>
+                  <HighDensityTable
+                    data={individualTahfizhLogs}
+                    keyExtractor={(item: any) => item.id || `setoran-${item.date}-${item.surah}`}
+                    emptyMessage="Belum ada riwayat setoran tahfizh untuk santri ini pada rentang waktu terpilih."
+                    columns={[
+                      { key: 'no', header: 'No', render: (_, idx) => <span className="font-mono">{idx + 1}</span> },
+                      { 
+                        key: 'date', 
+                        header: 'Tanggal', 
+                        render: (item: any) => <span className="font-mono text-xs text-[#0F172A]">{item.date || '-'}</span> 
+                      },
+                      { 
+                        key: 'category', 
+                        header: 'Jenis', 
+                        render: (item: any) => {
+                          const isZiyadah = item.category === 'Hafalan Baru' || !item.category;
+                          return (
+                            <span className={`font-semibold text-xs ${isZiyadah ? 'text-[#059669]' : 'text-[#0284C7]'}`}>
+                              {isZiyadah ? 'Ziyadah' : 'Muraja\'ah'}
+                            </span>
+                          );
+                        } 
+                      },
+                      { 
+                        key: 'target', 
+                        header: 'Surah / Halaman / Juz', 
+                        render: (item: any) => {
+                          const juzText = item.juz ? (item.juz.toString().toLowerCase().startsWith('juz') ? item.juz : `Juz ${item.juz}`) : '-';
+                          const halText = item.pageFrom && item.pageTo ? `Hal. ${item.pageFrom}-${item.pageTo}` : item.pageCount ? `${item.pageCount} Hal.` : '';
+                          const ayatText = item.ayatFrom && item.ayatTo ? `Ayat ${item.ayatFrom}-${item.ayatTo}` : '';
+                          return (
+                            <div>
+                              <div className="font-bold text-[#0F172A]">{item.surah || 'Al-Qur\'an'}</div>
+                              <div className="text-[10px] text-[#64748B]">
+                                {[juzText, halText, ayatText].filter(Boolean).join(' • ')}
+                              </div>
+                            </div>
+                          );
+                        } 
+                      },
+                      { 
+                        key: 'quality', 
+                        header: 'Kualitas Mutu', 
+                        render: (item: any) => {
+                          const quality = item.kelancaran || item.predikat || 'Mutqin';
+                          const isGood = quality.toLowerCase().includes('mutqin') || quality.toLowerCase().includes('lancar') || quality.toLowerCase().includes('a') || quality.toLowerCase().includes('mumtaz');
+                          return (
+                            <span className={`font-medium text-xs ${isGood ? 'text-[#059669]' : 'text-[#D97706]'}`}>
+                              {quality}
+                            </span>
+                          );
+                        } 
+                      },
+                      { 
+                        key: 'ustadz', 
+                        header: 'Pembimbing', 
+                        render: (item: any) => <span className="text-xs text-[#475569]">{item.ustadz || '-'}</span> 
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3 pt-2 print-avoid-break-card">
+                <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">REKAPITULASI SANTRI TERPRODUKTIF TAHFIZH</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 print:!grid-cols-2 gap-4">
+                  {/* Tabel Kiri: 10 Santri Paling Produktif Ziyadah */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between pb-1 border-b border-[#0F172A]">
+                      <span className="text-[11px] font-bold text-[#059669] font-headline uppercase tracking-wider">
+                        Top 10 Ziyadah (Hafalan Baru)
+                      </span>
+                    </div>
+                    <HighDensityTable
+                      data={analytics.tahfizh.topZiyadahPerformers}
+                      keyExtractor={(item: any) => `ziyadah-${item.studentId}`}
+                      emptyMessage="Belum ada data setoran Ziyadah."
+                      columns={[
+                        { key: 'rank', header: 'No', render: (_, idx) => <span className="font-mono">{idx + 1}</span> },
+                        { 
+                          key: 'name', 
+                          header: 'Nama Santri', 
+                          render: (item: any) => {
+                            const formattedKelas = (item.kelas || '').replace(/^Kelas\s+/i, '');
+                            return (
+                              <span className="font-bold text-[#0F172A]">
+                                {item.name} <span className="font-normal text-[#64748B] text-[11px]">(Kls {formattedKelas || item.kelas})</span>
+                              </span>
+                            );
+                          } 
+                        },
+                        { 
+                          key: 'pages', 
+                          header: 'Capaian Ziyadah', 
+                          className: 'text-right',
+                          render: (item: any) => (
+                            <span className="font-mono font-bold text-[#059669]">+{item.pages} Hal</span>
+                          ) 
+                        },
+                      ]}
+                    />
+                  </div>
+
+                  {/* Tabel Kanan: 10 Santri Paling Produktif Muraja'ah */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between pb-1 border-b border-[#0F172A]">
+                      <span className="text-[11px] font-bold text-[#0F172A] font-headline uppercase tracking-wider">
+                        Top 10 Muraja'ah (Pengulangan)
+                      </span>
+                    </div>
+                    <HighDensityTable
+                      data={analytics.tahfizh.topMurojaahPerformers}
+                      keyExtractor={(item: any) => `murojaah-${item.studentId}`}
+                      emptyMessage="Belum ada data setoran Muraja'ah."
+                      columns={[
+                        { key: 'rank', header: 'No', render: (_, idx) => <span className="font-mono">{idx + 1}</span> },
+                        { 
+                          key: 'name', 
+                          header: 'Nama Santri', 
+                          render: (item: any) => {
+                            const formattedKelas = (item.kelas || '').replace(/^Kelas\s+/i, '');
+                            return (
+                              <span className="font-bold text-[#0F172A]">
+                                {item.name} <span className="font-normal text-[#64748B] text-[11px]">(Kls {formattedKelas || item.kelas})</span>
+                              </span>
+                            );
+                          } 
+                        },
+                        { 
+                          key: 'pages', 
+                          header: 'Capaian Muraja\'ah', 
+                          className: 'text-right',
+                          render: (item: any) => (
+                            <span className="font-mono font-bold text-[#0F172A]">{item.pages} Hal</span>
+                          ) 
+                        },
+                      ]}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -510,7 +725,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         {activeDivision === 'keamanan' && (
           <div className="space-y-6">
             {/* Executive Metrics Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs divide-x divide-[#E2E8F0] border-b border-[#E2E8F0] pb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 print:!grid-cols-4 gap-4 text-xs divide-x divide-[#E2E8F0] border-b border-[#E2E8F0] pb-4 print-avoid-break-card">
               <div className="pr-2">
                 <span className="text-[10px] text-[#64748B] uppercase font-semibold font-headline">Total Active PK</span>
                 <p className="text-xl font-bold text-[#EF4444] mt-0.5 font-mono">{analytics.discipline.totalActivePK} <span className="text-xs font-normal">PK</span></p>
@@ -534,7 +749,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             </div>
 
             {/* Ratio Progress Bar Kategori Pelanggaran */}
-            <div className="space-y-2">
+            <div className="space-y-2 print-avoid-break-card">
               <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">DISTRIBUSI KATEGORI PELANGGARAN</h4>
               <RatioProgressBar
                 title="Proporsi Tingkat Pelanggaran"
@@ -547,7 +762,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             </div>
 
             {/* Trend Chart */}
-            <div className="space-y-2 pt-2">
+            <div className="space-y-2 pt-2 print-avoid-break-card">
               <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">TREN PELANGGARAN HARIAN (POIN PK BARU)</h4>
               <MinimalLineChart
                 dataPoints={analytics.discipline.dailyTrends}
@@ -559,7 +774,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             </div>
 
             {/* High Density Table High Risk Students */}
-            <div className="space-y-3 pt-2">
+            <div className="space-y-3 pt-2 print-avoid-break-card">
               <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">REKAPITULASI SANTRI DALAM PEMBINAAN DISIPLIN (HIGH RISK)</h4>
               <HighDensityTable
                 data={analytics.discipline.highRiskStudents}
@@ -585,7 +800,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         {activeDivision === 'gabungan' && (
           <div className="space-y-6">
             {/* Executive Metrics Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs divide-x divide-[#E2E8F0] border-b border-[#E2E8F0] pb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 print:!grid-cols-4 gap-4 text-xs divide-x divide-[#E2E8F0] border-b border-[#E2E8F0] pb-4 print-avoid-break-card">
               <div className="pr-2">
                 <span className="text-[10px] text-[#64748B] uppercase font-semibold font-headline">Total Active PP</span>
                 <p className="text-xl font-bold text-[#059669] mt-0.5 font-mono">+{analytics.totalActivePP} <span className="text-xs font-normal">PP</span></p>
@@ -605,7 +820,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             </div>
 
             {/* Proportional Ratio PP vs PK */}
-            <div className="space-y-2">
+            <div className="space-y-2 print-avoid-break-card">
               <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">KOMPARASI RASIO POIN PRESTASI VS POIN PELANGGARAN AKTIF</h4>
               <RatioProgressBar
                 title="Keseimbangan Poin Operasional Santri"
@@ -617,7 +832,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             </div>
 
             {/* High Density Table Executive Santri Roster */}
-            <div className="space-y-3 pt-2">
+            <div className="space-y-3 pt-2 print-avoid-break-card">
               <h4 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-headline">DAFTAR RINGKASAN INTEGRITAS OPERASIONAL SANTRI</h4>
               <HighDensityTable
                 data={students.slice(0, 15)}
@@ -644,21 +859,45 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         )}
 
         {/* Footer Signature Block (Editorial Anti-Gravity Print) */}
-        <div className="pt-8 border-t border-[#E2E8F0] grid grid-cols-3 gap-4 text-center text-xs print:pt-6 font-body print-avoid-break">
-          <div>
-            <p className="text-[10px] text-[#64748B]">Kepala Divisi Tahfizh</p>
-            <div className="h-14" />
-            <p className="font-bold text-[#0F172A] border-t border-[#E2E8F0] pt-1 inline-block px-4">Ust. H. Ahmad Dahlan, Lc.</p>
+        <div 
+          className="pt-8 border-t border-[#E2E8F0] grid grid-cols-3 print:!grid-cols-3 gap-4 text-center text-xs print:pt-6 font-body print-avoid-break"
+          style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}
+        >
+          {/* Kolom Kiri: Mudir */}
+          <div className="flex flex-col items-center justify-between">
+            <p className="text-[10px] text-[#64748B] font-semibold uppercase tracking-wider font-headline">
+              Mudir Pesantren
+            </p>
+            <div className="h-20" />
+            <p className="font-bold text-[#0F172A] border-t border-[#E2E8F0] pt-1 px-3 inline-block">
+              KH. Mulhat Ali Nuh, Lc., M.A.
+            </p>
           </div>
-          <div>
-            <p className="text-[10px] text-[#64748B]">Kepala Divisi Keamanan</p>
-            <div className="h-14" />
-            <p className="font-bold text-[#0F172A] border-t border-[#E2E8F0] pt-1 inline-block px-4">Ust. Muhammad Ridwan, S.Pd.</p>
+
+          {/* Kolom Tengah: Pembina */}
+          <div className="flex flex-col items-center justify-between">
+            <p className="text-[10px] text-[#64748B] font-semibold uppercase tracking-wider font-headline">
+              Pembina OSTIFAK
+            </p>
+            <div className="h-20" />
+            <p className="font-medium text-[#64748B] pt-1 px-3 inline-block font-mono tracking-tight select-none">
+              ( ........................................ )
+            </p>
           </div>
-          <div>
-            <p className="text-[10px] text-[#64748B]">Mudir / Pimpinan Pesantren</p>
-            <div className="h-14" />
-            <p className="font-bold text-[#0F172A] border-t border-[#E2E8F0] pt-1 inline-block px-4">K.H. Abdullah Syafi'i, M.Ag.</p>
+
+          {/* Kolom Kanan: Kepala Divisi / Ketua OSTIFAK (Dinamis) */}
+          <div className="flex flex-col items-center justify-between">
+            <p className="text-[10px] text-[#64748B] font-semibold uppercase tracking-wider font-headline">
+              {activeDivision === 'tahfizh'
+                ? 'Kepala Divisi Tahfizh'
+                : activeDivision === 'keamanan'
+                ? 'Kepala Divisi Keamanan'
+                : 'Ketua OSTIFAK'}
+            </p>
+            <div className="h-20" />
+            <p className="font-medium text-[#64748B] pt-1 px-3 inline-block font-mono tracking-tight select-none">
+              ( ........................................ )
+            </p>
           </div>
         </div>
       </div>

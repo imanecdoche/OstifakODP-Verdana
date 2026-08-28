@@ -1485,7 +1485,7 @@ export const INITIAL_KAS_TRANSACTIONS: KasTransaction[] = [
     amount: 1750000,
     description: 'Pembelian Perlengkapan Kebersihan & Roan Bulanan Seluruh Asrama',
     divisionId: 'kebersihan',
-    divisionName: 'Divisi Kebersihan & Asrama',
+    divisionName: 'Div. Kebersihan & Asrama',
     recordedBy: 'Ketua Divisi Kebersihan & Asrama',
   },
   {
@@ -1495,7 +1495,7 @@ export const INITIAL_KAS_TRANSACTIONS: KasTransaction[] = [
     amount: 3200000,
     description: 'Infaq Kas Bulanan Santri & Wali Santri Tahfizh Al-Quran',
     divisionId: 'tahfizh',
-    divisionName: 'Divisi Tahfizh & Diniyah',
+    divisionName: 'Div. Tahfizh & Diniyah',
     recordedBy: 'Bendahara OSTIFAK',
   },
   {
@@ -1505,7 +1505,7 @@ export const INITIAL_KAS_TRANSACTIONS: KasTransaction[] = [
     amount: 850000,
     description: 'Pengadaan Obat-obatan & P3K Posko UKS Santri',
     divisionId: 'kesehatan',
-    divisionName: 'Divisi Kesehatan & UKS',
+    divisionName: 'Div. Kesehatan & UKS',
     recordedBy: 'Ketua Divisi Kesehatan & UKS',
   },
   {
@@ -1515,7 +1515,7 @@ export const INITIAL_KAS_TRANSACTIONS: KasTransaction[] = [
     amount: 2500000,
     description: 'Sponsor Pembukaan Pekan Bahasa (Arabic & English Week)',
     divisionId: 'bahasa',
-    divisionName: 'Divisi Bahasa (Lughah)',
+    divisionName: 'Div. Bahasa (Lughah)',
     recordedBy: 'Ketua Divisi Bahasa (Lughah)',
   },
   {
@@ -1525,7 +1525,7 @@ export const INITIAL_KAS_TRANSACTIONS: KasTransaction[] = [
     amount: 1200000,
     description: 'Peremajaan Soundsystem & Mikrofon Masjid Utama',
     divisionId: 'ibadah',
-    divisionName: 'Divisi Ibadah & Masjid',
+    divisionName: 'Div. Ibadah & Masjid',
     recordedBy: 'Ketua Divisi Ibadah & Masjid',
   },
 ];

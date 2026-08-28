@@ -85,7 +85,7 @@ export const NewViolationModal: React.FC<NewViolationModalProps> = ({
   const [category, setCategory] = useState('Disiplin & Ibadah');
   const [points, setPoints] = useState<number>(10);
   const [penaltyDescription, setPenaltyDescription] = useState('');
-  const [reportedBy, setReportedBy] = useState('Divisi Keamanan');
+  const [reportedBy, setReportedBy] = useState('Div. Keamanan');
   const studentComboRef = useRef<HTMLDivElement>(null);
 
   useLenisModalLock(isOpen);

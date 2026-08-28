@@ -12,12 +12,12 @@ interface CollectiveMahkamahViewProps {
 }
 
 const AVAILABLE_DIVISIONS = [
-  'Divisi Keamanan',
-  'Divisi Ibadah & Masjid',
-  'Divisi Tahfizh & Diniyah',
-  'Divisi Bahasa (Lughah)',
-  'Divisi Kebersihan & Asrama',
-  'Divisi Kesehatan & UKS',
+  'Div. Keamanan',
+  'Div. Ibadah & Masjid',
+  'Div. Tahfizh & Diniyah',
+  'Div. Bahasa (Lughah)',
+  'Div. Kebersihan & Asrama',
+  'Div. Kesehatan & UKS',
   'BPH & Pengasuhan',
 ];
 
@@ -27,7 +27,7 @@ export const CollectiveMahkamahView: React.FC<CollectiveMahkamahViewProps> = ({
   onSuccess,
 }) => {
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
-  const [selectedDivisions, setSelectedDivisions] = useState<string[]>(['Divisi Keamanan']);
+  const [selectedDivisions, setSelectedDivisions] = useState<string[]>(['Div. Keamanan']);
   const [violation, setViolation] = useState('');
   const [penalty, setPenalty] = useState('');
   const [points, setPoints] = useState<number>(1);
@@ -437,7 +437,7 @@ export const CollectiveMahkamahView: React.FC<CollectiveMahkamahViewProps> = ({
               type="text"
               value={sessionNotes}
               onChange={(e) => setSessionNotes(e.target.value)}
-              placeholder="Contoh: Sidang dipimpin oleh Mahkamah Divisi Keamanan & Bahasa"
+              placeholder="Contoh: Sidang dipimpin oleh Mahkamah Div. Keamanan & Bahasa"
               className="w-full h-10 px-3.5 text-xs text-[#0F172A] bg-white border border-[#E2E8F0] rounded-md focus:outline-none focus:border-[#0F172A] font-body"
             />
           </div>

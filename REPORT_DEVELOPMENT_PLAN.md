@@ -10,8 +10,8 @@
 ## 📌 OVERVIEW & PRINSIP UTAMA (ANTI-GRAVITY PRINT & EDITORIAL ANALYTICS)
 
 Modul **Laporan Multidivisi & Analitik SSOT** dirancang untuk menyediakan visualisasi data, agregasi statistik, serta dokumen cetak laporan resmi bagi 3 ranah operasional utama:
-1. **Divisi Tahfizh Al-Qur'an** (Ziyadah, Murojaah, Kelancaran/Fluency, Peak Productivity).
-2. **Divisi Keamanan & Kedisiplinan** (Pelanggaran Aktif/Lifetime, Peluruhan/Daily Decay, Kasus Berat/Mahkamah, Tren Disiplin).
+1. **Div. Tahfizh Al-Qur'an** (Ziyadah, Murojaah, Kelancaran/Fluency, Peak Productivity).
+2. **Div. Keamanan & Kedisiplinan** (Pelanggaran Aktif/Lifetime, Peluruhan/Daily Decay, Kasus Berat/Mahkamah, Tren Disiplin).
 3. **Laporan Gabungan / Eksekutif** (Komparasi Rasio PP vs PK, Indeks Kedisiplinan & Prestasi Kolektif Santri).
 
 ### 🛡️ Prinsip Desain & Ekspor (Anti-Gravity Print):
@@ -95,7 +95,7 @@ flowchart TD
 *Fokus: Membangun antarmuka pengguna (`ReportsView.tsx`) sebagai hub utama laporan multidivisi.*
 
 #### 3.1 Header Panel Kontrol Filter
-- Selector Divisi (Pill Tabs: **Divisi Tahfizh**, **Divisi Keamanan**, **Laporan Gabungan**).
+- Selector Divisi (Pill Tabs: **Div. Tahfizh**, **Div. Keamanan**, **Laporan Gabungan**).
 - Selector Rentang Waktu (Mingguan, Bulanan, Tahunan, Kustom Rentang Tanggal).
 - Filter Spesifik: Kamar/Asrama, Kelas, dan Kata Kunci Santri.
 - Tombol Aksi Cetak: **"Cetak / Ekspor PDF Editorial"**.

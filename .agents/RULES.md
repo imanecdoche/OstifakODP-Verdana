@@ -7,6 +7,40 @@
 
 ## 📝 Log Instruksi Tambahan (Project Instructions Record)
 *Catat setiap instruksi baru dari user di bawah ini secara kronologis:*
+- **[2026-08-29]**: Standardisasi Blok Tanda Tangan Dokumen Laporan Multidivisi (3 Kolom Horizontal & Jabatan Dinamis) (Versi v1.1.0.77b):
+  - 1. STRUKTUR GRID TANDA TANGAN (3 KOLOM HORIZONTAL):
+    * Blok pengesahan berada di bagian paling bawah dokumen laporan menggunakan grid 3 kolom horizontal sejajar (`grid grid-cols-3 text-center print:!grid-cols-3 gap-4`).
+    * Spasi vertikal tanda tangan fisik sebesar `h-20` (sekitar 80px) antara judul jabatan dan baris nama.
+    * Proteksi CSS `page-break-inside: avoid` / `break-inside: avoid` (`print-avoid-break`) agar blok tanda tangan tidak terpotong saat ekspor ke PDF.
+  - 2. SUSUNAN & DETAIL 3 TANDA TANGAN:
+    * **Kolom Kiri (Mudir):** Jabatan "Mudir Pesantren", Nama tegas **"KH. Mulhat Ali Nuh, Lc., M.A."**.
+    * **Kolom Tengah (Pembina):** Jabatan "Pembina OSTIFAK", Nama `( ........................................ )`.
+    * **Kolom Kanan (Kepala Divisi / Ketua OSTIFAK - Dinamis):**
+      - Jika filter laporan divisi spesifik: "Kepala [Nama Divisi]" (misal *Kepala Divisi Tahfizh*, *Kepala Divisi Keamanan*).
+      - Jika filter laporan gabungan (seluruh divisi): "Ketua OSTIFAK".
+      - Nama: `( ........................................ )`.
+  - 3. KEPATUHAN ESTETIKA FLAT MINIMALIS:
+    * Menggunakan format teks monokrom rapi dan bersih, selaras dengan print stylesheet dokumen editorial.
+- **[2026-08-29]**: Refactoring & Audit: Penyingkatan Awalan Nama Divisi Menjadi "Div." (Versi v1.1.0.76b):
+  - 1. ATURAN PENYINGKATAN AWALAN NAMA DIVISI ("Div."):
+    * Mengganti kata awalan "Divisi" pada setiap nama divisi spesifik menjadi singkatan **"Div."** (huruf kapital D, huruf kecil iv, diikuti tanda titik dan satu spasi).
+    * Contoh pembaruan tampilan:
+      - "Divisi Keamanan" → **"Div. Keamanan"**
+      - "Divisi Ibadah & Masjid" → **"Div. Ibadah & Masjid"**
+      - "Divisi Tahfizh & Diniyah" → **"Div. Tahfizh & Diniyah"**
+      - "Divisi Bahasa (Lughah)" → **"Div. Bahasa (Lughah)"**
+      - "Divisi Kebersihan & Asrama" → **"Div. Kebersihan & Asrama"**
+      - "Divisi Kesehatan & UKS" → **"Div. Kesehatan & UKS"**
+    * Berlaku untuk seluruh divisi OSTIFAK pada sidebar navigasi, badge kartu, dropdown filter, hingga label laporan.
+  - 2. PENGECUALIAN KETAT (KATA "DIVISI" SEBAGAI KATA BENDA / KATEGORI UMUM):
+    * TIDAK mengubah kata "Divisi" yang berdiri sendiri atau merujuk pada konsep/entitas umum:
+      - Label grup sidebar: `"DIVISI OSTIFAK (9)"`
+      - Menu navigasi: `"Program Kerja Divisi"` dan `"Laporan Multidivisi"`
+      - Label input / filter: `"Pilih Divisi"`, `"Semua Divisi"`, atau header tabel bertuliskan `"Divisi"`.
+      - Teks pengesahan / footer: `"Kepala Divisi ..."` (tetap menggunakan format jabatan resmi).
+  - 3. INTEGRITAS DATA & IDENTIFIER:
+    * Pembaruan hanya mengubah teks tampilan antarmuka (*display label/name*).
+    * Nilai identifier teknis, `id`, dan `enum key` (seperti `keamanan`, `tahfizh`, dll.) tetap utuh dan sinkron.
 - **[2026-08-28]**: Mandatory System Audit: Laporan Multidivisi, Logika Peak Metrics, Searchable Combobox, & Standar Print Layout:
   - 1. AUDIT KALKULASI RENTANG WAKTU & METRIK PUNCAK (PEAK PERFORMANCE ADAPTABILITY):
     * Fungsi agregasi analitik (`reportAnalytics.ts`) wajib mengadaptasi metrik dan label titik puncak secara dinamis:

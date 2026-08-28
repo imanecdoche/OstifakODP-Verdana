@@ -20,9 +20,9 @@ export interface AppVersionInfo {
 }
 
 export const APP_VERSION_INFO: AppVersionInfo = {
-  version: 'v1.1.0.75b',
+  version: 'v1.1.0.77b',
   channel: 'BETA',
-  buildDate: '28 Agustus 2026',
+  buildDate: '29 Agustus 2026',
   author: {
     name: 'Fatih Farhat Asshidiq',
     role: 'Lead Developer & System Architect',

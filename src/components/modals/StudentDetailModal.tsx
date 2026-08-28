@@ -71,6 +71,7 @@ import {
   resolveViolationForStudent, 
   redeemPointsForDiscipline 
 } from '../../utils/disciplineCalculator';
+import { panelStack } from '../../lib/panelStackManager';
 
 export interface SetoranSplitAnalysis {
   murojaahRange: { from: number; to: number } | null;
@@ -346,48 +347,6 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     }
   };
 
-  // Close on Escape shortcut
-  useEffect(() => {
-    if (!student) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.stopPropagation();
-        if (isIzinModalOpen) {
-          setIsIzinModalOpen(false);
-          return;
-        }
-        if (isMoveKamarModalOpen) {
-          setIsMoveKamarModalOpen(false);
-          return;
-        }
-        if (isMoveKelasModalOpen) {
-          setIsMoveKelasModalOpen(false);
-          return;
-        }
-        if (isSetoranModalOpen) {
-          setIsSetoranModalOpen(false);
-          return;
-        }
-        if (isHafalanChartModalOpen) {
-          setIsHafalanChartModalOpen(false);
-          return;
-        }
-        onClose();
-      }
-    };
-
-    const handleCustomEscape = () => {
-      onClose();
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('ostifak-escape-pressed', handleCustomEscape);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('ostifak-escape-pressed', handleCustomEscape);
-    };
-  }, [student, onClose, isIzinModalOpen, isMoveKamarModalOpen, isMoveKelasModalOpen, isSetoranModalOpen, isHafalanChartModalOpen]);
-
   // Hafalan Chart state
   const [chartTimeframe, setChartTimeframe] = useState<'pekan' | 'bulan' | 'tahun'>('pekan');
   const [chartCategoryFilter, setChartCategoryFilter] = useState<'all' | 'Hafalan Baru' | 'Murojaah'>('all');
@@ -433,6 +392,59 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     y: number;
   } | null>(null);
   const [setoranToDelete, setSetoranToDelete] = useState<StudentHafalanEntry | null>(null);
+
+  // Stacked panel registrations for sub-panels
+  useEffect(() => {
+    if (isIzinModalOpen) {
+      const unregister = panelStack.push('modal-rekam-izin', () => setIsIzinModalOpen(false));
+      return () => unregister();
+    }
+  }, [isIzinModalOpen]);
+
+  useEffect(() => {
+    if (isMoveKamarModalOpen) {
+      const unregister = panelStack.push('modal-pindah-kamar', () => setIsMoveKamarModalOpen(false));
+      return () => unregister();
+    }
+  }, [isMoveKamarModalOpen]);
+
+  useEffect(() => {
+    if (isMoveKelasModalOpen) {
+      const unregister = panelStack.push('modal-pindah-kelas', () => setIsMoveKelasModalOpen(false));
+      return () => unregister();
+    }
+  }, [isMoveKelasModalOpen]);
+
+  useEffect(() => {
+    if (isSetoranModalOpen) {
+      const unregister = panelStack.push('modal-catat-setoran', () => {
+        setIsSetoranModalOpen(false);
+        setEditingSetoranId(null);
+      });
+      return () => unregister();
+    }
+  }, [isSetoranModalOpen]);
+
+  useEffect(() => {
+    if (isHafalanChartModalOpen) {
+      const unregister = panelStack.push('modal-hafalan-chart', () => setIsHafalanChartModalOpen(false));
+      return () => unregister();
+    }
+  }, [isHafalanChartModalOpen]);
+
+  useEffect(() => {
+    if (setoranToDelete) {
+      const unregister = panelStack.push(`modal-delete-setoran-${setoranToDelete.id}`, () => setSetoranToDelete(null));
+      return () => unregister();
+    }
+  }, [setoranToDelete]);
+
+  useEffect(() => {
+    if (isRedeemModalOpen) {
+      const unregister = panelStack.push('modal-redeem-pp', () => setIsRedeemModalOpen(false));
+      return () => unregister();
+    }
+  }, [isRedeemModalOpen]);
 
   // Bio Tab Unified Inline Edit States
   const [isEditingBio, setIsEditingBio] = useState(false);
@@ -2563,7 +2575,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       {/* 2. NESTED MODAL: REKAM IZIN SANTRI */}
       <AnimatePresence>
         {isIzinModalOpen && (
-          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+          <div data-lenis-prevent className="fixed inset-0 z-70 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -2571,7 +2583,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setIsIzinModalOpen(false)}
-              className="fixed inset-0 z-40 bg-black/50 cursor-default"
+              className="fixed inset-0 z-60 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}
@@ -2587,7 +2599,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               }}
               onClick={(e) => e.stopPropagation()}
               data-bottom-sheet
-              className="relative bg-white w-full max-w-lg max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
+              className="relative bg-white w-full max-w-lg max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-70"
             >
               {/* Mobile Top Drag Handle */}
               <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
@@ -2679,7 +2691,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       {/* 3. NESTED MODAL: PINDAH KAMAR ASRAMA */}
       <AnimatePresence>
         {isMoveKamarModalOpen && (
-          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+          <div data-lenis-prevent className="fixed inset-0 z-70 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -2687,7 +2699,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setIsMoveKamarModalOpen(false)}
-              className="fixed inset-0 z-40 bg-black/50 cursor-default"
+              className="fixed inset-0 z-60 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}
@@ -2703,7 +2715,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               }}
               onClick={(e) => e.stopPropagation()}
               data-bottom-sheet
-              className="relative bg-white w-full max-w-md max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
+              className="relative bg-white w-full max-w-md max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-70"
             >
               {/* Mobile Top Drag Handle */}
               <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
@@ -2768,7 +2780,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       {/* 4. NESTED MODAL: PINDAH KELAS */}
       <AnimatePresence>
         {isMoveKelasModalOpen && (
-          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+          <div data-lenis-prevent className="fixed inset-0 z-70 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -2776,7 +2788,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setIsMoveKelasModalOpen(false)}
-              className="fixed inset-0 z-40 bg-black/50 cursor-default"
+              className="fixed inset-0 z-60 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}
@@ -2792,7 +2804,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               }}
               onClick={(e) => e.stopPropagation()}
               data-bottom-sheet
-              className="relative bg-white w-full max-w-md max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-10"
+              className="relative bg-white w-full max-w-md max-h-[88dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden flex flex-col z-70"
             >
               {/* Mobile Top Drag Handle */}
               <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
@@ -2855,7 +2867,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       {/* 5. NESTED MODAL: CATAT SETORAN SANTRI (114 SURAHS & DYNAMIC PAGES) */}
       <AnimatePresence>
         {isSetoranModalOpen && (
-          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+          <div data-lenis-prevent className="fixed inset-0 z-70 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -2866,7 +2878,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 setIsSetoranModalOpen(false);
                 setEditingSetoranId(null);
               }}
-              className="fixed inset-0 z-40 bg-black/50 cursor-default"
+              className="fixed inset-0 z-60 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}
@@ -2882,7 +2894,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               }}
               onClick={(e) => e.stopPropagation()}
               data-bottom-sheet
-              className="relative bg-white w-full max-w-2xl max-h-[88dvh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden z-10"
+              className="relative bg-white w-full max-w-2xl max-h-[88dvh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden z-70"
             >
               {/* Mobile Top Drag Handle */}
               <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
@@ -3263,7 +3275,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       {/* 6. NESTED MODAL: STATISTIK & TREN GRAFIK HAFALAN (SMOOTH MONOTONE SPLINE) */}
       <AnimatePresence>
         {isHafalanChartModalOpen && (
-          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+          <div data-lenis-prevent className="fixed inset-0 z-70 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -3271,7 +3283,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setIsHafalanChartModalOpen(false)}
-              className="fixed inset-0 z-40 bg-black/50 cursor-default"
+              className="fixed inset-0 z-60 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}
@@ -3287,7 +3299,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               }}
               onClick={(e) => e.stopPropagation()}
               data-bottom-sheet
-              className="relative bg-white w-full max-w-3xl max-h-[88dvh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden z-10"
+              className="relative bg-white w-full max-w-3xl max-h-[88dvh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_16px_48px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden z-70"
             >
               {/* Mobile Top Drag Handle */}
               <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0 bg-[#F8FAFC]">
@@ -3789,7 +3801,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       {/* 8. CONFIRMATION DIALOG FOR DELETE SETORAN */}
       <AnimatePresence>
         {setoranToDelete && (
-          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+          <div data-lenis-prevent className="fixed inset-0 z-70 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -3797,7 +3809,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               onClick={() => setSetoranToDelete(null)}
-              className="fixed inset-0 z-40 bg-black/50 cursor-default"
+              className="fixed inset-0 z-60 bg-black/50 cursor-default"
             />
 
             {/* Sheet Panel (Spring Animation) */}
@@ -3812,7 +3824,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 mass: 0.8,
               }}
               onClick={(e) => e.stopPropagation()}
-              className="relative bg-white w-full max-w-md rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden p-6 space-y-4 max-h-[88dvh] sm:max-h-[90vh] flex flex-col z-10"
+              className="relative bg-white w-full max-w-md rounded-t-2xl sm:rounded-xl shadow-[0_-10px_40px_rgba(15,23,42,0.18)] sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)] border-t sm:border border-[#E2E8F0] overflow-hidden p-6 space-y-4 max-h-[88dvh] sm:max-h-[90vh] flex flex-col z-70"
             >
               {/* Mobile Top Drag Handle */}
               <div className="sm:hidden -mt-2 mb-1 flex justify-center shrink-0">
@@ -3855,13 +3867,13 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       {/* 9. NESTED MODAL: TEBUS POIN RESTORATIF */}
       <AnimatePresence>
         {isRedeemModalOpen && currentStudent && (
-          <div data-lenis-prevent className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
+          <div data-lenis-prevent className="fixed inset-0 z-70 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden pointer-events-auto font-body">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsRedeemModalOpen(false)}
-              className="fixed inset-0 z-40 bg-black/50 cursor-default"
+              className="fixed inset-0 z-60 bg-black/50 cursor-default"
             />
             <motion.div
               initial={{ y: '100%' }}
@@ -3869,7 +3881,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 320, mass: 0.8 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg bg-white rounded-t-2xl sm:rounded-xl shadow-xl overflow-hidden z-10 p-5 space-y-4 border border-slate-200"
+              className="w-full max-w-lg bg-white rounded-t-2xl sm:rounded-xl shadow-xl overflow-hidden z-70 p-5 space-y-4 border border-slate-200"
             >
               <div className="flex items-center justify-between pb-3 border-b border-slate-200">
                 <div className="flex items-center gap-2">

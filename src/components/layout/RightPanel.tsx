@@ -28,6 +28,7 @@ import {
   MudirDirective 
 } from '../../types';
 import { ScrollArea } from '../ui/ScrollArea';
+import { panelStack } from '../../lib/panelStackManager';
 
 interface RightPanelProps {
   students?: SantriRecord[];
@@ -82,6 +83,14 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   onOpenDirectivesView 
 }) => {
   useLenisModalLock(isOpen);
+
+  // Register into global stacked panel manager
+  useEffect(() => {
+    if (isOpen) {
+      const unregister = panelStack.push('right-info-panel', onClose);
+      return () => unregister();
+    }
+  }, [isOpen, onClose]);
 
   // Live Mudir Directives subscription directly from Firestore database
   const [directives, setDirectives] = useState<MudirDirective[]>([]);
@@ -321,7 +330,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop Layer with blur and darkness */}
+          {/* Backdrop Layer */}
           <motion.div
             key="right-panel-backdrop"
             initial={{ opacity: 0 }}

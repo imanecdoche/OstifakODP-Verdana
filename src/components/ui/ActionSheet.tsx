@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useLenisModalLock } from '../../lib/lenis';
+import { panelStack } from '../../lib/panelStackManager';
 
 export interface ActionSheetItem {
   label: string;
@@ -16,6 +17,7 @@ interface ActionSheetProps {
   title?: string;
   subtitle?: string;
   actions: ActionSheetItem[];
+  id?: string;
 }
 
 export const ActionSheet: React.FC<ActionSheetProps> = ({
@@ -24,6 +26,7 @@ export const ActionSheet: React.FC<ActionSheetProps> = ({
   title,
   subtitle,
   actions,
+  id,
 }) => {
   useLenisModalLock(isOpen);
 
@@ -42,16 +45,14 @@ export const ActionSheet: React.FC<ActionSheetProps> = ({
   const activeSubtitle = subtitle || lastSubtitleRef.current;
   const activeActions = (actions && actions.length > 0) ? actions : lastActionsRef.current;
 
-  // Global Escape key listener
+  // Register into global panel stack
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+    if (isOpen) {
+      const sheetId = id || `action-sheet-${(title || 'menu').toLowerCase().replace(/\s+/g, '-')}`;
+      const unregister = panelStack.push(sheetId, onClose);
+      return () => unregister();
+    }
+  }, [isOpen, onClose, id, title]);
 
   return (
     <AnimatePresence>

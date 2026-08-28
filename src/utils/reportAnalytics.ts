@@ -270,8 +270,33 @@ export function calculateTahfizhAnalytics(
     });
   }
 
-  // Top Performers
-  const topPerformers = Array.from(studentTotalsMap.values())
+  // Top 10 Performers for Ziyadah & Muraja'ah
+  const allTotals = Array.from(studentTotalsMap.values());
+  
+  const topZiyadahPerformers = allTotals
+    .filter((item) => item.ziyadah > 0)
+    .sort((a, b) => b.ziyadah - a.ziyadah)
+    .slice(0, 10)
+    .map((item) => ({
+      studentId: item.student.id,
+      name: item.student.name || item.student.studentName || 'Santri',
+      kelas: item.student.classId || item.student.kelas || '-',
+      pages: item.ziyadah,
+    }));
+
+  const topMurojaahPerformers = allTotals
+    .filter((item) => item.murojaah > 0)
+    .sort((a, b) => b.murojaah - a.murojaah)
+    .slice(0, 10)
+    .map((item) => ({
+      studentId: item.student.id,
+      name: item.student.name || item.student.studentName || 'Santri',
+      kelas: item.student.classId || item.student.kelas || '-',
+      pages: item.murojaah,
+    }));
+
+  // Top Performers (legacy fallback / combined)
+  const topPerformers = allTotals
     .sort((a, b) => b.ziyadah - a.ziyadah)
     .slice(0, 5)
     .map((item) => ({
@@ -299,6 +324,8 @@ export function calculateTahfizhAnalytics(
       totalActiveDays: dateVolumeMap.size,
     },
     dailyTrends,
+    topZiyadahPerformers,
+    topMurojaahPerformers,
     topPerformers,
   };
 }

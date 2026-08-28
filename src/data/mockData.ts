@@ -128,7 +128,7 @@ export const mockUsers: UserProfile[] = OFFICIAL_ACCOUNTS.map((acc, index) => ({
 export const mockDivisions: DivisionInfo[] = [
   {
     id: 'keamanan',
-    name: 'Divisi Keamanan',
+    name: 'Div. Keamanan',
     shortName: 'Keamanan',
     iconName: 'ShieldAlert',
     description: 'Penegakan disiplin, mahkamah santri, & perizinan',
@@ -137,7 +137,7 @@ export const mockDivisions: DivisionInfo[] = [
   },
   {
     id: 'ibadah',
-    name: 'Divisi Ibadah & Masjid',
+    name: 'Div. Ibadah & Masjid',
     shortName: 'Ibadah',
     iconName: 'Building2',
     description: 'Presensi shalat jamaah, jadwal imam & piket masjid',
@@ -146,7 +146,7 @@ export const mockDivisions: DivisionInfo[] = [
   },
   {
     id: 'tahfizh',
-    name: 'Divisi Tahfizh & Diniyah',
+    name: 'Div. Tahfizh & Diniyah',
     shortName: 'Tahfizh',
     iconName: 'BookOpen',
     description: 'Mutabaah halaqah, target hafalan, & KBM diniyah',
@@ -155,7 +155,7 @@ export const mockDivisions: DivisionInfo[] = [
   },
   {
     id: 'bahasa',
-    name: 'Divisi Bahasa (Lughah)',
+    name: 'Div. Bahasa (Lughah)',
     shortName: 'Bahasa',
     iconName: 'Languages',
     description: 'Jasus tracker & pengawasan bahasa resmi Arab/Inggris',
@@ -164,7 +164,7 @@ export const mockDivisions: DivisionInfo[] = [
   },
   {
     id: 'kebersihan',
-    name: 'Divisi Kebersihan & Asrama',
+    name: 'Div. Kebersihan & Asrama',
     shortName: 'Kebersihan',
     iconName: 'Sparkles',
     description: 'Inspeksi roan mingguan & evaluasi kebersihan kamar',
@@ -173,7 +173,7 @@ export const mockDivisions: DivisionInfo[] = [
   },
   {
     id: 'kesehatan',
-    name: 'Divisi Kesehatan & UKS',
+    name: 'Div. Kesehatan & UKS',
     shortName: 'Kesehatan',
     iconName: 'HeartPulse',
     description: 'Log santri sakit, obat-obatan, & rujukan',

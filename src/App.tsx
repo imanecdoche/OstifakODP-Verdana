@@ -46,6 +46,7 @@ import {
 } from './lib/firestoreService';
 import { GooeyToaster, gooeyToast } from './lib/toast';
 import 'goey-toast/styles.css';
+import { panelStack } from './lib/panelStackManager';
 import { 
   recordLoginSession, 
   recordLogoutSession, 
@@ -192,6 +193,11 @@ export default function App() {
         const { App: CapacitorApp } = await import('@capacitor/app');
 
         const handleBackButton = async () => {
+          // 0. Check if panelStack has any open panels/modals/sheets and pop the top one
+          if (panelStack.pop()) {
+            return;
+          }
+
           // 1. Dispatch custom event for child views/modals to handle first
           const backEvent = new CustomEvent('ostifak-back-pressed', {
             cancelable: true,

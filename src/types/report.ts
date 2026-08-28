@@ -48,6 +48,18 @@ export interface TahfizhAnalyticsSummary {
   fluency: FluencyDistribution;
   peakProductivity: PeakProductivityInfo;
   dailyTrends: DailyTrendPoint[];
+  topZiyadahPerformers: Array<{
+    studentId: string;
+    name: string;
+    kelas: string;
+    pages: number;
+  }>;
+  topMurojaahPerformers: Array<{
+    studentId: string;
+    name: string;
+    kelas: string;
+    pages: number;
+  }>;
   topPerformers: Array<{
     studentId: string;
     name: string;

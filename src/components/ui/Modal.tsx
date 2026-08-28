@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLenisModalLock } from '../../lib/lenis';
+import { panelStack } from '../../lib/panelStackManager';
 import { ScrollArea } from './ScrollArea';
 
 interface ModalProps {
@@ -10,6 +11,7 @@ interface ModalProps {
   subtitle?: string;
   children: React.ReactNode;
   maxWidth?: string;
+  id?: string;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -19,30 +21,21 @@ export const Modal: React.FC<ModalProps> = ({
   subtitle,
   children,
   maxWidth = 'max-w-lg',
+  id,
 }) => {
   useLenisModalLock(isOpen);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    const handleBackButton = (e: Event) => {
-      if (isOpen) {
-        e.preventDefault();
-        onClose();
-      }
-    };
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
-      window.addEventListener('ostifak-back-pressed', handleBackButton);
+      const modalId = id || `modal-${title.toLowerCase().replace(/\s+/g, '-')}`;
+      const unregister = panelStack.push(modalId, onClose);
+      return () => {
+        document.body.style.overflow = 'auto';
+        unregister();
+      };
     }
-    return () => {
-      document.body.style.overflow = 'auto';
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('ostifak-back-pressed', handleBackButton);
-    };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, id, title]);
 
   return (
     <AnimatePresence>

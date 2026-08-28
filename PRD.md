@@ -39,12 +39,12 @@ Sistem ODP menerapkan hierarki otorisasi 5 level (`RoleLevel 0` hingga `RoleLeve
 | **Level 4** | `santri` | Santri / Anggota Organisasi | Santri Pesantren | **Read-Only / Directory View**: Melihat status hafalan, skor kamar, dan presensi pribadi. |
 
 ### 2.1 Daftar 9 Divisi Resmi OSTIFAK
-1. **Divisi Keamanan (`keamanan`)**: Penegakan disiplin santri, pencatatan kasus berbobot poin, sidang mahkamah, dan barang sitaan.
-2. **Divisi Ibadah & Masjid (`ibadah`)**: Presensi shalat 5 waktu berjamaah, jadwal imam/muadzin, kebersihan masjid, dan piket ibadah.
-3. **Divisi Tahfizh & Diniyah (`tahfizh`)**: Mutabaah halaqah Al-Quran, setoran hafalan harian, target juz, dan presensi KBM diniyah.
-4. **Divisi Bahasa / Lughah (`bahasa`)**: Penegakan bahasa resmi Arab & Inggris (Biah Lughawiyyah), Jasus language tracker, mufrodat harian.
-5. **Divisi Kebersihan & Asrama (`kebersihan`)**: Inspeksi roan mingguan, penilaian kebersihan kamar asrama (*cleanliness score & rank*), pemeliharaan fasilitas.
-6. **Divisi Kesehatan & UKS (`kesehatan`)**: Log santri sakit, inventaris obat-obatan, penanganan pertama, dan izin rujukan klinik/RS.
+1. **Div. Keamanan (`keamanan`)**: Penegakan disiplin santri, pencatatan kasus berbobot poin, sidang mahkamah, dan barang sitaan.
+2. **Div. Ibadah & Masjid (`ibadah`)**: Presensi shalat 5 waktu berjamaah, jadwal imam & muadzin, kebersihan masjid, dan piket ibadah.
+3. **Div. Tahfizh & Diniyah (`tahfizh`)**: Mutabaah halaqah Al-Quran, setoran hafalan harian, target juz, dan presensi KBM diniyah.
+4. **Div. Bahasa (Lughah) (`bahasa`)**: Penegakan bahasa resmi Arab & Inggris (Biah Lughawiyyah), Jasus language tracker, mufrodat harian.
+5. **Div. Kebersihan & Asrama (`kebersihan`)**: Inspeksi roan mingguan, penilaian kebersihan kamar asrama (*cleanliness score & rank*), pemeliharaan fasilitas.
+6. **Div. Kesehatan & UKS (`kesehatan`)**: Log santri sakit, inventaris obat-obatan, penanganan pertama, dan izin rujukan klinik/RS.
 7. **BPH & Kas Organisasi (`bph`)**: Pengarsipan surat resmi, pengajuan anggaran kegiatan, monitoring kas operasional OSTIFAK.
 8. **Kotak Saran Digital (`saran`)**: Kanal aspirasi, kritik, dan masukan santri yang difilter dan dikelompokkan secara digital.
 

@@ -23,6 +23,7 @@ import {
 } from '../../lib/firestoreService';
 import { useLenisModalLock } from '../../lib/lenis';
 import { useIsMobile } from '../../lib/useIsMobile';
+import { panelStack } from '../../lib/panelStackManager';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { PillTabs, TabOption } from '../ui/PillTabs';
@@ -81,32 +82,20 @@ export const DormitoryView: React.FC<DormitoryViewProps> = ({
   }, []);
 
   // Global Escape Key Listener for DormitoryView
+  // Register panels into global panelStack
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (selectedDetailStudent) {
-          setSelectedDetailStudent(null);
-          return;
-        }
-        if (selectedRoomModal) {
-          setSelectedRoomModal(null);
-          return;
-        }
-      }
-    };
+    if (selectedRoomModal) {
+      const unregister = panelStack.push(`dormitory-room-${selectedRoomModal.id}`, () => setSelectedRoomModal(null));
+      return () => unregister();
+    }
+  }, [selectedRoomModal]);
 
-    const handleCustomEscape = () => {
-      setSelectedDetailStudent(null);
-      setSelectedRoomModal(null);
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('ostifak-escape-pressed', handleCustomEscape);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('ostifak-escape-pressed', handleCustomEscape);
-    };
-  }, [selectedDetailStudent, selectedRoomModal]);
+  useEffect(() => {
+    if (selectedDetailStudent) {
+      const unregister = panelStack.push(`dormitory-student-detail-${selectedDetailStudent.id}`, () => setSelectedDetailStudent(null));
+      return () => unregister();
+    }
+  }, [selectedDetailStudent]);
 
   // Subscribe to realtime students if not passed as prop or to ensure reactivity
   useEffect(() => {
